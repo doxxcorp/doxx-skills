@@ -1,0 +1,46 @@
+{
+  "skill_name": "network-status",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Show me my network status",
+      "expected_output": "Overview of tunnels, bandwidth, and security alerts",
+      "expectations": [
+        "Calls list_tunnels to show connection status",
+        "Calls /api/stats/bandwidth for recent bandwidth data",
+        "Calls /api/stats/alerts for recent security events",
+        "Presents a clear summary of network health"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "How much bandwidth am I using?",
+      "expected_output": "Bandwidth stats for the requested time period",
+      "expectations": [
+        "Calls /api/stats/bandwidth with appropriate time range",
+        "Presents bandwidth in human-readable units (Mbps, GB)",
+        "Shows per-tunnel breakdown if multiple tunnels exist"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Are there any security alerts?",
+      "expected_output": "Recent security events and threat summary",
+      "expectations": [
+        "Calls /api/stats/alerts with a recent time range",
+        "Groups alerts by category (dns_block, security_event, port_scan, etc.)",
+        "Highlights anything unusual or concerning"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Is my VPN connected?",
+      "expected_output": "Tunnel connection status check",
+      "expectations": [
+        "Calls list_tunnels and checks is_connected / connection_status",
+        "Clearly shows which tunnels are connected and which are not",
+        "Suggests dig @10.10.10.10 to verify DNS is working through the VPN"
+      ]
+    }
+  ]
+}

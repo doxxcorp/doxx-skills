@@ -105,4 +105,4 @@ curl -s -X POST $API -d "firewall_rule_add=1&token=$TOKEN&tunnel_token=$TUNNEL&p
 - Confirm with the user before deleting rules
 - Prefer link-all over manual rules when the user wants full mesh
 
-For full API details, see [../../api/reference.md](../../api/reference.md).
+For full API details, see [../../../api/reference.md](../../../api/reference.md).

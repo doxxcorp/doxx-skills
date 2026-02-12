@@ -79,4 +79,4 @@ curl -s -X POST $API -d "disconnect_peer=1&token=$TOKEN&tunnel_token=$TUNNEL"
 - When moving a tunnel to a new server, explain that the WireGuard config will change and needs to be re-installed on the device
 - Always check API response `status` field — HTTP 200 can still be an error
 
-For full API details, see [../../api/reference.md](../../api/reference.md).
+For full API details, see [../../../api/reference.md](../../../api/reference.md).

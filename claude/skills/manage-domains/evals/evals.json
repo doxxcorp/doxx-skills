@@ -1,0 +1,48 @@
+{
+  "skill_name": "manage-domains",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Register the domain mynetwork.lan and point it to my tunnels",
+      "expected_output": "Registers domain and creates DNS A records for each tunnel",
+      "expectations": [
+        "Calls create_domain with domain=mynetwork.lan",
+        "Calls list_tunnels to get assigned IPs",
+        "Creates DNS A records pointing tunnel hostnames to their IPs",
+        "Verifies DNS with dig @a.root-dx.net"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Generate a TLS certificate for mysite.crypto",
+      "expected_output": "Generates key, CSR, and signs certificate with doxx.net CA",
+      "expectations": [
+        "Generates a private key locally with openssl",
+        "Creates a CSR with the correct CN",
+        "Calls sign_certificate with the CSR",
+        "Verifies the certificate with openssl x509",
+        "Mentions that clients need the doxx.net root CA installed"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Import my external domain example.com to doxx.net",
+      "expected_output": "Walks through TXT verification and domain import",
+      "expectations": [
+        "Calls get_domain_validation to get the verification code",
+        "Instructs user to set _doxx-verify.example.com TXT record",
+        "Calls import_domain after user confirms TXT record is set",
+        "Tells user to update nameservers to a.root-dx.net, a.root-dx.com, a.root-dx.org"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Add a CNAME record for blog.mysite.doxx pointing to mysite.doxx",
+      "expected_output": "Creates the DNS record",
+      "expectations": [
+        "Calls create_dns_record with type=CNAME, name=blog.mysite.doxx, content=mysite.doxx",
+        "Verifies the record was created"
+      ]
+    }
+  ]
+}

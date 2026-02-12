@@ -114,4 +114,4 @@ curl -s "$STATS/api/stats/global" | jq .
 - On macOS, `date -v-1H` works for relative time. On Linux, use `date -d '1 hour ago'`
 - If websocat is not installed, explain that real-time connection tracking needs it, or suggest monitoring via the doxx.net portal
 
-For full API details, see [../../api/reference.md](../../api/reference.md).
+For full API details, see [../../../api/reference.md](../../../api/reference.md).

@@ -1,0 +1,52 @@
+{
+  "skill_name": "network-wizard",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Set up a doxx.net private network with 3 devices on a Miami server",
+      "expected_output": "Wizard walks through auth, creates 3 tunnels on Miami server, offers mesh networking, DNS blocking, and client setup",
+      "expectations": [
+        "Asks for or detects an auth token before making API calls",
+        "Calls the servers endpoint to list available servers",
+        "Creates 3 tunnels using create_tunnel with the Miami server",
+        "Asks about mesh networking (firewall_link_all_toggle)",
+        "Offers DNS blocking configuration",
+        "Provides WireGuard config or QR code for client setup",
+        "Prints a summary of the completed network"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I want to set up a VPN but I don't have a doxx.net account yet",
+      "expected_output": "Explains account creation process and offers to wait",
+      "expectations": [
+        "Explains that accounts must be created at https://a0x13.doxx.net",
+        "Mentions proof-of-work is required (human-only)",
+        "Does NOT attempt to create an account via API",
+        "Offers to continue the wizard once the user has a token"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I already have some tunnels set up, can you help me add a domain and DNS blocking?",
+      "expected_output": "Checks existing state and resumes from the relevant phase",
+      "expectations": [
+        "Calls list_tunnels to check existing state before creating anything",
+        "Skips tunnel creation phases since tunnels already exist",
+        "Proceeds to domain registration (Phase 6) or DNS blocking (Phase 7)",
+        "Demonstrates idempotent behavior — does not duplicate existing resources"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Help me set up my iPhone on the VPN",
+      "expected_output": "Generates QR code for iOS WireGuard app setup",
+      "expectations": [
+        "Gets or asks for tunnel token for the iPhone tunnel",
+        "Fetches WireGuard config via the wireguard endpoint",
+        "Generates a QR code using the generate_qr endpoint",
+        "Provides step-by-step WireGuard iOS app instructions"
+      ]
+    }
+  ]
+}

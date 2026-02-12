@@ -1,0 +1,47 @@
+{
+  "skill_name": "manage-dns-blocking",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Enable ad and tracker blocking on all my devices",
+      "expected_output": "Enables ads and tracking blocklists on all tunnels",
+      "expectations": [
+        "Calls dns_get_options to show available blocklists",
+        "Calls dns_set_subscription for ads with enabled=1 and apply_to_all=1",
+        "Calls dns_set_subscription for tracking with enabled=1 and apply_to_all=1",
+        "Confirms the subscriptions were applied"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "A website is broken, I think it's being blocked. Whitelist example.com",
+      "expected_output": "Adds example.com to the whitelist",
+      "expectations": [
+        "Calls dns_add_whitelist with domain=example.com",
+        "Confirms the domain was whitelisted",
+        "Optionally offers apply_to_all"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Set up DNS blocking on my phone without using VPN",
+      "expected_output": "Creates a Secure DNS hash and provides setup instructions",
+      "expectations": [
+        "Calls public_dns_create_hash to generate DoH/DoT URLs",
+        "Provides the DoH URL and DoT hostname",
+        "Gives platform-specific setup instructions (iOS or Android)",
+        "Explains this works without the VPN connection"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "What's being blocked on my network?",
+      "expected_output": "Shows DNS blocking stats and active subscriptions",
+      "expectations": [
+        "Calls dns_blocklist_stats to show overall stats",
+        "Calls dns_get_tunnel_config to show per-tunnel config",
+        "Presents total blocked domains and active blocklists"
+      ]
+    }
+  ]
+}

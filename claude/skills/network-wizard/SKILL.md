@@ -220,4 +220,4 @@ Print a summary card with:
 - **Always validate API responses:** check `status` field, show errors clearly
 - **Handle failover:** if the primary API endpoint fails, try regional endpoints
 
-For full API details, see [../../api/reference.md](../../api/reference.md).
+For full API details, see [../../../api/reference.md](../../../api/reference.md).

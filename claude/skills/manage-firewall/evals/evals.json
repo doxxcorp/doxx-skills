@@ -1,0 +1,46 @@
+{
+  "skill_name": "manage-firewall",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Link all my tunnels so they can see each other",
+      "expected_output": "Enables mesh networking via firewall_link_all_toggle",
+      "expectations": [
+        "Calls firewall_link_all_toggle with enabled=1",
+        "Confirms mesh networking is enabled",
+        "Explains that all tunnels can now reach each other"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Open port 443 on my Home Server tunnel to the internet",
+      "expected_output": "Creates a firewall rule for TCP 443",
+      "expectations": [
+        "Lists tunnels to find Home Server's tunnel token and IP",
+        "Calls firewall_rule_add with protocol=TCP, src_ip=0.0.0.0/0, dst_port=443",
+        "Uses the correct tunnel IP as dst_ip"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Only let my MacBook and iPhone see each other, not my other devices",
+      "expected_output": "Creates bidirectional firewall rules between the two tunnels",
+      "expectations": [
+        "Lists tunnels to find MacBook and iPhone tunnel tokens and IPs",
+        "Creates a rule allowing MacBook IP to reach iPhone IP",
+        "Creates a rule allowing iPhone IP to reach MacBook IP",
+        "Does NOT enable link-all (selective mesh only)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Show me my current firewall rules",
+      "expected_output": "Lists all firewall rules and mesh status",
+      "expectations": [
+        "Calls firewall_rule_list",
+        "Calls firewall_link_all_status",
+        "Presents rules in a readable format"
+      ]
+    }
+  ]
+}

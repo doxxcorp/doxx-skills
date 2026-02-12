@@ -111,4 +111,4 @@ curl -s -X POST $API -d "public_dns_delete_hash=1&token=$TOKEN&host_hash=HASH"
 - Use `apply_to_all=1` when the user wants consistent blocking across all devices
 - If user has multiple tunnels, ask which to configure (or offer apply_to_all)
 
-For full API details, see [../../api/reference.md](../../api/reference.md).
+For full API details, see [../../../api/reference.md](../../../api/reference.md).

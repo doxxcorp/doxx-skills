@@ -111,4 +111,4 @@ Download: `curl -o doxx-root-ca.crt https://a0x13.doxx.net/assets/doxx-root-ca.c
 - Verify DNS after changes with `dig @a.root-dx.net`
 - For TLS certs, the private key stays local — never send it anywhere
 
-For full API details, see [../../api/reference.md](../../api/reference.md).
+For full API details, see [../../../api/reference.md](../../../api/reference.md).

@@ -1,0 +1,47 @@
+{
+  "skill_name": "manage-tunnels",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Show me all my tunnels",
+      "expected_output": "Lists all tunnels with names, IPs, servers, and connection status",
+      "expectations": [
+        "Calls list_tunnels with the user's auth token",
+        "Displays tunnel name, assigned IP, server, and connection status",
+        "Presents output in a readable format"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Add a new device called Work Laptop on the London server",
+      "expected_output": "Creates a tunnel named Work Laptop on the London server",
+      "expectations": [
+        "Calls servers endpoint to find the London server hostname",
+        "Calls create_tunnel with name=Work Laptop and the correct server",
+        "Shows the created tunnel's assigned IP and tunnel token",
+        "Offers to get the WireGuard config for the new tunnel"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Move my Home Server tunnel to the EU",
+      "expected_output": "Updates the tunnel's server to an EU location",
+      "expectations": [
+        "Lists tunnels to find the Home Server tunnel token",
+        "Calls servers endpoint to show EU server options",
+        "Calls update_tunnel with the new server",
+        "Warns that the WireGuard config will change and needs reinstalling"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Delete the tunnel called Test Device",
+      "expected_output": "Deletes the specified tunnel after confirmation",
+      "expectations": [
+        "Lists tunnels to find Test Device's tunnel token",
+        "Asks for confirmation before deleting",
+        "Calls delete_tunnel with the correct tunnel token"
+      ]
+    }
+  ]
+}
