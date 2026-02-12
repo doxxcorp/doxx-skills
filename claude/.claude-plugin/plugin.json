@@ -1,0 +1,13 @@
+{
+  "name": "doxx",
+  "version": "0.1.0",
+  "description": "AI skills for setting up and managing doxx.net private networks",
+  "skills": [
+    "skills/network-wizard",
+    "skills/manage-tunnels",
+    "skills/manage-domains",
+    "skills/manage-firewall",
+    "skills/manage-dns-blocking",
+    "skills/network-status"
+  ]
+}
