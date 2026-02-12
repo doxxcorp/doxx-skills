@@ -3,7 +3,7 @@ name: network-wizard
 description: Set up a doxx.net private network: tunnels, mesh networking, domains, DNS blocking, and client installation
 argument-hint: "[number of devices] [server location]"
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo *), Bash(mkdir *), Bash(tee *), Bash(chmod *), Read, Write
+allowed-tools: Bash(curl *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo *), Read, Write
 ---
 
 # doxx.net Network Wizard
@@ -22,8 +22,8 @@ Token file: `~/.config/doxxnet/token`
 
 **IMPORTANT — avoiding permission prompts:**
 - To check if the token file exists: use the `Read` tool on `~/.config/doxxnet/token`
-- To save a token: `mkdir -p ~/.config/doxxnet`, then `Write` tool to write the token to `~/.config/doxxnet/token`, then `chmod 600 ~/.config/doxxnet/token`
-- NEVER chain commands with `&&` or `||` — compound commands trigger permission prompts. Each Bash call must be a single simple command.
+- To save a token: use the `Write` tool to write the token to `~/.config/doxxnet/token` (it creates parent directories automatically)
+- NEVER use Bash for token file operations (no `cat`, `mkdir`, `chmod`, `test`, etc.) — only `Read` and `Write` tools are pre-approved. Bash is ONLY pre-approved for commands starting with `curl`.
 
 **Config API** — POST to `https://config.doxx.net/v1/` with URL-encoded form data:
 ```
@@ -49,10 +49,7 @@ Use the `Read` tool on `~/.config/doxxnet/token` to check if a token exists. If 
 
 If no token or validation fails, ask: "Do you have a doxx.net auth token?"
 
-**If yes:** validate with `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=THEIR_TOKEN"`. On success, save it:
-1. `mkdir -p ~/.config/doxxnet`
-2. Use the `Write` tool to save the token to `~/.config/doxxnet/token`
-3. `chmod 600 ~/.config/doxxnet/token`
+**If yes:** validate with `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=THEIR_TOKEN"`. On success, save it with the `Write` tool to `~/.config/doxxnet/token`.
 **If no:** tell them to create one at https://a0x13.doxx.net (human-only, POW required). Offer to wait.
 
 Warn: "This token is your identity. There are no passwords. Keep it safe."

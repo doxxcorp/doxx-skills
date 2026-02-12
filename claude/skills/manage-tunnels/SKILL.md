@@ -3,7 +3,7 @@ name: manage-tunnels
 description: Manage doxx.net tunnels: create, update, move, delete devices and get WireGuard configs
 argument-hint: "[action] [tunnel name]"
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo *), Bash(mkdir *), Bash(tee *), Bash(chmod *), Read, Write
+allowed-tools: Bash(curl *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo *), Read, Write
 ---
 
 # Manage doxx.net Tunnels
@@ -18,10 +18,10 @@ Token file: `~/.config/doxxnet/token`
 
 **IMPORTANT — avoiding permission prompts:**
 - To check if the token file exists: use the `Read` tool on `~/.config/doxxnet/token`
-- To save a token: `mkdir -p ~/.config/doxxnet`, then `Write` tool to write the token to `~/.config/doxxnet/token`, then `chmod 600 ~/.config/doxxnet/token`
-- NEVER chain commands with `&&` or `||` — compound commands trigger permission prompts. Each Bash call must be a single simple command.
+- To save a token: use the `Write` tool to write the token to `~/.config/doxxnet/token` (it creates parent directories automatically)
+- NEVER use Bash for token file operations (no `cat`, `mkdir`, `chmod`, `test`, etc.) — only `Read` and `Write` tools are pre-approved. Bash is ONLY pre-approved for commands starting with `curl`.
 
-If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it using the steps above.
+If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it with the `Write` tool.
 
 **Config API** — POST to `https://config.doxx.net/v1/`:
 ```

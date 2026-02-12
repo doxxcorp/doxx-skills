@@ -3,7 +3,7 @@ name: manage-dns-blocking
 description: Manage doxx.net DNS blocking: enable blocklists, whitelist/blacklist domains, configure Secure DNS
 argument-hint: "[action] [domain or blocklist]"
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(mkdir *), Bash(chmod *), Read, Write
+allowed-tools: Bash(curl *), Read, Write
 ---
 
 # Manage doxx.net DNS Blocking
@@ -18,10 +18,10 @@ Token file: `~/.config/doxxnet/token`
 
 **IMPORTANT — avoiding permission prompts:**
 - To check if the token file exists: use the `Read` tool on `~/.config/doxxnet/token`
-- To save a token: `mkdir -p ~/.config/doxxnet`, then `Write` tool to write the token to `~/.config/doxxnet/token`, then `chmod 600 ~/.config/doxxnet/token`
-- NEVER chain commands with `&&` or `||` — compound commands trigger permission prompts. Each Bash call must be a single simple command.
+- To save a token: use the `Write` tool to write the token to `~/.config/doxxnet/token` (it creates parent directories automatically)
+- NEVER use Bash for token file operations (no `cat`, `mkdir`, `chmod`, `test`, etc.) — only `Read` and `Write` tools are pre-approved. Bash is ONLY pre-approved for commands starting with `curl`.
 
-If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it using the steps above.
+If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it with the `Write` tool.
 
 **Config API** — POST to `https://config.doxx.net/v1/`:
 ```
