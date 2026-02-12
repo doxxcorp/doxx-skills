@@ -37,7 +37,7 @@ claude /plugin install doxxnet
 3. Switch to the **Plugins** tab and search for "doxx" — **doxxnet** will appear
 4. Click **Install** and choose your scope
 
-**Set your auth token** so skills can authenticate automatically. Add it to your shell profile so it persists:
+**Set your auth token** so the MCP server can authenticate API calls. Add it to your shell profile so it persists:
 
 ```bash
 echo 'export DOXXNET_TOKEN=your-token-here' >> ~/.zshenv
@@ -45,7 +45,9 @@ echo 'export DOXXNET_TOKEN=your-token-here' >> ~/.zshenv
 
 Then **fully quit and reopen** your terminal, IDE, or editor so it picks up the new env var.
 
-Once installed, use any skill as a slash command:
+Once installed, the plugin registers a local MCP server that provides ~39 tools for interacting with the doxx.net API. Skills use these tools directly — no permission prompts for API calls.
+
+Use any skill as a slash command:
 
 ```
 /doxxnet:network-wizard
@@ -66,6 +68,8 @@ Point your agent at the relevant file and provide your doxx.net auth token at ru
 ## What's Inside
 
 ### Claude Code Plugin (`claude/`)
+
+The plugin bundles a local MCP server (`scripts/mcp-server.py`) that handles all doxx.net API communication. No external dependencies — Python 3 stdlib only.
 
 Interactive skills with guided workflows:
 
@@ -94,7 +98,7 @@ doxx.net is anonymous by design. There are no usernames, passwords, or emails. Y
 2. You give your auth token to the agent
 3. The agent makes API calls on your behalf to set up your private network
 
-No secrets are stored in this repo. Tokens are always provided by you at runtime.
+No secrets are stored in this repo. Tokens are always provided by you at runtime (via `DOXXNET_TOKEN` env var).
 
 ## TODO
 
