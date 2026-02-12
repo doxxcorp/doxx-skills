@@ -2,28 +2,38 @@
 
 AI agent skills for setting up and managing [doxx.net](https://doxx.net) private networks through natural language.
 
-## Install
+## Getting Started
 
-Requires [Claude Code](https://code.claude.com/). Run these commands inside Claude Code:
+### Claude Code
+
+Run these commands inside [Claude Code](https://code.claude.com/):
 
 ```
 /plugin marketplace add doxxcorp/doxx-skills
 /plugin install doxx
 ```
 
-That's it. The plugin is fetched directly from GitHub — no cloning needed.
-
-Once installed, use any skill as a slash command:
+The plugin is fetched directly from GitHub — no cloning needed. Once installed, use any skill as a slash command:
 
 ```
 /doxx:network-wizard
 ```
 
+### Other Agents
+
+Any AI agent with shell access can use the shared resources in this repo directly:
+
+- **[api/reference.md](api/reference.md)** — Condensed doxx.net API reference optimized for agent consumption
+- **[shared/workflows/](shared/workflows/)** — Step-by-step procedures for common tasks (private network setup, tunnels, domains, client install)
+- **[shared/client-guides/](shared/client-guides/)** — Platform-specific WireGuard installation (macOS, iOS, Android)
+
+Point your agent at the relevant file and provide your doxx.net auth token at runtime.
+
 ## What's Inside
 
 ### Claude Code Plugin (`claude/`)
 
-Interactive skills that let Claude set up and manage your doxx.net private network:
+Interactive skills with guided workflows:
 
 | Skill | What it does |
 |-------|-------------|
@@ -34,31 +44,26 @@ Interactive skills that let Claude set up and manage your doxx.net private netwo
 | **manage-dns-blocking** | Enable ad/tracker blocking, manage whitelists/blacklists |
 | **network-status** | Bandwidth stats, connection tracking, security alerts |
 
-### Shared Resources (`shared/`)
+### Shared Resources (`shared/`, `api/`)
 
-Agent-agnostic workflows and guides that any AI agent can use:
+Agent-agnostic workflows, guides, and API reference that work with any AI agent or can be followed manually:
 
-- **workflows/** — Step-by-step procedures for common tasks
-- **client-guides/** — Platform-specific WireGuard installation (macOS, iOS, Android)
-
-### API Reference (`api/`)
-
-Condensed doxx.net API reference optimized for agent consumption.
+- **api/reference.md** — Every doxx.net API endpoint with curl examples
+- **shared/workflows/** — Step-by-step procedures for common tasks
+- **shared/client-guides/** — Platform-specific WireGuard installation (macOS, iOS, Android)
 
 ## Requirements
 
 - A doxx.net account (create one at [a0x13.doxx.net](https://a0x13.doxx.net))
-- [Claude Code](https://claude.ai/claude-code) (for the Claude plugin)
-- `curl`, `jq` (for API calls)
-- `wg-quick` / WireGuard (for VPN connection)
+- doxx.net VPN client (macOS, iOS, Android) or [WireGuard](https://www.wireguard.com/install/)
 
 ## How It Works
 
 doxx.net is anonymous by design. There are no usernames, passwords, or emails. Your auth token **is** your identity.
 
 1. You create an account at [a0x13.doxx.net](https://a0x13.doxx.net) (human-only, proof-of-work gated)
-2. You give your auth token to the skill
-3. The skill makes API calls on your behalf to set up your private network
+2. You give your auth token to the agent
+3. The agent makes API calls on your behalf to set up your private network
 4. WireGuard configs are generated and installed on your devices
 
 No secrets are stored in this repo. Tokens are always provided by you at runtime.
