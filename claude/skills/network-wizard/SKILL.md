@@ -21,19 +21,21 @@ You are an interactive wizard that helps users set up a complete doxx.net privat
 Token file: `~/.config/doxxnet/token`
 
 **IMPORTANT — avoiding permission prompts:**
-- To check if the token file exists: use the `Read` tool on `~/.config/doxxnet/token`
-- To save a token: use the `Write` tool to write the token to `~/.config/doxxnet/token` (it creates parent directories automatically)
-- NEVER use Bash for token file operations (no `cat`, `mkdir`, `chmod`, `test`, etc.) — only `Read` and `Write` tools are pre-approved. Bash is ONLY pre-approved for commands starting with `curl`.
+- To read the token: use the `Read` tool on `~/.config/doxxnet/token`. Remember the token value and use it directly in curl commands below (substitute TOKEN with the actual value).
+- To save a token: use the `Write` tool to `~/.config/doxxnet/token`
+- NEVER use Bash for file operations — only `Read` and `Write` tools. Bash is ONLY for `curl` commands.
 
 **Config API** — POST to `https://config.doxx.net/v1/` with URL-encoded form data:
 ```
-curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$(cat ~/.config/doxxnet/token)"
+curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=TOKEN"
 ```
 
 **Stats API** — GET from `https://secure-wss.doxx.net/api/stats/`:
 ```
-curl -s "https://secure-wss.doxx.net/api/stats/ENDPOINT?token=$(cat ~/.config/doxxnet/token)&param=value"
+curl -s "https://secure-wss.doxx.net/api/stats/ENDPOINT?token=TOKEN&param=value"
 ```
+
+Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat ...)` or any subshell.
 
 **Special responses:** `sign_certificate` returns raw PEM (not JSON). `generate_qr` returns binary PNG — use `curl -s ... -o file.png`.
 
@@ -45,7 +47,7 @@ If the user provided arguments: $ARGUMENTS — parse them for device count and/o
 
 ## Phase 1: Authentication
 
-Use the `Read` tool on `~/.config/doxxnet/token` to check if a token exists. If it does, validate: `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=$(cat ~/.config/doxxnet/token)"`
+Use the `Read` tool on `~/.config/doxxnet/token` to check if a token exists. If it does, validate: `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=TOKEN"` (substitute the actual token value)
 
 If no token or validation fails, ask: "Do you have a doxx.net auth token?"
 

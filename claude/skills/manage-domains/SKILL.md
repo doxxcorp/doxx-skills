@@ -17,16 +17,18 @@ User request: $ARGUMENTS
 Token file: `~/.config/doxxnet/token`
 
 **IMPORTANT — avoiding permission prompts:**
-- To check if the token file exists: use the `Read` tool on `~/.config/doxxnet/token`
-- To save a token: use the `Write` tool to write the token to `~/.config/doxxnet/token` (it creates parent directories automatically)
-- NEVER use Bash for token file operations (no `cat`, `mkdir`, `chmod`, `test`, etc.) — only `Read` and `Write` tools are pre-approved. Bash is ONLY pre-approved for commands starting with `curl`.
+- To read the token: use the `Read` tool on `~/.config/doxxnet/token`. Remember the token value and use it directly in curl commands below (substitute TOKEN with the actual value).
+- To save a token: use the `Write` tool to `~/.config/doxxnet/token`
+- NEVER use Bash for file operations — only `Read` and `Write` tools. Bash is ONLY for `curl` commands.
 
 If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it with the `Write` tool.
 
 **Config API** — POST to `https://config.doxx.net/v1/`:
 ```
-curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$(cat ~/.config/doxxnet/token)"
+curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=TOKEN"
 ```
+
+Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat ...)` or any subshell.
 
 ## Endpoints
 
@@ -55,7 +57,7 @@ Default TLD is `.doxx` if none specified.
 To sign a certificate, generate a key and CSR first with openssl, then call `sign_certificate`:
 1. `openssl ecparam -genkey -name prime256v1 -out DOMAIN.key`
 2. `openssl req -new -key DOMAIN.key -out DOMAIN.csr -subj "/CN=DOMAIN"`
-3. `curl -s -X POST https://config.doxx.net/v1/ --data-urlencode "csr@DOMAIN.csr" -d "sign_certificate=1&domain=DOMAIN&token=$(cat ~/.config/doxxnet/token)"`
+3. `curl -s -X POST https://config.doxx.net/v1/ --data-urlencode "csr@DOMAIN.csr" -d "sign_certificate=1&domain=DOMAIN&token=TOKEN"`
 
 Remind users: clients need the doxx.net root CA installed to trust these certs.
 
