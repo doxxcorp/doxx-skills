@@ -1,6 +1,6 @@
 ---
 name: manage-tunnels
-description: Manage doxx.net tunnels: create, update, move, delete devices and get WireGuard configs
+description: "Manage doxx.net tunnels: create, update, move, delete devices and get WireGuard configs"
 argument-hint: "[action] [tunnel name]"
 user-invocable: true
 allowed-tools: Bash(curl *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo *), Read, Write

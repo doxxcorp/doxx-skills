@@ -1,6 +1,6 @@
 ---
 name: manage-firewall
-description: Manage doxx.net firewall rules: open ports, link tunnels for mesh networking, manage access rules
+description: "Manage doxx.net firewall rules: open ports, link tunnels for mesh networking, manage access rules"
 argument-hint: "[action] [details]"
 user-invocable: true
 allowed-tools: Bash(curl *), Read, Write

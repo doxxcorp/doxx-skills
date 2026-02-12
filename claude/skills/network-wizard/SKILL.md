@@ -1,6 +1,6 @@
 ---
 name: network-wizard
-description: Set up a doxx.net private network: tunnels, mesh networking, domains, DNS blocking, and client installation
+description: "Set up a doxx.net private network: tunnels, mesh networking, domains, DNS blocking, and client installation"
 argument-hint: "[number of devices] [server location]"
 user-invocable: true
 allowed-tools: Bash(curl *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo *), Read, Write

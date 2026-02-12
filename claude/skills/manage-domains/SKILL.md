@@ -1,6 +1,6 @@
 ---
 name: manage-domains
-description: Manage doxx.net domains: register, DNS records, TLS certificates, import external domains
+description: "Manage doxx.net domains: register, DNS records, TLS certificates, import external domains"
 argument-hint: "[action] [domain name]"
 user-invocable: true
 allowed-tools: Bash(curl *), Bash(openssl *), Bash(dig *), Read, Write

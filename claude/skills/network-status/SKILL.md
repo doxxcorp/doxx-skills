@@ -1,6 +1,6 @@
 ---
 name: network-status
-description: Check doxx.net network status: bandwidth, connections, security alerts, tunnel status
+description: "Check doxx.net network status: bandwidth, connections, security alerts, tunnel status"
 argument-hint: "[what to check]"
 user-invocable: true
 allowed-tools: Bash(curl *), Bash(dig *), Read, Write

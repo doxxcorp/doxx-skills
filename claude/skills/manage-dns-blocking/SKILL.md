@@ -1,6 +1,6 @@
 ---
 name: manage-dns-blocking
-description: Manage doxx.net DNS blocking: enable blocklists, whitelist/blacklist domains, configure Secure DNS
+description: "Manage doxx.net DNS blocking: enable blocklists, whitelist/blacklist domains, configure Secure DNS"
 argument-hint: "[action] [domain or blocklist]"
 user-invocable: true
 allowed-tools: Bash(curl *), Read, Write
