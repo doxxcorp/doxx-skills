@@ -4,19 +4,14 @@ AI agent skills for setting up and managing [doxx.net](https://doxx.net) private
 
 ## Install
 
-Requires [Claude Code](https://code.claude.com/).
-
-```bash
-# Clone the repo (or use the GitHub URL directly)
-git clone https://github.com/doxxcorp/doxx-skills.git
-```
-
-Then from within Claude Code, add the marketplace and install:
+Requires [Claude Code](https://code.claude.com/). Run these commands inside Claude Code:
 
 ```
 /plugin marketplace add doxxcorp/doxx-skills
 /plugin install doxx
 ```
+
+That's it. The plugin is fetched directly from GitHub — no cloning needed.
 
 Once installed, use any skill as a slash command:
 
