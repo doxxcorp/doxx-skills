@@ -3,7 +3,7 @@ name: network-status
 description: Check doxx.net network status: bandwidth, connections, security alerts, tunnel status
 argument-hint: "[what to check]"
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(dig *), Bash(mkdir *), Bash(chmod *), Read, Write
+allowed-tools: Bash(curl *), Bash(cat *), Bash(dig *), Bash(mkdir *), Bash(chmod *), Read, Write
 ---
 
 # doxx.net Network Status

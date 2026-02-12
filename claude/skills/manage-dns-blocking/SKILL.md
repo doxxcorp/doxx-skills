@@ -3,7 +3,7 @@ name: manage-dns-blocking
 description: Manage doxx.net DNS blocking: enable blocklists, whitelist/blacklist domains, configure Secure DNS
 argument-hint: "[action] [domain or blocklist]"
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(mkdir *), Bash(chmod *), Read, Write
+allowed-tools: Bash(curl *), Bash(cat *), Bash(mkdir *), Bash(chmod *), Read, Write
 ---
 
 # Manage doxx.net DNS Blocking
