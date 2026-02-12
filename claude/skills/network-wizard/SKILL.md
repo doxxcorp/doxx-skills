@@ -20,7 +20,10 @@ You are an interactive wizard that helps users set up a complete doxx.net privat
 
 Token file: `~/.config/doxxnet/token`
 
-**IMPORTANT: To check if the token file exists, use the `Read` tool on `~/.config/doxxnet/token`. NEVER use Bash with `cat`, `test`, or `[` to check — those commands are not pre-approved and will prompt the user.**
+**IMPORTANT — avoiding permission prompts:**
+- To check if the token file exists: use the `Read` tool on `~/.config/doxxnet/token`
+- To save a token: `mkdir -p ~/.config/doxxnet`, then `Write` tool to write the token to `~/.config/doxxnet/token`, then `chmod 600 ~/.config/doxxnet/token`
+- NEVER chain commands with `&&` or `||` — compound commands trigger permission prompts. Each Bash call must be a single simple command.
 
 **Config API** — POST to `https://config.doxx.net/v1/` with URL-encoded form data:
 ```
@@ -47,9 +50,9 @@ Use the `Read` tool on `~/.config/doxxnet/token` to check if a token exists. If 
 If no token or validation fails, ask: "Do you have a doxx.net auth token?"
 
 **If yes:** validate with `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=THEIR_TOKEN"`. On success, save it:
-```
-mkdir -p ~/.config/doxxnet && printf '%s\n' 'TOKEN' > ~/.config/doxxnet/token && chmod 600 ~/.config/doxxnet/token
-```
+1. `mkdir -p ~/.config/doxxnet`
+2. Use the `Write` tool to save the token to `~/.config/doxxnet/token`
+3. `chmod 600 ~/.config/doxxnet/token`
 **If no:** tell them to create one at https://a0x13.doxx.net (human-only, POW required). Offer to wait.
 
 Warn: "This token is your identity. There are no passwords. Keep it safe."
