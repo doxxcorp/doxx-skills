@@ -34,7 +34,7 @@
         "Calls list_tunnels to check existing state before creating anything",
         "Skips tunnel creation phases since tunnels already exist",
         "Proceeds to domain registration (Phase 6) or DNS blocking (Phase 7)",
-        "Demonstrates idempotent behavior — does not duplicate existing resources"
+        "Demonstrates idempotent behavior: does not duplicate existing resources"
       ]
     },
     {

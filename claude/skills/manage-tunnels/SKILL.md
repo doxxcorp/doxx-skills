@@ -1,6 +1,6 @@
 ---
 name: manage-tunnels
-description: Manage doxx.net VPN tunnels — create, update, move, delete devices and get WireGuard configs
+description: Manage doxx.net tunnels: create, update, move, delete devices and get WireGuard configs
 argument-hint: "[action] [tunnel name]"
 user-invocable: true
 allowed-tools: Bash(curl *), Bash(jq *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo *), Bash(mkdir *), Bash(tee *), Read, Write
@@ -8,7 +8,7 @@ allowed-tools: Bash(curl *), Bash(jq *), Bash(openssl *), Bash(wg-quick *), Bash
 
 # Manage doxx.net Tunnels
 
-You help users manage their doxx.net VPN tunnels. Each tunnel represents a device on the network.
+You help users manage their doxx.net tunnels. Each tunnel represents a device on the network.
 
 ## Setup
 
@@ -49,7 +49,7 @@ curl -s -X POST $API -d "servers=1" | jq '.servers[] | {server_name, location, c
 curl -s -X POST $API -d "wireguard=1&token=$TOKEN&tunnel_token=$TUNNEL" | jq .config
 ```
 
-Build a .conf file from the response — see `shared/workflows/tunnel-setup.md` for the full procedure.
+Build a .conf file from the response:see `shared/workflows/tunnel-setup.md` for the full procedure.
 
 ### Update tunnel
 ```bash
@@ -77,6 +77,6 @@ curl -s -X POST $API -d "disconnect_peer=1&token=$TOKEN&tunnel_token=$TUNNEL"
 - Always list tunnels first to show current state before making changes
 - When creating tunnels, suggest the nearest server based on the user's context
 - When moving a tunnel to a new server, explain that the WireGuard config will change and needs to be re-installed on the device
-- Always check API response `status` field — HTTP 200 can still be an error
+- Always check API response `status` field:HTTP 200 can still be an error
 
 For full API details, see [../../../api/reference.md](../../../api/reference.md).

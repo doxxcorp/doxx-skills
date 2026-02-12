@@ -1,6 +1,6 @@
 # Workflow: Tunnel Setup
 
-Agent-neutral procedure for creating and configuring a single VPN tunnel.
+Agent-neutral procedure for creating and configuring a single encrypted tunnel.
 
 ## Variables
 

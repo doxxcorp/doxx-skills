@@ -5,7 +5,7 @@
   },
   "plugins": [
     {
-      "name": "doxx",
+      "name": "doxxnet",
       "source": "./claude",
       "description": "AI skills for setting up and managing doxx.net private networks",
       "version": "0.1.0"

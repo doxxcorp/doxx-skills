@@ -1,4 +1,4 @@
-# macOS — WireGuard Setup
+# macOS:WireGuard Setup
 
 ## Prerequisites
 

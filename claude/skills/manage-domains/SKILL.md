@@ -1,6 +1,6 @@
 ---
 name: manage-domains
-description: Manage doxx.net domains — register, DNS records, TLS certificates, import external domains
+description: Manage doxx.net domains: register, DNS records, TLS certificates, import external domains
 argument-hint: "[action] [domain name]"
 user-invocable: true
 allowed-tools: Bash(curl *), Bash(jq *), Bash(openssl *), Bash(dig *), Read, Write
@@ -109,6 +109,6 @@ Download: `curl -o doxx-root-ca.crt https://a0x13.doxx.net/assets/doxx-root-ca.c
 - Always list existing domains/records before making changes
 - When creating A records for tunnels, get tunnel IPs from `list_tunnels` first
 - Verify DNS after changes with `dig @a.root-dx.net`
-- For TLS certs, the private key stays local — never send it anywhere
+- For TLS certs, the private key stays local:never send it anywhere
 
 For full API details, see [../../../api/reference.md](../../../api/reference.md).

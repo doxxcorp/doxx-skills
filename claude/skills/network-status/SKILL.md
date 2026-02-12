@@ -1,6 +1,6 @@
 ---
 name: network-status
-description: Check doxx.net network status — bandwidth, connections, security alerts, tunnel status
+description: Check doxx.net network status: bandwidth, connections, security alerts, tunnel status
 argument-hint: "[what to check]"
 user-invocable: true
 allowed-tools: Bash(curl *), Bash(jq *), Bash(websocat *), Read
@@ -8,7 +8,7 @@ allowed-tools: Bash(curl *), Bash(jq *), Bash(websocat *), Read
 
 # doxx.net Network Status
 
-You help users monitor their doxx.net network — bandwidth usage, active connections, security alerts, and tunnel status.
+You help users monitor their doxx.net network:bandwidth usage, active connections, security alerts, and tunnel status.
 
 ## Setup
 
@@ -38,7 +38,7 @@ Filter by tunnel:
 curl -s "$STATS/api/stats/bandwidth?token=$TOKEN&tunnel_token=$TUNNEL&start=$(date -u -v-1H +%Y-%m-%dT%H:%M:%SZ)&end=$(date -u +%Y-%m-%dT%H:%M:%SZ)" | jq .
 ```
 
-Time ranges — granularity auto-selects: `1s` (<5m), `1m` (<6h), `5m` (<48h), `1h` (<30d), `6h` (30d+).
+Time ranges:granularity auto-selects: `1s` (<5m), `1m` (<6h), `5m` (<48h), `1h` (<30d), `6h` (30d+).
 
 ### Security alerts
 ```bash
@@ -100,7 +100,7 @@ curl -s "$STATS/api/stats/global" | jq .
 
 **"Show me everything":** list tunnels + bandwidth last hour + alerts last 24h + DNS stats.
 
-**"Is my VPN working?":** list tunnels (check `is_connected`), then `dig A doxx.net @10.10.10.10 +short` to verify DNS.
+**"Is my tunnel working?":** list tunnels (check `is_connected`), then `dig A doxx.net @10.10.10.10 +short` to verify DNS.
 
 **"What's being blocked?":** alerts with `type=dns_block` + DNS blocklist stats.
 
@@ -108,7 +108,7 @@ curl -s "$STATS/api/stats/global" | jq .
 
 ## Guidelines
 
-- Present data in a clear, readable format — tables or structured summaries
+- Present data in a clear, readable format:tables or structured summaries
 - For bandwidth, convert to human-readable units (Mbps, GB)
 - For alerts, group by category and highlight anything unusual
 - On macOS, `date -v-1H` works for relative time. On Linux, use `date -d '1 hour ago'`

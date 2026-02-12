@@ -97,10 +97,10 @@ Auto-start: `sudo systemctl enable wg-quick@doxx`
 # Check WireGuard handshake
 sudo wg show
 
-# Verify VPN DNS works
+# Verify tunnel DNS works
 dig A doxx.net @10.10.10.10 +short
 
-# Check your public IP changed (should be the VPN server's IP)
+# Check your public IP changed (should be the server's IP)
 curl -s https://ifconfig.me
 ```
 

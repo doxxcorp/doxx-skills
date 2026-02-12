@@ -1,6 +1,6 @@
 ---
 name: manage-firewall
-description: Manage doxx.net firewall rules — open ports, link tunnels for mesh networking, manage access rules
+description: Manage doxx.net firewall rules: open ports, link tunnels for mesh networking, manage access rules
 argument-hint: "[action] [details]"
 user-invocable: true
 allowed-tools: Bash(curl *), Bash(jq *), Read
@@ -36,7 +36,7 @@ curl -s -X POST $API -d "firewall_rule_list=1&token=$TOKEN&tunnel_token=$TUNNEL"
 
 ### Link all tunnels (mesh networking)
 
-Enable — every tunnel can reach every other tunnel on the account:
+Enable:every tunnel can reach every other tunnel on the account:
 ```bash
 curl -s -X POST $API -d "firewall_link_all_toggle=1&token=$TOKEN&enabled=1"
 ```
@@ -100,7 +100,7 @@ curl -s -X POST $API -d "firewall_rule_add=1&token=$TOKEN&tunnel_token=$TUNNEL&p
 ## Guidelines
 
 - Always list current rules before making changes
-- Get tunnel IPs from `list_tunnels` — you need the `assigned_ip` for rules
+- Get tunnel IPs from `list_tunnels`:you need the `assigned_ip` for rules
 - For mesh networking between two tunnels, always create bidirectional rules (A→B and B→A)
 - Confirm with the user before deleting rules
 - Prefer link-all over manual rules when the user wants full mesh

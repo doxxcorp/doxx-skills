@@ -23,7 +23,7 @@ Agent-neutral procedure for building a complete doxx.net private network from sc
    - If `"error"` → token is invalid, ask them to check and retry
 3. **If no:** explain they must create an account at `https://a0x13.doxx.net`
    - Account creation is human-only (proof-of-work gated)
-   - Cannot be done via API — this is by design
+   - Cannot be done via API:this is by design
    - Offer to wait while they create one
 
 **Important:** The auth token IS the user's identity. There are no usernames or passwords.
@@ -51,7 +51,7 @@ Agent-neutral procedure for building a complete doxx.net private network from sc
 
 ## Phase 3: Server Selection
 
-**Goal:** Choose a VPN server location.
+**Goal:** Choose a server location.
 
 1. Fetch server list (no auth needed):
    ```bash
@@ -65,7 +65,7 @@ Agent-neutral procedure for building a complete doxx.net private network from sc
 
 ## Phase 4: Tunnel Creation
 
-**Goal:** Create VPN tunnels for each device.
+**Goal:** Create tunnels for each device.
 
 1. Ask: "How many devices will be on this network?"
 2. For each device:
@@ -168,9 +168,9 @@ Agent-neutral procedure for building a complete doxx.net private network from sc
 
 ## Phase 9: Secure DNS (optional)
 
-**Goal:** Provide DNS blocking on devices not using the VPN.
+**Goal:** Provide DNS blocking on devices not on the tunnel.
 
-1. Ask: "Want DNS blocking on devices that aren't on the VPN?"
+1. Ask: "Want DNS blocking on devices that aren't on the tunnel?"
 2. Create a Secure DNS hash:
    ```bash
    curl -s -X POST $API -d "public_dns_create_hash=1&token=$TOKEN&tunnel_token=$TUNNEL" | jq .

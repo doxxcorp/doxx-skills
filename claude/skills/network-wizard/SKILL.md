@@ -1,6 +1,6 @@
 ---
 name: network-wizard
-description: Set up a doxx.net private network — tunnels, mesh networking, domains, DNS blocking, and client installation
+description: Set up a doxx.net private network: tunnels, mesh networking, domains, DNS blocking, and client installation
 argument-hint: "[number of devices] [server location]"
 user-invocable: true
 allowed-tools: Bash(curl *), Bash(jq *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(brew *), Bash(sudo *), Bash(mkdir *), Bash(tee *), Bash(cat *), Bash(echo *), Read, Write
@@ -16,12 +16,12 @@ You are an interactive wizard that helps users set up a complete doxx.net privat
 - You CANNOT create accounts via API. Humans must visit https://a0x13.doxx.net and complete a proof-of-work challenge.
 - All Config API calls: `POST https://config.doxx.net/v1/` with `endpoint_name=1` parameter.
 - Failover endpoints: `config-us-east.doxx.net`, `config-us-west.doxx.net`, `config-eu-central.doxx.net`
-- HTTP 200 can still be an error — always check the `status` field in JSON responses.
-- `generate_qr` returns binary PNG, `sign_certificate` returns raw PEM — not JSON.
+- HTTP 200 can still be an error:always check the `status` field in JSON responses.
+- `generate_qr` returns binary PNG, `sign_certificate` returns raw PEM:not JSON.
 
 ## Quick start
 
-If the user provided arguments: $ARGUMENTS — parse them for device count and/or server preference, then skip ahead to the relevant phase. If `$DOXX_TOKEN` is set in the environment, skip Phase 1-2.
+If the user provided arguments: $ARGUMENTS:parse them for device count and/or server preference, then skip ahead to the relevant phase. If `$DOXX_TOKEN` is set in the environment, skip Phase 1-2.
 
 ## API setup
 
@@ -61,7 +61,7 @@ Offer to generate recovery codes:
 ```bash
 curl -s -X POST $API -d "create_account_recovery=1&token=$TOKEN" | jq .
 ```
-Tell user to save the returned codes — they're the only way to recover a lost token.
+Tell user to save the returned codes:they're the only way to recover a lost token.
 
 ## Phase 3: Server Selection
 
@@ -172,7 +172,7 @@ For detailed per-platform steps, read the guides in `shared/client-guides/`.
 
 ## Phase 9: Secure DNS (optional)
 
-Ask: "Want DNS blocking on devices that aren't on the VPN?"
+Ask: "Want DNS blocking on devices that aren't on the tunnel?"
 
 Create Secure DNS hash:
 ```bash

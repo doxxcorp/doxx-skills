@@ -1,6 +1,6 @@
 ---
 name: manage-dns-blocking
-description: Manage doxx.net DNS blocking — enable blocklists, whitelist/blacklist domains, configure Secure DNS
+description: Manage doxx.net DNS blocking: enable blocklists, whitelist/blacklist domains, configure Secure DNS
 argument-hint: "[action] [domain or blocklist]"
 user-invocable: true
 allowed-tools: Bash(curl *), Bash(jq *), Read
@@ -8,7 +8,7 @@ allowed-tools: Bash(curl *), Bash(jq *), Read
 
 # Manage doxx.net DNS Blocking
 
-You help users configure DNS-level ad/tracker/malware blocking on their doxx.net tunnels, plus Secure DNS (DoH/DoT) for non-VPN devices.
+You help users configure DNS-level ad/tracker/malware blocking on their doxx.net tunnels, plus Secure DNS (DoH/DoT) for devices not on the tunnel.
 
 ## Setup
 
@@ -79,14 +79,14 @@ curl -s -X POST $API -d "dns_blocklist_stats=1&token=$TOKEN" | jq .
 
 Returns: `total_domains`, `lists[]` with per-list domain counts and status.
 
-### Secure DNS (DoH/DoT for non-VPN devices)
+### Secure DNS (DoH/DoT for devices not on the tunnel)
 
 Create a personalized DNS hash:
 ```bash
 curl -s -X POST $API -d "public_dns_create_hash=1&token=$TOKEN&tunnel_token=$TUNNEL" | jq .
 ```
 
-Returns `doh_url` and `dot_host`. Use these to get your tunnel's DNS blocking on any device without VPN:
+Returns `doh_url` and `dot_host`. Use these to get your tunnel's DNS blocking on any device without an encrypted tunnel:
 
 - **iOS:** Settings → General → VPN & Device Management → DNS → add DoH URL
 - **Android:** Settings → Network → Private DNS → enter DoT hostname (`HASH.sdns.doxx.net`)

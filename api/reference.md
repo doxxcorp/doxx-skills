@@ -6,7 +6,7 @@ All Config API calls use `POST https://config.doxx.net/v1/` with `application/x-
 
 **Auth:** Most endpoints require `token=AUTH_TOKEN`. Exceptions noted with "(no auth)".
 
-**Responses:** JSON with `"status": "success"` or `"status": "error"`. HTTP 200 can still be an error — always check `status` field.
+**Responses:** JSON with `"status": "success"` or `"status": "error"`. HTTP 200 can still be an error:always check `status` field.
 
 **Variables used below:**
 ```
@@ -50,7 +50,7 @@ curl -s -X POST $API -d "update_profile=1&token=$TOKEN&email=EMAIL&name=NAME"
 Optional params: `email`, `name`.
 
 ### create_account_recovery
-Generate recovery codes (save these — they're the only way to recover a lost token).
+Generate recovery codes (save these:they're the only way to recover a lost token).
 ```bash
 curl -s -X POST $API -d "create_account_recovery=1&token=$TOKEN"
 ```
@@ -290,7 +290,7 @@ curl -s -X POST $API -d "delete_dns_record=1&token=$TOKEN&domain=mysite.doxx&nam
 
 ## Public DNS (Secure DNS Sharing)
 
-Create DoH/DoT endpoints that share your tunnel's DNS blocking config without VPN.
+Create DoH/DoT endpoints that share your tunnel's DNS blocking config without an encrypted tunnel.
 
 ### public_dns_list_hashes
 ```bash
@@ -428,7 +428,7 @@ curl -s "https://secure-wss.doxx.net/api/stats/global"
 ```
 Returns: `total` (global threat counter), `ts`.
 
-### WebSocket — Real-time events
+### WebSocket:Real-time events
 ```
 wss://secure-wss.doxx.net/ws?token=TOKEN[&tunnel_token=TUNNEL]
 ```
@@ -436,7 +436,7 @@ Event types: `dns_block`, `security_event`, `dangerous_port`, `dns_bypass`, `doh
 
 Event fields: `tunnel_token`, `ts`, `type`, `action`, `category`, `value`, `count`, `display`.
 
-### WebSocket — Global threat counter (no auth)
+### WebSocket:Global threat counter (no auth)
 ```
 wss://secure-wss.doxx.net/ws/global
 ```
@@ -445,7 +445,7 @@ wss://secure-wss.doxx.net/ws/global
 
 ## Conntrack API
 
-Real-time connection tracking across VPN backbone nodes.
+Real-time connection tracking across backbone nodes.
 
 ### WebSocket
 ```
@@ -468,8 +468,8 @@ curl -s https://conntrack.doxx.net/health
 
 | Layer | Address | Purpose |
 |-------|---------|---------|
-| VPN Recursive | `10.10.10.10`, `fd53::` | VPN clients — personalized blocking, DNSSEC, resolves all .doxx TLDs |
-| Public Recursive | `207.207.200.200`, `207.207.201.201` | Anyone — resolves .doxx TLDs + internet domains |
+| Tunnel Recursive | `10.10.10.10`, `fd53::` | Tunnel clients: personalized blocking, DNSSEC, resolves all .doxx TLDs |
+| Public Recursive | `207.207.200.200`, `207.207.201.201` | Anyone:resolves .doxx TLDs + internet domains |
 | Public Recursive IPv6 | `2602:f5c1::` (Americas), `2a11:46c0::` (Europe) | Same as above, IPv6 |
 | DoH | `https://doxx.net/dns-query` | DNS-over-HTTPS (public) |
 | DoT | `doxx.net:853` | DNS-over-TLS (public) |

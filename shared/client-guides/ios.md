@@ -1,4 +1,4 @@
-# iOS — WireGuard Setup
+# iOS:WireGuard Setup
 
 ## Prerequisites
 
@@ -47,9 +47,9 @@ curl -s -X POST $API --data-urlencode "generate_qr=1" --data-urlencode "data=$WG
 5. Allow VPN configuration when prompted
 6. Toggle the tunnel **ON**
 
-## Setup via Secure DNS (no VPN app needed)
+## Setup via Secure DNS (no app needed)
 
-For DNS blocking only (no VPN tunnel), use Secure DNS:
+For DNS blocking only (no tunnel), use Secure DNS:
 
 ### 1. Create a Secure DNS hash
 
@@ -65,6 +65,6 @@ curl -s -X POST $API -d "public_dns_create_hash=1&token=$TOKEN&tunnel_token=$TUN
 
 ## Verify
 
-- Open Safari and visit any website — should load normally
+- Open Safari and visit any website:should load normally
 - Try resolving a .doxx domain (if you have one registered)
 - Check doxx.net portal for connection status
