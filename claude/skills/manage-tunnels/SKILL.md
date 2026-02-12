@@ -10,16 +10,9 @@ allowed-tools: Bash(python3 *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), 
 
 You help users manage their doxx.net tunnels. Each tunnel represents a device on the network.
 
-## Setup
-
-All API calls use the helper script. Locate it first:
-```bash
-DOXXNET_API=$(find ~/.claude/plugins -name "doxx-api.py" -path "*/doxxnet/*" 2>/dev/null | head -1)
-```
-
 If `$DOXXNET_TOKEN` is not set in the environment, ask for the auth token and validate with:
 ```bash
-python3 $DOXXNET_API auth token=TOKEN_VALUE
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py auth token=TOKEN_VALUE
 ```
 
 User request: $ARGUMENTS
@@ -28,49 +21,49 @@ User request: $ARGUMENTS
 
 ### List tunnels
 ```bash
-python3 $DOXXNET_API list_tunnels
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py list_tunnels
 ```
 
 ### Create tunnel
 ```bash
 # Desktop/server
-python3 $DOXXNET_API create_tunnel name=NAME server=SERVER_HOSTNAME
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py create_tunnel name=NAME server=SERVER_HOSTNAME
 
 # Mobile device
-python3 $DOXXNET_API create_tunnel_mobile server=SERVER_HOSTNAME device_type=mobile
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py create_tunnel_mobile server=SERVER_HOSTNAME device_type=mobile
 ```
 
 To pick a server, list available ones first (no auth needed):
 ```bash
-python3 $DOXXNET_API servers
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py servers
 ```
 
 ### Get WireGuard config
 ```bash
-python3 $DOXXNET_API wireguard tunnel_token=TUNNEL
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py wireguard tunnel_token=TUNNEL
 ```
 
 Build a .conf file from the response:see `shared/workflows/tunnel-setup.md` for the full procedure.
 
 ### Update tunnel
 ```bash
-python3 $DOXXNET_API update_tunnel tunnel_token=TUNNEL name=NEW_NAME
-python3 $DOXXNET_API update_tunnel tunnel_token=TUNNEL server=NEW_SERVER
-python3 $DOXXNET_API update_tunnel tunnel_token=TUNNEL firewall=1 ipv6_enabled=1 block_bad_dns=1
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py update_tunnel tunnel_token=TUNNEL name=NEW_NAME
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py update_tunnel tunnel_token=TUNNEL server=NEW_SERVER
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py update_tunnel tunnel_token=TUNNEL firewall=1 ipv6_enabled=1 block_bad_dns=1
 ```
 
 Optional fields: `name`, `server`, `firewall` (1/0), `ipv6_enabled` (1/0), `block_bad_dns` (1/0).
 
 ### Delete tunnel
 ```bash
-python3 $DOXXNET_API delete_tunnel tunnel_token=TUNNEL
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py delete_tunnel tunnel_token=TUNNEL
 ```
 
 Confirm with the user before deleting.
 
 ### Disconnect peer
 ```bash
-python3 $DOXXNET_API disconnect_peer tunnel_token=TUNNEL
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py disconnect_peer tunnel_token=TUNNEL
 ```
 
 ## Guidelines

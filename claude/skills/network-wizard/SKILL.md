@@ -23,15 +23,6 @@ You are an interactive wizard that helps users set up a complete doxx.net privat
 
 If the user provided arguments: $ARGUMENTS:parse them for device count and/or server preference, then skip ahead to the relevant phase. If `$DOXXNET_TOKEN` is set in the environment, skip Phase 1-2.
 
-## API setup
-
-All API calls use the helper script. Locate it first:
-```bash
-DOXXNET_API=$(find ~/.claude/plugins -name "doxx-api.py" -path "*/doxxnet/*" 2>/dev/null | head -1)
-```
-
-If `$DOXXNET_TOKEN` is set, use it. Otherwise, ask for the token in Phase 1.
-
 ---
 
 ## Phase 1: Authentication
@@ -40,7 +31,7 @@ Ask: "Do you have a doxx.net auth token?"
 
 **If yes:** ask them to provide it, then validate:
 ```bash
-python3 $DOXXNET_API auth token=TOKEN_VALUE
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py auth token=TOKEN_VALUE
 ```
 - `"status": "success"` → proceed
 - `"status": "error"` → invalid token, ask to check and retry
@@ -60,7 +51,7 @@ Warn: "This token is your identity. There are no passwords. Keep it safe."
 
 Offer to generate recovery codes:
 ```bash
-python3 $DOXXNET_API create_account_recovery
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py create_account_recovery
 ```
 Tell user to save the returned codes:they're the only way to recover a lost token.
 
@@ -68,7 +59,7 @@ Tell user to save the returned codes:they're the only way to recover a lost toke
 
 Fetch servers (no auth needed):
 ```bash
-python3 $DOXXNET_API servers
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py servers
 ```
 
 Present grouped by continent. Ask which server is closest, or suggest based on context.
@@ -80,15 +71,15 @@ Ask: "How many devices will be on this network?"
 For each device, ask for a name and type, then create:
 ```bash
 # Desktop/server
-python3 $DOXXNET_API create_tunnel name=DEVICE_NAME server=SERVER
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py create_tunnel name=DEVICE_NAME server=SERVER
 
 # Mobile
-python3 $DOXXNET_API create_tunnel_mobile server=SERVER device_type=mobile
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py create_tunnel_mobile server=SERVER device_type=mobile
 ```
 
 List all tunnels to confirm:
 ```bash
-python3 $DOXXNET_API list_tunnels
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py list_tunnels
 ```
 
 ## Phase 5: Mesh Networking
@@ -97,12 +88,12 @@ Ask: "Do you want all your devices to see each other? (recommended for private n
 
 **Yes, all:**
 ```bash
-python3 $DOXXNET_API firewall_link_all_toggle enabled=1
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py firewall_link_all_toggle enabled=1
 ```
 
 **Selective:** create rules between specific tunnel pairs:
 ```bash
-python3 $DOXXNET_API firewall_rule_add tunnel_token=TUNNEL_B protocol=ALL src_ip=TUNNEL_A_IP/32 src_port=ALL dst_ip=TUNNEL_B_IP dst_port=ALL
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py firewall_rule_add tunnel_token=TUNNEL_B protocol=ALL src_ip=TUNNEL_A_IP/32 src_port=ALL dst_ip=TUNNEL_B_IP dst_port=ALL
 ```
 (Create bidirectional rules for each pair.)
 
@@ -116,12 +107,12 @@ Suggest TLDs: `.lan`, `.vpn`, `.mesh`, `.home`, `.wg`, `.wireguard`, `.local`, `
 
 Register:
 ```bash
-python3 $DOXXNET_API create_domain domain=DOMAIN
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py create_domain domain=DOMAIN
 ```
 
 Create DNS A records pointing to each tunnel's assigned IP:
 ```bash
-python3 $DOXXNET_API create_dns_record domain=DOMAIN name=HOSTNAME.DOMAIN type=A content=TUNNEL_IP ttl=300
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py create_dns_record domain=DOMAIN name=HOSTNAME.DOMAIN type=A content=TUNNEL_IP ttl=300
 ```
 
 Optionally sign a TLS certificate:
@@ -145,12 +136,12 @@ Ask: "Want to enable ad/tracker blocking on your network?"
 
 Fetch options:
 ```bash
-python3 $DOXXNET_API dns_get_options
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_get_options
 ```
 
 Recommend: ads, tracking, malware. Apply:
 ```bash
-python3 $DOXXNET_API dns_set_subscription tunnel_token=TUNNEL subscription=BLOCKLIST_NAME enabled=1 apply_to_all=1
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_set_subscription tunnel_token=TUNNEL subscription=BLOCKLIST_NAME enabled=1 apply_to_all=1
 ```
 
 ## Phase 8: Client Installation
@@ -159,7 +150,7 @@ Ask: "Which devices do you want to set up now?"
 
 For each device, get WireGuard config:
 ```bash
-python3 $DOXXNET_API wireguard tunnel_token=TUNNEL
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py wireguard tunnel_token=TUNNEL
 ```
 
 **macOS:**
@@ -191,7 +182,7 @@ Ask: "Want DNS blocking on devices that aren't on the tunnel?"
 
 Create Secure DNS hash:
 ```bash
-python3 $DOXXNET_API public_dns_create_hash tunnel_token=TUNNEL
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py public_dns_create_hash tunnel_token=TUNNEL
 ```
 
 Provide setup instructions:
@@ -205,13 +196,13 @@ Provide setup instructions:
 Verify everything:
 ```bash
 # Auth
-python3 $DOXXNET_API auth
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py auth
 
 # Tunnels
-python3 $DOXXNET_API list_tunnels
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py list_tunnels
 
 # Firewall
-python3 $DOXXNET_API firewall_rule_list
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py firewall_rule_list
 
 # DNS (if domain registered)
 dig A DOMAIN @a.root-dx.net +short

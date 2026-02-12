@@ -10,13 +10,6 @@ allowed-tools: Bash(python3 *), Read
 
 You help users configure DNS-level ad/tracker/malware blocking on their doxx.net tunnels, plus Secure DNS (DoH/DoT) for devices not on the tunnel.
 
-## Setup
-
-All API calls use the helper script. Locate it first:
-```bash
-DOXXNET_API=$(find ~/.claude/plugins -name "doxx-api.py" -path "*/doxxnet/*" 2>/dev/null | head -1)
-```
-
 If `$DOXXNET_TOKEN` is not set in the environment, ask the user for their auth token.
 
 User request: $ARGUMENTS
@@ -25,12 +18,12 @@ User request: $ARGUMENTS
 
 ### List available blocklists (no auth)
 ```bash
-python3 $DOXXNET_API dns_get_options
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_get_options
 ```
 
 ### Get tunnel's DNS config
 ```bash
-python3 $DOXXNET_API dns_get_tunnel_config tunnel_token=TUNNEL
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_get_tunnel_config tunnel_token=TUNNEL
 ```
 
 Returns: `dns_blocking_enabled`, `base_protections[]`, `subscriptions[]`, `whitelists[]`, `blacklists[]`.
@@ -38,44 +31,44 @@ Returns: `dns_blocking_enabled`, `base_protections[]`, `subscriptions[]`, `white
 ### Enable/disable a blocklist
 ```bash
 # Enable
-python3 $DOXXNET_API dns_set_subscription tunnel_token=TUNNEL subscription=BLOCKLIST_NAME enabled=1
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_set_subscription tunnel_token=TUNNEL subscription=BLOCKLIST_NAME enabled=1
 
 # Disable
-python3 $DOXXNET_API dns_set_subscription tunnel_token=TUNNEL subscription=BLOCKLIST_NAME enabled=0
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_set_subscription tunnel_token=TUNNEL subscription=BLOCKLIST_NAME enabled=0
 
 # Apply to ALL tunnels
-python3 $DOXXNET_API dns_set_subscription tunnel_token=TUNNEL subscription=BLOCKLIST_NAME enabled=1 apply_to_all=1
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_set_subscription tunnel_token=TUNNEL subscription=BLOCKLIST_NAME enabled=1 apply_to_all=1
 ```
 
 ### Whitelist a domain (stop blocking it)
 ```bash
-python3 $DOXXNET_API dns_add_whitelist tunnel_token=TUNNEL domain=example.com
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_add_whitelist tunnel_token=TUNNEL domain=example.com
 
 # Apply to all tunnels
-python3 $DOXXNET_API dns_add_whitelist tunnel_token=TUNNEL domain=example.com apply_to_all=1
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_add_whitelist tunnel_token=TUNNEL domain=example.com apply_to_all=1
 ```
 
 ### Remove from whitelist
 ```bash
-python3 $DOXXNET_API dns_remove_whitelist tunnel_token=TUNNEL domain=example.com
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_remove_whitelist tunnel_token=TUNNEL domain=example.com
 ```
 
 ### Blacklist a domain (force block it)
 ```bash
-python3 $DOXXNET_API dns_add_blacklist tunnel_token=TUNNEL domain=evil.com
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_add_blacklist tunnel_token=TUNNEL domain=evil.com
 
 # Apply to all tunnels
-python3 $DOXXNET_API dns_add_blacklist tunnel_token=TUNNEL domain=evil.com apply_to_all=1
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_add_blacklist tunnel_token=TUNNEL domain=evil.com apply_to_all=1
 ```
 
 ### Remove from blacklist
 ```bash
-python3 $DOXXNET_API dns_remove_blacklist tunnel_token=TUNNEL domain=evil.com
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_remove_blacklist tunnel_token=TUNNEL domain=evil.com
 ```
 
 ### Get blocklist stats
 ```bash
-python3 $DOXXNET_API dns_blocklist_stats
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_blocklist_stats
 ```
 
 Returns: `total_domains`, `lists[]` with per-list domain counts and status.
@@ -84,7 +77,7 @@ Returns: `total_domains`, `lists[]` with per-list domain counts and status.
 
 Create a personalized DNS hash:
 ```bash
-python3 $DOXXNET_API public_dns_create_hash tunnel_token=TUNNEL
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py public_dns_create_hash tunnel_token=TUNNEL
 ```
 
 Returns `doh_url` and `dot_host`. Use these to get your tunnel's DNS blocking on any device without an encrypted tunnel:
@@ -96,12 +89,12 @@ Returns `doh_url` and `dot_host`. Use these to get your tunnel's DNS blocking on
 
 List existing hashes:
 ```bash
-python3 $DOXXNET_API public_dns_list_hashes
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py public_dns_list_hashes
 ```
 
 Delete a hash:
 ```bash
-python3 $DOXXNET_API public_dns_delete_hash host_hash=HASH
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py public_dns_delete_hash host_hash=HASH
 ```
 
 ## Guidelines

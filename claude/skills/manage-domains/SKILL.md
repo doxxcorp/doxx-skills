@@ -10,13 +10,6 @@ allowed-tools: Bash(python3 *), Bash(openssl *), Bash(dig *), Read, Write
 
 You help users register domains, manage DNS records, sign TLS certificates, and import external domains on doxx.net.
 
-## Setup
-
-All API calls use the helper script. Locate it first:
-```bash
-DOXXNET_API=$(find ~/.claude/plugins -name "doxx-api.py" -path "*/doxxnet/*" 2>/dev/null | head -1)
-```
-
 If `$DOXXNET_TOKEN` is not set in the environment, ask the user for their auth token.
 
 User request: $ARGUMENTS
@@ -25,7 +18,7 @@ User request: $ARGUMENTS
 
 ### List domains
 ```bash
-python3 $DOXXNET_API list_domains
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py list_domains
 ```
 
 ### Register a domain
@@ -38,38 +31,38 @@ python3 $DOXXNET_API list_domains
 Default TLD is `.doxx` if none specified.
 
 ```bash
-python3 $DOXXNET_API create_domain domain=DOMAIN
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py create_domain domain=DOMAIN
 ```
 
 ### Delete a domain
 ```bash
-python3 $DOXXNET_API delete_domain domain=DOMAIN
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py delete_domain domain=DOMAIN
 ```
 
 Confirm with user before deleting.
 
 ### List DNS records
 ```bash
-python3 $DOXXNET_API list_dns domain=DOMAIN
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py list_dns domain=DOMAIN
 ```
 
 ### Create DNS record
 Supported types: `A`, `AAAA`, `CNAME`, `MX`, `TXT`, `NS`, `SRV`, `PTR`.
 
 ```bash
-python3 $DOXXNET_API create_dns_record domain=DOMAIN name=FQDN type=A content=IP ttl=300
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py create_dns_record domain=DOMAIN name=FQDN type=A content=IP ttl=300
 ```
 
 For SRV records: add `srv_priority`, `srv_weight`, `srv_port`, `srv_target`.
 
 ### Update DNS record
 ```bash
-python3 $DOXXNET_API update_dns_record domain=DOMAIN old_name=FQDN old_type=TYPE old_content=OLD_VALUE name=FQDN content=NEW_VALUE ttl=300
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py update_dns_record domain=DOMAIN old_name=FQDN old_type=TYPE old_content=OLD_VALUE name=FQDN content=NEW_VALUE ttl=300
 ```
 
 ### Delete DNS record
 ```bash
-python3 $DOXXNET_API delete_dns_record domain=DOMAIN name=FQDN type=TYPE content=VALUE
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py delete_dns_record domain=DOMAIN name=FQDN type=TYPE content=VALUE
 ```
 
 ### Verify DNS
@@ -104,12 +97,12 @@ Download: `python3 -c "import urllib.request; urllib.request.urlretrieve('https:
 
 1. Get verification code:
    ```bash
-   python3 $DOXXNET_API get_domain_validation domain=DOMAIN
+   python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py get_domain_validation domain=DOMAIN
    ```
 2. Tell user to set TXT record `_doxx-verify.DOMAIN` at their current DNS provider
 3. Import:
    ```bash
-   python3 $DOXXNET_API import_domain domain=DOMAIN
+   python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py import_domain domain=DOMAIN
    ```
 4. Tell user to update nameservers to: `a.root-dx.net`, `a.root-dx.com`, `a.root-dx.org`
 

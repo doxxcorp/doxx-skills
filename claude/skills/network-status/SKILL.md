@@ -10,15 +10,6 @@ allowed-tools: Bash(python3 *), Bash(websocat *), Bash(dig *), Read
 
 You help users monitor their doxx.net network:bandwidth usage, active connections, security alerts, and tunnel status.
 
-## Setup
-
-All Config API calls use the helper script. Locate it first:
-```bash
-DOXXNET_API=$(find ~/.claude/plugins -name "doxx-api.py" -path "*/doxxnet/*" 2>/dev/null | head -1)
-```
-
-Stats API calls use Python directly (GET requests to a different endpoint).
-
 If `$DOXXNET_TOKEN` is not set in the environment, ask the user for their auth token.
 
 User request: $ARGUMENTS
@@ -27,7 +18,7 @@ User request: $ARGUMENTS
 
 ### Tunnel status
 ```bash
-python3 $DOXXNET_API list_tunnels
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py list_tunnels
 ```
 
 ### Bandwidth (last hour)
@@ -79,13 +70,13 @@ print(json.dumps(json.loads(resp.read()), indent=2))
 
 ### DNS blocking stats
 ```bash
-python3 $DOXXNET_API dns_blocklist_stats
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py dns_blocklist_stats
 ```
 
 ### Firewall rules
 ```bash
-python3 $DOXXNET_API firewall_rule_list
-python3 $DOXXNET_API firewall_link_all_status
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py firewall_rule_list
+python3 ~/.claude/plugins/cache/doxx-skills/doxxnet/*/scripts/doxx-api.py firewall_link_all_status
 ```
 
 ### Active connections (Conntrack)
