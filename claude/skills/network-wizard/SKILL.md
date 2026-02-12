@@ -29,6 +29,11 @@ If the user provided arguments: $ARGUMENTS:parse them for device count and/or se
 API="https://config.doxx.net/v1/"
 ```
 
+Before running commands, ensure `jq` is installed:
+```bash
+command -v jq >/dev/null 2>&1 || brew install jq
+```
+
 If `$DOXXNET_TOKEN` is set, use it. Otherwise, ask for the token in Phase 1.
 
 ---

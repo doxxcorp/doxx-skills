@@ -16,6 +16,11 @@ You help users register domains, manage DNS records, sign TLS certificates, and 
 API="https://config.doxx.net/v1/"
 ```
 
+Before running commands, ensure `jq` is installed:
+```bash
+command -v jq >/dev/null 2>&1 || brew install jq
+```
+
 Use `$DOXXNET_TOKEN` if set, otherwise ask for the auth token.
 
 User request: $ARGUMENTS

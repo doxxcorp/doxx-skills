@@ -37,14 +37,13 @@ claude /plugin install doxxnet
 3. Switch to the **Plugins** tab and search for "doxx" — **doxxnet** will appear
 4. Click **Install** and choose your scope
 
-**Set your auth token** so skills can authenticate automatically:
+**Set your auth token** so skills can authenticate automatically. Add it to your shell profile so it persists:
 
 ```bash
-# Add to ~/.zshrc or ~/.bashrc
-export DOXXNET_TOKEN=your-token-here
+echo 'export DOXXNET_TOKEN=your-token-here' >> ~/.zshenv
 ```
 
-If launching from an IDE, restart it after updating your shell profile so it picks up the new env var.
+Then **fully quit and reopen** your terminal, IDE, or editor so it picks up the new env var.
 
 Once installed, use any skill as a slash command:
 

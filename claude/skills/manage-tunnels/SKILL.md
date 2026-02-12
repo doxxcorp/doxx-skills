@@ -16,6 +16,11 @@ You help users manage their doxx.net tunnels. Each tunnel represents a device on
 API="https://config.doxx.net/v1/"
 ```
 
+Before running commands, ensure `jq` is installed:
+```bash
+command -v jq >/dev/null 2>&1 || brew install jq
+```
+
 Use `$DOXXNET_TOKEN` if set, otherwise ask for the auth token and validate with:
 ```bash
 curl -s -X POST $API -d "auth=1&token=$TOKEN" | jq .

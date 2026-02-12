@@ -2,6 +2,13 @@
 
 Agent-neutral procedure for building a complete doxx.net private network from scratch. Agents should adapt the prompts and interactions to their native format.
 
+## Prerequisites
+
+Ensure `jq` is installed:
+```bash
+command -v jq >/dev/null 2>&1 || brew install jq
+```
+
 ## Variables
 
 - `API` = `https://config.doxx.net/v1/`
