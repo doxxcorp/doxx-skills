@@ -3,7 +3,7 @@ name: network-status
 description: Check doxx.net network status: bandwidth, connections, security alerts, tunnel status
 argument-hint: "[what to check]"
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(cat *), Bash(dig *), Bash(mkdir *), Bash(chmod *), Read, Write
+allowed-tools: Bash(curl *), Bash(dig *), Bash(mkdir *), Bash(chmod *), Read, Write
 ---
 
 # doxx.net Network Status
@@ -14,7 +14,7 @@ User request: $ARGUMENTS
 
 ## API convention
 
-Token file: `~/.config/doxxnet/token`. If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it:
+Token file: `~/.config/doxxnet/token`. Use the `Read` tool to check if it exists — NEVER use Bash with `cat`, `test`, or `[` to check (those will prompt the user). If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it:
 ```
 mkdir -p ~/.config/doxxnet && printf '%s\n' 'TOKEN' > ~/.config/doxxnet/token && chmod 600 ~/.config/doxxnet/token
 ```

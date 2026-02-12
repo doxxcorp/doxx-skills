@@ -3,7 +3,7 @@ name: manage-dns-blocking
 description: Manage doxx.net DNS blocking: enable blocklists, whitelist/blacklist domains, configure Secure DNS
 argument-hint: "[action] [domain or blocklist]"
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(cat *), Bash(mkdir *), Bash(chmod *), Read, Write
+allowed-tools: Bash(curl *), Bash(mkdir *), Bash(chmod *), Read, Write
 ---
 
 # Manage doxx.net DNS Blocking
@@ -14,7 +14,7 @@ User request: $ARGUMENTS
 
 ## API convention
 
-Token file: `~/.config/doxxnet/token`. If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it:
+Token file: `~/.config/doxxnet/token`. Use the `Read` tool to check if it exists — NEVER use Bash with `cat`, `test`, or `[` to check (those will prompt the user). If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it:
 ```
 mkdir -p ~/.config/doxxnet && printf '%s\n' 'TOKEN' > ~/.config/doxxnet/token && chmod 600 ~/.config/doxxnet/token
 ```

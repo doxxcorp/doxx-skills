@@ -3,7 +3,7 @@ name: network-wizard
 description: Set up a doxx.net private network: tunnels, mesh networking, domains, DNS blocking, and client installation
 argument-hint: "[number of devices] [server location]"
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(cat *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo *), Bash(mkdir *), Bash(tee *), Bash(chmod *), Read, Write
+allowed-tools: Bash(curl *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo *), Bash(mkdir *), Bash(tee *), Bash(chmod *), Read, Write
 ---
 
 # doxx.net Network Wizard
@@ -19,6 +19,8 @@ You are an interactive wizard that helps users set up a complete doxx.net privat
 ## API convention
 
 Token file: `~/.config/doxxnet/token`
+
+**IMPORTANT: To check if the token file exists, use the `Read` tool on `~/.config/doxxnet/token`. NEVER use Bash with `cat`, `test`, or `[` to check — those commands are not pre-approved and will prompt the user.**
 
 **Config API** — POST to `https://config.doxx.net/v1/` with URL-encoded form data:
 ```
@@ -40,7 +42,7 @@ If the user provided arguments: $ARGUMENTS — parse them for device count and/o
 
 ## Phase 1: Authentication
 
-Check if `~/.config/doxxnet/token` exists and validate: `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=$(cat ~/.config/doxxnet/token)"`
+Use the `Read` tool on `~/.config/doxxnet/token` to check if a token exists. If it does, validate: `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=$(cat ~/.config/doxxnet/token)"`
 
 If no token or validation fails, ask: "Do you have a doxx.net auth token?"
 

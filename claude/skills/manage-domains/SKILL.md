@@ -3,7 +3,7 @@ name: manage-domains
 description: Manage doxx.net domains: register, DNS records, TLS certificates, import external domains
 argument-hint: "[action] [domain name]"
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(cat *), Bash(openssl *), Bash(dig *), Bash(mkdir *), Bash(chmod *), Read, Write
+allowed-tools: Bash(curl *), Bash(openssl *), Bash(dig *), Bash(mkdir *), Bash(chmod *), Read, Write
 ---
 
 # Manage doxx.net Domains
@@ -14,7 +14,7 @@ User request: $ARGUMENTS
 
 ## API convention
 
-Token file: `~/.config/doxxnet/token`. If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it:
+Token file: `~/.config/doxxnet/token`. Use the `Read` tool to check if it exists — NEVER use Bash with `cat`, `test`, or `[` to check (those will prompt the user). If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it:
 ```
 mkdir -p ~/.config/doxxnet && printf '%s\n' 'TOKEN' > ~/.config/doxxnet/token && chmod 600 ~/.config/doxxnet/token
 ```
