@@ -8,6 +8,10 @@
 
 AI agent skills for setting up and managing [doxx.net](https://doxx.net) private networks through natural language.
 
+## Requirements
+
+- A doxx.net account (create one at [a0x13.doxx.net](https://a0x13.doxx.net))
+
 ## Getting Started
 
 ### Claude Code
@@ -83,11 +87,6 @@ Agent-agnostic workflows, guides, and API reference that work with any AI agent 
 - **shared/workflows/**: Step-by-step procedures for common tasks
 - **shared/client-guides/**: Platform-specific WireGuard installation (macOS, iOS, Android)
 
-## Requirements
-
-- A doxx.net account (create one at [a0x13.doxx.net](https://a0x13.doxx.net))
-- doxx.net client (macOS, iOS, Android) or [WireGuard](https://www.wireguard.com/install/)
-
 ## How It Works
 
 doxx.net is anonymous by design. There are no usernames, passwords, or emails. Your auth token **is** your identity.
@@ -95,7 +94,6 @@ doxx.net is anonymous by design. There are no usernames, passwords, or emails. Y
 1. You create an account at [a0x13.doxx.net](https://a0x13.doxx.net) (human-only, proof-of-work gated)
 2. You give your auth token to the agent
 3. The agent makes API calls on your behalf to set up your private network
-4. WireGuard configs are generated and installed on your devices
 
 No secrets are stored in this repo. Tokens are always provided by you at runtime.
 
