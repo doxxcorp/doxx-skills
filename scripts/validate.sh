@@ -26,13 +26,6 @@ EXPECTED_FILES=(
   LICENSE
   api/reference.md
   claude/.claude-plugin/plugin.json
-  shared/client-guides/macos.md
-  shared/client-guides/ios.md
-  shared/client-guides/android.md
-  shared/workflows/private-network.md
-  shared/workflows/tunnel-setup.md
-  shared/workflows/domain-setup.md
-  shared/workflows/client-install.md
 )
 
 for f in "${EXPECTED_FILES[@]}"; do
@@ -178,28 +171,24 @@ for skill_md in "$SKILLS_DIR"/*/SKILL.md; do
   [[ -f "$skill_md" ]] && check_links_in "$skill_md"
 done
 
-for workflow in "$REPO_ROOT"/shared/workflows/*.md; do
-  [[ -f "$workflow" ]] && check_links_in "$workflow"
-done
-
 # ─── API consistency ─────────────────────────────────────────────────────────
 
 section "API consistency"
 
 REFERENCE="$REPO_ROOT/api/reference.md"
 
-# Extract endpoint names from patterns like endpoint=1 or 'endpoint': '1'
+# Extract endpoint names from patterns like endpoint=1, 'endpoint': '1', and /api/stats/endpoint
 ref_endpoints=$(grep -oE "'[a-z_]+': *'1'" "$REFERENCE" 2>/dev/null | sed "s/'//g; s/: *1//; s/ //g" | sort -u || true)
 ref_endpoints_curl=$(grep -o '"[a-z_]*=1' "$REFERENCE" 2>/dev/null | sed 's/^"//; s/=1$//' | sort -u || true)
-ref_endpoints=$(printf "%s\n%s" "$ref_endpoints" "$ref_endpoints_curl" | sort -u)
+ref_endpoints_stats=$(grep -oE '/api/stats/[a-z_]+' "$REFERENCE" 2>/dev/null | sed 's|.*/||' | sort -u || true)
+ref_endpoints=$(printf "%s\n%s\n%s" "$ref_endpoints" "$ref_endpoints_curl" "$ref_endpoints_stats" | sort -u)
 
 for skill_md in "$SKILLS_DIR"/*/SKILL.md; do
   rel="${skill_md#"$REPO_ROOT/"}"
-  # Match both python3 $DOXXNET_API endpoint and 'endpoint': '1' patterns
-  skill_endpoints=$(grep -oE "'[a-z_]+': *'1'" "$skill_md" 2>/dev/null | sed "s/'//g; s/: *1//; s/ //g" | sort -u || true)
-  skill_endpoints_cmd=$(grep -oE '\$DOXXNET_API [a-z_]+' "$skill_md" 2>/dev/null | sed 's/.*\$DOXXNET_API //' | sort -u || true)
+  # Match endpoint=1 patterns in curl examples and backtick endpoint names in lists
   skill_endpoints_curl=$(grep -o '"[a-z_]*=1' "$skill_md" 2>/dev/null | sed 's/^"//; s/=1$//' | sort -u || true)
-  all_endpoints=$(printf "%s\n%s\n%s" "$skill_endpoints" "$skill_endpoints_cmd" "$skill_endpoints_curl" | sort -u)
+  skill_endpoints_list=$(grep -oE '^\- `[a-z_]+`' "$skill_md" 2>/dev/null | sed 's/^- `//; s/`$//' | sort -u || true)
+  all_endpoints=$(printf "%s\n%s" "$skill_endpoints_curl" "$skill_endpoints_list" | sort -u)
 
   for ep in $all_endpoints; do
     [[ -z "$ep" ]] && continue

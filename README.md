@@ -8,6 +8,8 @@
 
 AI agent skills for setting up and managing [doxx.net](https://doxx.net) private networks through natural language.
 
+No external dependencies — skills use `curl` for API calls. No Python, no servers, no daemons.
+
 ## Requirements
 
 - A doxx.net account (create one at [a0x13.doxx.net](https://a0x13.doxx.net))
@@ -37,48 +39,25 @@ claude /plugin install doxxnet
 3. Switch to the **Plugins** tab and search for "doxx" — **doxxnet** will appear
 4. Click **Install** and choose your scope
 
-**Set your auth token** and **start the MCP server**:
-
-```bash
-echo 'export DOXXNET_TOKEN=your-token-here' >> ~/.zshenv
-source ~/.zshenv
-cd doxx-skills
-python3 claude/scripts/mcp-server.py --daemon
-```
-
-The MCP server runs as a background daemon on `localhost:19533`. It auto-exits if already running, so it's safe to run multiple times.
-
-To start it automatically on login, add to your shell profile:
-
-```bash
-echo 'python3 ~/doxx-skills/claude/scripts/mcp-server.py --daemon' >> ~/.zshenv
-```
-
-Once running, the plugin provides ~39 MCP tools for the doxx.net API. Skills use these tools directly — no permission prompts for API calls.
-
 Use any skill as a slash command:
 
 ```
 /doxxnet:network-wizard
 ```
 
-If `DOXXNET_TOKEN` is not set, the skill will prompt you for it.
+On first use, the skill will ask for your auth token. It validates it and saves it locally to `~/.config/doxxnet/token` — no manual setup needed.
 
 ### Other Agents
 
-Any AI agent with shell access can use the shared resources in this repo directly:
+Any AI agent with shell access can use the API reference directly:
 
 - **[api/reference.md](api/reference.md)**: Condensed doxx.net API reference optimized for agent consumption
-- **[shared/workflows/](shared/workflows/)**: Step-by-step procedures for common tasks (private network setup, tunnels, domains, client install)
-- **[shared/client-guides/](shared/client-guides/)**: Platform-specific WireGuard installation (macOS, iOS, Android)
 
-Point your agent at the relevant file and provide your doxx.net auth token at runtime.
+Point your agent at the reference file and provide your doxx.net auth token at runtime.
 
 ## What's Inside
 
 ### Claude Code Plugin (`claude/`)
-
-The plugin includes a local HTTP MCP server (`scripts/mcp-server.py`) that handles all doxx.net API communication. No external dependencies — Python 3 stdlib only. Runs as a background daemon on `localhost:19533`.
 
 Interactive skills with guided workflows:
 
@@ -91,13 +70,11 @@ Interactive skills with guided workflows:
 | **manage-dns-blocking** | Enable ad/tracker blocking, manage whitelists/blacklists |
 | **network-status** | Bandwidth stats, connection tracking, security alerts |
 
-### Shared Resources (`shared/`, `api/`)
+Skills call the doxx.net API directly via `curl` — no intermediate server, no permission prompts.
 
-Agent-agnostic workflows, guides, and API reference that work with any AI agent or can be followed manually:
+### API Reference (`api/`)
 
-- **api/reference.md**: Every doxx.net API endpoint with curl examples
-- **shared/workflows/**: Step-by-step procedures for common tasks
-- **shared/client-guides/**: Platform-specific WireGuard installation (macOS, iOS, Android)
+- **api/reference.md**: Every doxx.net API endpoint with curl examples — works with any AI agent or can be followed manually
 
 ## How It Works
 
@@ -105,9 +82,9 @@ doxx.net is anonymous by design. There are no usernames, passwords, or emails. Y
 
 1. You create an account at [a0x13.doxx.net](https://a0x13.doxx.net) (human-only, proof-of-work gated)
 2. You give your auth token to the agent
-3. The agent makes API calls on your behalf to set up your private network
+3. The agent saves it locally to `~/.config/doxxnet/token` and makes API calls on your behalf
 
-No secrets are stored in this repo. Tokens are always provided by you at runtime (via `DOXXNET_TOKEN` env var).
+No secrets are stored in this repo. Your token stays on your machine.
 
 ## TODO
 

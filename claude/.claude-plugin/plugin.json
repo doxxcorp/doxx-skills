@@ -10,12 +10,6 @@
   "repository": "https://github.com/doxxcorp/doxx-skills",
   "license": "MIT",
   "keywords": ["doxx", "doxxnet", "wireguard", "tunnel", "private-network", "dns-blocking", "mesh-networking"],
-  "mcpServers": {
-    "doxxnet": {
-      "type": "http",
-      "url": "http://127.0.0.1:19533/mcp"
-    }
-  },
   "commands": [
     "./skills/network-wizard/",
     "./skills/manage-tunnels/",

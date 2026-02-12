@@ -3,27 +3,45 @@ name: network-status
 description: Check doxx.net network status: bandwidth, connections, security alerts, tunnel status
 argument-hint: "[what to check]"
 user-invocable: true
-allowed-tools: Bash(dig *)
+allowed-tools: Bash(curl *), Bash(dig *), Bash(mkdir *), Bash(chmod *), Read, Write
 ---
 
 # doxx.net Network Status
 
 You help users monitor their doxx.net network: bandwidth usage, active connections, security alerts, and tunnel status.
 
-Use the doxxnet MCP tools for all API calls. If the token is not configured, ask the user for their auth token.
-
 User request: $ARGUMENTS
 
-## Available MCP tools
+## API convention
 
-- `doxx_list_tunnels` — tunnel status (check `is_connected`)
-- `doxx_bandwidth` — bandwidth stats (default: last hour, optional: hours, tunnel_token)
-- `doxx_alerts` — security alerts (default: last 1d, optional: last, type, tunnel_token)
-- `doxx_summary` — network summary (optional: days, default 30)
-- `doxx_global_stats` — global threat counter (no auth)
-- `doxx_dns_blocklist_stats` — DNS blocklist statistics
-- `doxx_firewall_list` — firewall rules
-- `doxx_firewall_link_status` — mesh networking status
+Token file: `~/.config/doxxnet/token`. If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it:
+```
+mkdir -p ~/.config/doxxnet && printf '%s\n' 'TOKEN' > ~/.config/doxxnet/token && chmod 600 ~/.config/doxxnet/token
+```
+
+**Config API** — POST to `https://config.doxx.net/v1/`:
+```
+curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$(cat ~/.config/doxxnet/token)"
+```
+
+**Stats API** — GET from `https://secure-wss.doxx.net/api/stats/`:
+```
+curl -s "https://secure-wss.doxx.net/api/stats/ENDPOINT?token=$(cat ~/.config/doxxnet/token)&param=value"
+```
+
+## Config API endpoints
+
+- `list_tunnels` — tunnel status (check `is_connected`)
+- `firewall_rule_list` — firewall rules
+- `firewall_link_all_status` — mesh networking status
+- `dns_blocklist_stats` — DNS blocklist statistics (no auth)
+
+## Stats API endpoints
+
+- `bandwidth` — bandwidth stats. Optional: `tunnel_token`, `start` (ISO 8601), `end`, `hours` (default: 1)
+- `alerts` — security alerts. Optional: `tunnel_token`, `last` (session/1m/1h/1d/7d/30d, default: 1d), `type`
+- `summary` — network summary. Optional: `days` (default: 30)
+- `global` — global threat counter (no auth)
 
 ## Alert types
 
@@ -37,7 +55,7 @@ User request: $ARGUMENTS
 
 **"What's being blocked?":** alerts with type=dns_block + DNS blocklist stats
 
-**"How much bandwidth am I using?":** bandwidth tool with appropriate hours parameter
+**"How much bandwidth am I using?":** stats/bandwidth with appropriate hours parameter
 
 ## Guidelines
 

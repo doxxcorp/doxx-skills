@@ -3,30 +3,45 @@ name: manage-dns-blocking
 description: Manage doxx.net DNS blocking: enable blocklists, whitelist/blacklist domains, configure Secure DNS
 argument-hint: "[action] [domain or blocklist]"
 user-invocable: true
+allowed-tools: Bash(curl *), Bash(mkdir *), Bash(chmod *), Read, Write
 ---
 
 # Manage doxx.net DNS Blocking
 
 You help users configure DNS-level ad/tracker/malware blocking on their doxx.net tunnels, plus Secure DNS (DoH/DoT) for devices not on the tunnel.
 
-Use the doxxnet MCP tools for all API calls. If the token is not configured, ask the user for their auth token.
-
 User request: $ARGUMENTS
 
-## Available MCP tools
+## API convention
 
-- `doxx_dns_options` — list available blocklists (no auth)
-- `doxx_dns_tunnel_config` — get a tunnel's DNS blocking config
-- `doxx_dns_set_subscription` — enable/disable a blocklist
-- `doxx_dns_whitelist_add` / `doxx_dns_whitelist_remove` — manage whitelist
-- `doxx_dns_blacklist_add` / `doxx_dns_blacklist_remove` — manage blacklist
-- `doxx_dns_blocklist_stats` — get blocklist statistics
-- `doxx_secure_dns_create` / `doxx_secure_dns_list` / `doxx_secure_dns_delete` — manage Secure DNS hashes
-- `doxx_list_tunnels` — list tunnels (to find tunnel tokens)
+Token file: `~/.config/doxxnet/token`. If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it:
+```
+mkdir -p ~/.config/doxxnet && printf '%s\n' 'TOKEN' > ~/.config/doxxnet/token && chmod 600 ~/.config/doxxnet/token
+```
+
+**Config API** — POST to `https://config.doxx.net/v1/`:
+```
+curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$(cat ~/.config/doxxnet/token)"
+```
+
+## Endpoints
+
+- `dns_get_options` — list available blocklists (no auth needed)
+- `dns_get_tunnel_config` — get a tunnel's DNS blocking config. Params: `tunnel_token`
+- `dns_set_subscription` — enable/disable a blocklist. Params: `tunnel_token`, `subscription`, `enabled` (1/0). Optional: `apply_to_all`
+- `dns_add_whitelist` — whitelist a domain (stop blocking it). Params: `tunnel_token`, `domain`. Optional: `apply_to_all`
+- `dns_remove_whitelist` — remove from whitelist. Params: `tunnel_token`, `domain`
+- `dns_add_blacklist` — blacklist a domain (force block it). Params: `tunnel_token`, `domain`. Optional: `apply_to_all`
+- `dns_remove_blacklist` — remove from blacklist. Params: `tunnel_token`, `domain`
+- `dns_blocklist_stats` — blocklist statistics (no auth needed)
+- `public_dns_create_hash` — create Secure DNS hash. Params: `tunnel_token`
+- `public_dns_list_hashes` — list Secure DNS hashes
+- `public_dns_delete_hash` — delete a hash. Params: `host_hash`
+- `list_tunnels` — list tunnels (to find tunnel tokens)
 
 ## Secure DNS setup
 
-After creating a hash with `doxx_secure_dns_create`, provide setup instructions:
+After creating a hash with `public_dns_create_hash`, provide setup instructions:
 
 - **iOS:** Settings → General → VPN & Device Management → DNS → add DoH URL
 - **Android:** Settings → Network → Private DNS → enter DoT hostname (`HASH.sdns.doxx.net`)
