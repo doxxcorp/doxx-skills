@@ -13,51 +13,117 @@ Agent-neutral procedure for creating and configuring a single encrypted tunnel.
 ## Step 1: Select a server
 
 ```bash
-curl -s -X POST $API -d "servers=1" | jq '.servers[] | {server_name, location, continent}'
+python3 -c "
+import urllib.request, urllib.parse, json
+
+API = 'https://config.doxx.net/v1/'
+data = urllib.parse.urlencode({'servers': '1'}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+servers = json.loads(resp.read())['servers']
+for s in servers:
+    print(f\"{s['server_name']:40} {s['location']:20} {s['continent']}\")
+"
 ```
 
 ## Step 2: Create the tunnel
 
 **Desktop/Server:**
 ```bash
-curl -s -X POST $API -d "create_tunnel=1&token=$TOKEN&name=DEVICE_NAME&server=$SERVER"
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+SERVER = input('Server hostname: ')
+NAME = input('Device name: ')
+
+data = urllib.parse.urlencode({'create_tunnel': '1', 'token': TOKEN, 'name': NAME, 'server': SERVER}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
 **Mobile:**
 ```bash
-curl -s -X POST $API -d "create_tunnel_mobile=1&token=$TOKEN&server=$SERVER&device_type=mobile"
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+SERVER = input('Server hostname: ')
+
+data = urllib.parse.urlencode({'create_tunnel_mobile': '1', 'token': TOKEN, 'server': SERVER, 'device_type': 'mobile'}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
 ## Step 3: Get tunnel token
 
 ```bash
-curl -s -X POST $API -d "list_tunnels=1&token=$TOKEN" | jq '.tunnels[-1] | {tunnel_token, name, assigned_ip, server}'
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+
+data = urllib.parse.urlencode({'list_tunnels': '1', 'token': TOKEN}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+tunnels = json.loads(resp.read())['tunnels']
+latest = tunnels[-1]
+print(f\"tunnel_token: {latest['tunnel_token']}\")
+print(f\"name:         {latest['name']}\")
+print(f\"assigned_ip:  {latest['assigned_ip']}\")
+print(f\"server:       {latest['server']}\")
+"
 ```
 
 ## Step 4: Get WireGuard config
 
 ```bash
-TUNNEL="tunnel_token_from_step_3"
-curl -s -X POST $API -d "wireguard=1&token=$TOKEN&tunnel_token=$TUNNEL" | jq .config
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+TUNNEL = input('Tunnel token: ')
+
+data = urllib.parse.urlencode({'wireguard': '1', 'token': TOKEN, 'tunnel_token': TUNNEL}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+print(json.dumps(json.loads(resp.read())['config'], indent=2))
+"
 ```
 
 ## Step 5: Build .conf file
 
 ```bash
-CONFIG=$(curl -s -X POST $API -d "wireguard=1&token=$TOKEN&tunnel_token=$TUNNEL")
+python3 -c "
+import urllib.request, urllib.parse, json, os
 
-cat << EOF
-[Interface]
-PrivateKey = $(echo $CONFIG | jq -r '.config.interface.private_key')
-Address = $(echo $CONFIG | jq -r '.config.interface.address')
-DNS = $(echo $CONFIG | jq -r '.config.interface.dns')
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+TUNNEL = input('Tunnel token: ')
+
+data = urllib.parse.urlencode({'wireguard': '1', 'token': TOKEN, 'tunnel_token': TUNNEL}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+cfg = json.loads(resp.read())['config']
+
+iface = cfg['interface']
+peer = cfg['peer']
+
+conf = f'''[Interface]
+PrivateKey = {iface[\"private_key\"]}
+Address = {iface[\"address\"]}
+DNS = {iface[\"dns\"]}
 
 [Peer]
-PublicKey = $(echo $CONFIG | jq -r '.config.peer.public_key')
-AllowedIPs = $(echo $CONFIG | jq -r '.config.peer.allowed_ips')
-Endpoint = $(echo $CONFIG | jq -r '.config.peer.endpoint')
-PersistentKeepalive = 25
-EOF
+PublicKey = {peer[\"public_key\"]}
+AllowedIPs = {peer[\"allowed_ips\"]}
+Endpoint = {peer[\"endpoint\"]}
+PersistentKeepalive = 25'''
+
+print(conf)
+"
 ```
 
 ## Step 6: Connect
@@ -68,20 +134,62 @@ See platform-specific guides in `client-guides/`.
 
 **Rename:**
 ```bash
-curl -s -X POST $API -d "update_tunnel=1&token=$TOKEN&tunnel_token=$TUNNEL&name=NEW_NAME"
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+TUNNEL = input('Tunnel token: ')
+NAME = input('New name: ')
+
+data = urllib.parse.urlencode({'update_tunnel': '1', 'token': TOKEN, 'tunnel_token': TUNNEL, 'name': NAME}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
 **Move to different server:**
 ```bash
-curl -s -X POST $API -d "update_tunnel=1&token=$TOKEN&tunnel_token=$TUNNEL&server=NEW_SERVER"
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+TUNNEL = input('Tunnel token: ')
+SERVER = input('New server: ')
+
+data = urllib.parse.urlencode({'update_tunnel': '1', 'token': TOKEN, 'tunnel_token': TUNNEL, 'server': SERVER}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
 **Toggle features:**
 ```bash
-curl -s -X POST $API -d "update_tunnel=1&token=$TOKEN&tunnel_token=$TUNNEL&firewall=1&ipv6_enabled=1&block_bad_dns=1"
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+TUNNEL = input('Tunnel token: ')
+
+data = urllib.parse.urlencode({'update_tunnel': '1', 'token': TOKEN, 'tunnel_token': TUNNEL, 'firewall': '1', 'ipv6_enabled': '1', 'block_bad_dns': '1'}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
 **Delete:**
 ```bash
-curl -s -X POST $API -d "delete_tunnel=1&token=$TOKEN&tunnel_token=$TUNNEL"
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+TUNNEL = input('Tunnel token: ')
+
+data = urllib.parse.urlencode({'delete_tunnel': '1', 'token': TOKEN, 'tunnel_token': TUNNEL}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```

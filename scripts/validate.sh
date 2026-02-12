@@ -10,9 +10,9 @@ section() { printf "\n\033[1m%s\033[0m\n" "$1"; }
 
 # ─── Dependencies ─────────────────────────────────────────────────────────────
 
-for cmd in jq; do
+for cmd in python3; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
-    echo "ERROR: $cmd is required. Install it: brew install $cmd (macOS) or apt install $cmd (Linux)"
+    echo "ERROR: $cmd is required."
     exit 1
   fi
 done
@@ -57,29 +57,33 @@ section "plugin.json"
 
 PLUGIN="$REPO_ROOT/claude/.claude-plugin/plugin.json"
 
-if jq empty "$PLUGIN" 2>/dev/null; then
+if python3 -c "import json; json.load(open('$PLUGIN'))" 2>/dev/null; then
   pass "valid JSON"
 else
   fail "invalid JSON"
 fi
 
-for field in name version description skills; do
-  if jq -e ".$field" "$PLUGIN" >/dev/null 2>&1; then
+for field in name version description commands; do
+  if python3 -c "import json; d=json.load(open('$PLUGIN')); assert '$field' in d" 2>/dev/null; then
     pass "has .$field"
   else
     fail "missing .$field"
   fi
 done
 
-# Check that every skill path in plugin.json has a SKILL.md
-while IFS= read -r skill_path; do
-  skill_md="$REPO_ROOT/claude/$skill_path/SKILL.md"
+# Check that every command path in plugin.json has a SKILL.md
+while IFS= read -r cmd_path; do
+  # Strip leading ./ if present
+  cmd_path="${cmd_path#./}"
+  # Strip trailing / if present
+  cmd_path="${cmd_path%/}"
+  skill_md="$REPO_ROOT/claude/$cmd_path/SKILL.md"
   if [[ -f "$skill_md" ]]; then
-    pass "plugin.json → $skill_path/SKILL.md exists"
+    pass "plugin.json → $cmd_path/SKILL.md exists"
   else
-    fail "plugin.json → $skill_path/SKILL.md not found"
+    fail "plugin.json → $cmd_path/SKILL.md not found"
   fi
-done < <(jq -r '.skills[]' "$PLUGIN")
+done < <(python3 -c "import json; [print(c) for c in json.load(open('$PLUGIN'))['commands']]")
 
 # ─── SKILL.md frontmatter ────────────────────────────────────────────────────
 
@@ -184,14 +188,21 @@ section "API consistency"
 
 REFERENCE="$REPO_ROOT/api/reference.md"
 
-# Extract endpoint names from curl -d "endpoint=1" patterns (portable grep)
-ref_endpoints=$(grep -o '"[a-z_]*=1' "$REFERENCE" | sed 's/^"//; s/=1$//' | sort -u || true)
+# Extract endpoint names from patterns like endpoint=1 or 'endpoint': '1'
+ref_endpoints=$(grep -oE "'[a-z_]+': *'1'" "$REFERENCE" 2>/dev/null | sed "s/'//g; s/: *1//; s/ //g" | sort -u || true)
+ref_endpoints_curl=$(grep -o '"[a-z_]*=1' "$REFERENCE" 2>/dev/null | sed 's/^"//; s/=1$//' | sort -u || true)
+ref_endpoints=$(printf "%s\n%s" "$ref_endpoints" "$ref_endpoints_curl" | sort -u)
 
 for skill_md in "$SKILLS_DIR"/*/SKILL.md; do
   rel="${skill_md#"$REPO_ROOT/"}"
-  skill_endpoints=$(grep -o '"[a-z_]*=1' "$skill_md" 2>/dev/null | sed 's/^"//; s/=1$//' | sort -u || true)
+  # Match both python3 $DOXXNET_API endpoint and 'endpoint': '1' patterns
+  skill_endpoints=$(grep -oE "'[a-z_]+': *'1'" "$skill_md" 2>/dev/null | sed "s/'//g; s/: *1//; s/ //g" | sort -u || true)
+  skill_endpoints_cmd=$(grep -oE '\$DOXXNET_API [a-z_]+' "$skill_md" 2>/dev/null | sed 's/.*\$DOXXNET_API //' | sort -u || true)
+  skill_endpoints_curl=$(grep -o '"[a-z_]*=1' "$skill_md" 2>/dev/null | sed 's/^"//; s/=1$//' | sort -u || true)
+  all_endpoints=$(printf "%s\n%s\n%s" "$skill_endpoints" "$skill_endpoints_cmd" "$skill_endpoints_curl" | sort -u)
 
-  for ep in $skill_endpoints; do
+  for ep in $all_endpoints; do
+    [[ -z "$ep" ]] && continue
     case "$ep" in
       enabled|apply_to_all) continue ;;
     esac
@@ -213,18 +224,23 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   evals_file="$skill_dir/evals/evals.json"
 
   if [[ -f "$evals_file" ]]; then
-    if jq empty "$evals_file" 2>/dev/null; then
+    if python3 -c "import json; json.load(open('$evals_file'))" 2>/dev/null; then
       pass "$skill_name: evals.json valid"
 
-      eval_count=$(jq '.evals | length' "$evals_file")
+      eval_count=$(python3 -c "import json; print(len(json.load(open('$evals_file'))['evals']))")
       if [[ "$eval_count" -gt 0 ]]; then
         pass "$skill_name: $eval_count eval(s)"
       else
         fail "$skill_name: evals array is empty"
       fi
 
-      missing=$(jq -r '.evals[] | select(.prompt == null or .expectations == null) | .id // "unknown"' "$evals_file")
-      if [[ -z "$missing" ]]; then
+      missing=$(python3 -c "
+import json
+evals = json.load(open('$evals_file'))['evals']
+missing = [e.get('id', 'unknown') for e in evals if not e.get('prompt') or not e.get('expectations')]
+print(' '.join(missing))
+")
+      if [[ -z "$missing" || "$missing" == " " ]]; then
         pass "$skill_name: all evals have prompt + expectations"
       else
         fail "$skill_name: eval(s) missing prompt or expectations: $missing"

@@ -4,7 +4,8 @@ Agent-neutral procedure for installing WireGuard on user devices and connecting 
 
 ## Prerequisites
 
-- Auth token (`$TOKEN`)
+- Python 3
+- Auth token (`$DOXXNET_TOKEN`)
 - Tunnel already created, tunnel token available (`$TUNNEL`)
 
 ## Variables
@@ -16,30 +17,52 @@ Agent-neutral procedure for installing WireGuard on user devices and connecting 
 ## Step 1: Get WireGuard config from API
 
 ```bash
-CONFIG=$(curl -s -X POST $API -d "wireguard=1&token=$TOKEN&tunnel_token=$TUNNEL")
-echo $CONFIG | jq .config
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+TUNNEL = os.environ.get('TUNNEL_TOKEN') or input('Enter tunnel token: ')
+
+data = urllib.parse.urlencode({'wireguard': '1', 'token': TOKEN, 'tunnel_token': TUNNEL}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+cfg = json.loads(resp.read())['config']
+print(json.dumps(cfg, indent=2))
+"
 ```
 
 ## Step 2: Build the .conf content
 
 ```bash
-PRIVATE_KEY=$(echo $CONFIG | jq -r '.config.interface.private_key')
-ADDRESS=$(echo $CONFIG | jq -r '.config.interface.address')
-DNS=$(echo $CONFIG | jq -r '.config.interface.dns')
-PEER_KEY=$(echo $CONFIG | jq -r '.config.peer.public_key')
-ENDPOINT=$(echo $CONFIG | jq -r '.config.peer.endpoint')
-ALLOWED_IPS=$(echo $CONFIG | jq -r '.config.peer.allowed_ips')
+python3 -c "
+import urllib.request, urllib.parse, json, os
 
-WG_CONF="[Interface]
-PrivateKey = $PRIVATE_KEY
-Address = $ADDRESS
-DNS = $DNS
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+TUNNEL = os.environ.get('TUNNEL_TOKEN') or input('Enter tunnel token: ')
+
+data = urllib.parse.urlencode({'wireguard': '1', 'token': TOKEN, 'tunnel_token': TUNNEL}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+cfg = json.loads(resp.read())['config']
+
+iface = cfg['interface']
+peer = cfg['peer']
+
+conf = f'''[Interface]
+PrivateKey = {iface[\"private_key\"]}
+Address = {iface[\"address\"]}
+DNS = {iface[\"dns\"]}
 
 [Peer]
-PublicKey = $PEER_KEY
-AllowedIPs = $ALLOWED_IPS
-Endpoint = $ENDPOINT
-PersistentKeepalive = 25"
+PublicKey = {peer[\"public_key\"]}
+AllowedIPs = {peer[\"allowed_ips\"]}
+Endpoint = {peer[\"endpoint\"]}
+PersistentKeepalive = 25'''
+
+print(conf)
+open('/tmp/doxx.conf', 'w').write(conf)
+print('\nConfig written to /tmp/doxx.conf')
+"
 ```
 
 ---
@@ -51,7 +74,7 @@ PersistentKeepalive = 25"
 ```bash
 brew install wireguard-tools
 sudo mkdir -p /etc/wireguard
-echo "$WG_CONF" | sudo tee /etc/wireguard/doxx.conf > /dev/null
+sudo cp /tmp/doxx.conf /etc/wireguard/doxx.conf
 sudo wg-quick up doxx
 ```
 
@@ -63,7 +86,16 @@ See: `client-guides/macos.md`
 
 Generate QR code:
 ```bash
-curl -s -X POST $API --data-urlencode "generate_qr=1" --data-urlencode "data=$WG_CONF" --data-urlencode "size=512" -o doxx-qr.png
+python3 -c "
+import urllib.request, urllib.parse
+
+API = 'https://config.doxx.net/v1/'
+wg_conf = open('/tmp/doxx.conf').read()
+data = urllib.parse.urlencode({'generate_qr': '1', 'data': wg_conf, 'size': '512'}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+open('doxx-qr.png', 'wb').write(resp.read())
+print('QR code saved to doxx-qr.png')
+"
 ```
 
 Then: open WireGuard app → + → Scan QR code → toggle ON.
@@ -83,7 +115,7 @@ See: `client-guides/android.md`
 ```bash
 sudo apt install wireguard  # Debian/Ubuntu
 sudo mkdir -p /etc/wireguard
-echo "$WG_CONF" | sudo tee /etc/wireguard/doxx.conf > /dev/null
+sudo cp /tmp/doxx.conf /etc/wireguard/doxx.conf
 sudo wg-quick up doxx
 ```
 
@@ -101,7 +133,7 @@ sudo wg show
 dig A doxx.net @10.10.10.10 +short
 
 # Check your public IP changed (should be the server's IP)
-curl -s https://ifconfig.me
+python3 -c "import urllib.request; print(urllib.request.urlopen('https://ifconfig.me').read().decode())"
 ```
 
 ## Disconnect

@@ -3,6 +3,7 @@
 ## Prerequisites
 
 - WireGuard app installed from Google Play Store
+- Python 3 (on the machine generating the QR code)
 - Auth token and tunnel already created via the doxx.net API (use `create_tunnel_mobile` with `device_type=mobile`)
 
 ## Setup via QR Code (recommended)
@@ -10,32 +11,38 @@
 ### 1. Generate QR code from API
 
 ```bash
-API="https://config.doxx.net/v1/"
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ.get('DOXXNET_TOKEN') or input('Enter your auth token: ')
+TUNNEL = os.environ.get('TUNNEL_TOKEN') or input('Enter your tunnel token: ')
 
 # Get WireGuard config
-CONFIG=$(curl -s -X POST $API -d "wireguard=1&token=$TOKEN&tunnel_token=$TUNNEL")
+data = urllib.parse.urlencode({'wireguard': '1', 'token': TOKEN, 'tunnel_token': TUNNEL}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+cfg = json.loads(resp.read())['config']
 
-# Build the config string
-PRIVATE_KEY=$(echo $CONFIG | jq -r '.config.interface.private_key')
-ADDRESS=$(echo $CONFIG | jq -r '.config.interface.address')
-DNS=$(echo $CONFIG | jq -r '.config.interface.dns')
-PEER_KEY=$(echo $CONFIG | jq -r '.config.peer.public_key')
-ENDPOINT=$(echo $CONFIG | jq -r '.config.peer.endpoint')
-ALLOWED_IPS=$(echo $CONFIG | jq -r '.config.peer.allowed_ips')
+iface = cfg['interface']
+peer = cfg['peer']
 
-WG_CONF="[Interface]
-PrivateKey = $PRIVATE_KEY
-Address = $ADDRESS
-DNS = $DNS
+wg_conf = f'''[Interface]
+PrivateKey = {iface[\"private_key\"]}
+Address = {iface[\"address\"]}
+DNS = {iface[\"dns\"]}
 
 [Peer]
-PublicKey = $PEER_KEY
-AllowedIPs = $ALLOWED_IPS
-Endpoint = $ENDPOINT
-PersistentKeepalive = 25"
+PublicKey = {peer[\"public_key\"]}
+AllowedIPs = {peer[\"allowed_ips\"]}
+Endpoint = {peer[\"endpoint\"]}
+PersistentKeepalive = 25'''
 
 # Generate QR code
-curl -s -X POST $API --data-urlencode "generate_qr=1" --data-urlencode "data=$WG_CONF" --data-urlencode "size=512" -o doxx-qr.png
+qr_data = urllib.parse.urlencode({'generate_qr': '1', 'data': wg_conf, 'size': '512'}).encode()
+qr_resp = urllib.request.urlopen(urllib.request.Request(API, data=qr_data, method='POST'))
+open('doxx-qr.png', 'wb').write(qr_resp.read())
+print('QR code saved to doxx-qr.png')
+"
 ```
 
 ### 2. Scan in WireGuard app
@@ -54,7 +61,17 @@ For DNS blocking only (no tunnel), use Private DNS:
 ### 1. Create a Secure DNS hash
 
 ```bash
-curl -s -X POST $API -d "public_dns_create_hash=1&token=$TOKEN&tunnel_token=$TUNNEL" | jq .
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ.get('DOXXNET_TOKEN') or input('Enter your auth token: ')
+TUNNEL = os.environ.get('TUNNEL_TOKEN') or input('Enter your tunnel token: ')
+
+data = urllib.parse.urlencode({'public_dns_create_hash': '1', 'token': TOKEN, 'tunnel_token': TUNNEL}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
 ### 2. Configure on Android

@@ -3,7 +3,7 @@ name: network-wizard
 description: Set up a doxx.net private network: tunnels, mesh networking, domains, DNS blocking, and client installation
 argument-hint: "[number of devices] [server location]"
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(jq *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(brew *), Bash(sudo *), Bash(mkdir *), Bash(tee *), Bash(cat *), Bash(echo *), Read, Write
+allowed-tools: Bash(python3 *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo *), Bash(mkdir *), Bash(tee *), Read, Write
 ---
 
 # doxx.net Network Wizard
@@ -25,13 +25,9 @@ If the user provided arguments: $ARGUMENTS:parse them for device count and/or se
 
 ## API setup
 
+All API calls use the helper script. Locate it first:
 ```bash
-API="https://config.doxx.net/v1/"
-```
-
-Before running commands, ensure `jq` is installed:
-```bash
-command -v jq >/dev/null 2>&1 || brew install jq
+DOXXNET_API=$(find ~/.claude/plugins -name "doxx-api.py" -path "*/doxxnet/*" 2>/dev/null | head -1)
 ```
 
 If `$DOXXNET_TOKEN` is set, use it. Otherwise, ask for the token in Phase 1.
@@ -44,7 +40,7 @@ Ask: "Do you have a doxx.net auth token?"
 
 **If yes:** ask them to provide it, then validate:
 ```bash
-curl -s -X POST $API -d "auth=1&token=$TOKEN" | jq .
+python3 $DOXXNET_API auth token=TOKEN_VALUE
 ```
 - `"status": "success"` → proceed
 - `"status": "error"` → invalid token, ask to check and retry
@@ -56,7 +52,7 @@ curl -s -X POST $API -d "auth=1&token=$TOKEN" | jq .
 Ask: "Want me to store this token for future sessions?"
 
 Options:
-- **Shell profile:** append `export DOXXNET_TOKEN=...` to `~/.zshrc` or `~/.bashrc`
+- **Shell profile:** append `export DOXXNET_TOKEN=...` to `~/.zshenv`
 - **.env file:** write to `.env` in current directory
 - **Skip:** user provides token each time
 
@@ -64,7 +60,7 @@ Warn: "This token is your identity. There are no passwords. Keep it safe."
 
 Offer to generate recovery codes:
 ```bash
-curl -s -X POST $API -d "create_account_recovery=1&token=$TOKEN" | jq .
+python3 $DOXXNET_API create_account_recovery
 ```
 Tell user to save the returned codes:they're the only way to recover a lost token.
 
@@ -72,7 +68,7 @@ Tell user to save the returned codes:they're the only way to recover a lost toke
 
 Fetch servers (no auth needed):
 ```bash
-curl -s -X POST $API -d "servers=1" | jq '.servers[] | {server_name, location, description, continent}'
+python3 $DOXXNET_API servers
 ```
 
 Present grouped by continent. Ask which server is closest, or suggest based on context.
@@ -84,15 +80,15 @@ Ask: "How many devices will be on this network?"
 For each device, ask for a name and type, then create:
 ```bash
 # Desktop/server
-curl -s -X POST $API -d "create_tunnel=1&token=$TOKEN&name=DEVICE_NAME&server=$SERVER"
+python3 $DOXXNET_API create_tunnel name=DEVICE_NAME server=SERVER
 
 # Mobile
-curl -s -X POST $API -d "create_tunnel_mobile=1&token=$TOKEN&server=$SERVER&device_type=mobile"
+python3 $DOXXNET_API create_tunnel_mobile server=SERVER device_type=mobile
 ```
 
 List all tunnels to confirm:
 ```bash
-curl -s -X POST $API -d "list_tunnels=1&token=$TOKEN" | jq '.tunnels[] | {name, tunnel_token, assigned_ip, server}'
+python3 $DOXXNET_API list_tunnels
 ```
 
 ## Phase 5: Mesh Networking
@@ -101,12 +97,12 @@ Ask: "Do you want all your devices to see each other? (recommended for private n
 
 **Yes, all:**
 ```bash
-curl -s -X POST $API -d "firewall_link_all_toggle=1&token=$TOKEN&enabled=1"
+python3 $DOXXNET_API firewall_link_all_toggle enabled=1
 ```
 
 **Selective:** create rules between specific tunnel pairs:
 ```bash
-curl -s -X POST $API -d "firewall_rule_add=1&token=$TOKEN&tunnel_token=$TUNNEL_B&protocol=ALL&src_ip=$TUNNEL_A_IP/32&src_port=ALL&dst_ip=$TUNNEL_B_IP&dst_port=ALL"
+python3 $DOXXNET_API firewall_rule_add tunnel_token=TUNNEL_B protocol=ALL src_ip=TUNNEL_A_IP/32 src_port=ALL dst_ip=TUNNEL_B_IP dst_port=ALL
 ```
 (Create bidirectional rules for each pair.)
 
@@ -120,19 +116,27 @@ Suggest TLDs: `.lan`, `.vpn`, `.mesh`, `.home`, `.wg`, `.wireguard`, `.local`, `
 
 Register:
 ```bash
-curl -s -X POST $API -d "create_domain=1&token=$TOKEN&domain=$DOMAIN"
+python3 $DOXXNET_API create_domain domain=DOMAIN
 ```
 
 Create DNS A records pointing to each tunnel's assigned IP:
 ```bash
-curl -s -X POST $API -d "create_dns_record=1&token=$TOKEN&domain=$DOMAIN&name=HOSTNAME.$DOMAIN&type=A&content=$TUNNEL_IP&ttl=300"
+python3 $DOXXNET_API create_dns_record domain=DOMAIN name=HOSTNAME.DOMAIN type=A content=TUNNEL_IP ttl=300
 ```
 
 Optionally sign a TLS certificate:
 ```bash
-openssl ecparam -genkey -name prime256v1 -out $DOMAIN.key 2>/dev/null
-openssl req -new -key $DOMAIN.key -out $DOMAIN.csr -subj "/CN=$DOMAIN" 2>/dev/null
-curl -s -X POST $API -d "sign_certificate=1&token=$TOKEN&domain=$DOMAIN" --data-urlencode "csr=$(cat $DOMAIN.csr)" -o $DOMAIN.crt
+openssl ecparam -genkey -name prime256v1 -out DOMAIN.key 2>/dev/null
+openssl req -new -key DOMAIN.key -out DOMAIN.csr -subj "/CN=DOMAIN" 2>/dev/null
+python3 -c "
+import urllib.request, urllib.parse, os
+token = os.environ['DOXXNET_TOKEN']
+csr = open('DOMAIN.csr').read()
+data = urllib.parse.urlencode({'sign_certificate': '1', 'token': token, 'domain': 'DOMAIN', 'csr': csr}).encode()
+req = urllib.request.Request('https://config.doxx.net/v1/', data=data, method='POST')
+resp = urllib.request.urlopen(req)
+open('DOMAIN.crt', 'wb').write(resp.read())
+"
 ```
 
 ## Phase 7: DNS Blocking (optional)
@@ -141,12 +145,12 @@ Ask: "Want to enable ad/tracker blocking on your network?"
 
 Fetch options:
 ```bash
-curl -s -X POST $API -d "dns_get_options=1" | jq '.options[] | {name, display_name, category, domain_count}'
+python3 $DOXXNET_API dns_get_options
 ```
 
 Recommend: ads, tracking, malware. Apply:
 ```bash
-curl -s -X POST $API -d "dns_set_subscription=1&token=$TOKEN&tunnel_token=$TUNNEL&subscription=BLOCKLIST_NAME&enabled=1&apply_to_all=1"
+python3 $DOXXNET_API dns_set_subscription tunnel_token=TUNNEL subscription=BLOCKLIST_NAME enabled=1 apply_to_all=1
 ```
 
 ## Phase 8: Client Installation
@@ -155,21 +159,27 @@ Ask: "Which devices do you want to set up now?"
 
 For each device, get WireGuard config:
 ```bash
-CONFIG=$(curl -s -X POST $API -d "wireguard=1&token=$TOKEN&tunnel_token=$TUNNEL")
+python3 $DOXXNET_API wireguard tunnel_token=TUNNEL
 ```
 
 **macOS:**
 ```bash
-brew install wireguard-tools
 sudo mkdir -p /etc/wireguard
-# Write .conf from $CONFIG (extract interface + peer fields with jq)
+# Write .conf from the config response (extract interface + peer fields)
 sudo wg-quick up doxx
 ```
 
 **iOS/Android:** generate QR code:
 ```bash
-# Build WG_CONF string from $CONFIG, then:
-curl -s -X POST $API --data-urlencode "generate_qr=1" --data-urlencode "data=$WG_CONF" --data-urlencode "size=512" -o doxx-qr.png
+python3 -c "
+import urllib.request, urllib.parse, os
+token = os.environ['DOXXNET_TOKEN']
+wg_conf = 'WG_CONF_STRING_HERE'
+data = urllib.parse.urlencode({'generate_qr': '1', 'data': wg_conf, 'size': '512'}).encode()
+req = urllib.request.Request('https://config.doxx.net/v1/', data=data, method='POST')
+resp = urllib.request.urlopen(req)
+open('doxx-qr.png', 'wb').write(resp.read())
+"
 ```
 Tell user to scan with WireGuard app.
 
@@ -181,7 +191,7 @@ Ask: "Want DNS blocking on devices that aren't on the tunnel?"
 
 Create Secure DNS hash:
 ```bash
-curl -s -X POST $API -d "public_dns_create_hash=1&token=$TOKEN&tunnel_token=$TUNNEL" | jq .
+python3 $DOXXNET_API public_dns_create_hash tunnel_token=TUNNEL
 ```
 
 Provide setup instructions:
@@ -195,16 +205,16 @@ Provide setup instructions:
 Verify everything:
 ```bash
 # Auth
-curl -s -X POST $API -d "auth=1&token=$TOKEN" | jq .status
+python3 $DOXXNET_API auth
 
 # Tunnels
-curl -s -X POST $API -d "list_tunnels=1&token=$TOKEN" | jq '.tunnels[] | {name, assigned_ip, server, is_connected}'
+python3 $DOXXNET_API list_tunnels
 
 # Firewall
-curl -s -X POST $API -d "firewall_rule_list=1&token=$TOKEN" | jq .
+python3 $DOXXNET_API firewall_rule_list
 
 # DNS (if domain registered)
-dig A $DOMAIN @a.root-dx.net +short
+dig A DOMAIN @a.root-dx.net +short
 ```
 
 Print a summary card with:

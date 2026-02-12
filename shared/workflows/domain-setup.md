@@ -24,20 +24,36 @@ If no TLD specified, defaults to `.doxx`.
 ### Step 2: Register
 
 ```bash
-curl -s -X POST $API -d "create_domain=1&token=$TOKEN&domain=$DOMAIN"
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+DOMAIN = input('Domain to register: ')
+
+data = urllib.parse.urlencode({'create_domain': '1', 'token': TOKEN, 'domain': DOMAIN}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
 ### Step 3: Add DNS records
 
 ```bash
-# A record (IPv4)
-curl -s -X POST $API -d "create_dns_record=1&token=$TOKEN&domain=$DOMAIN&name=$DOMAIN&type=A&content=IP_ADDRESS&ttl=300"
+python3 -c "
+import urllib.request, urllib.parse, json, os
 
-# Wildcard
-curl -s -X POST $API -d "create_dns_record=1&token=$TOKEN&domain=$DOMAIN&name=*.$DOMAIN&type=A&content=IP_ADDRESS&ttl=300"
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+DOMAIN = input('Domain: ')
+NAME = input('Record name (FQDN): ')
+TYPE = input('Record type (A/AAAA/CNAME/MX/TXT): ')
+CONTENT = input('Content (IP or value): ')
 
-# AAAA record (IPv6)
-curl -s -X POST $API -d "create_dns_record=1&token=$TOKEN&domain=$DOMAIN&name=$DOMAIN&type=AAAA&content=IPV6_ADDRESS&ttl=300"
+data = urllib.parse.urlencode({'create_dns_record': '1', 'token': TOKEN, 'domain': DOMAIN, 'name': NAME, 'type': TYPE, 'content': CONTENT, 'ttl': '300'}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
 ### Step 4: Verify DNS
@@ -53,7 +69,18 @@ dig A $DOMAIN @a.root-dx.net +short
 ### Step 1: Get verification code
 
 ```bash
-curl -s -X POST $API -d "get_domain_validation=1&token=$TOKEN&domain=mysite.com" | jq .validation_code
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+DOMAIN = input('External domain to import: ')
+
+data = urllib.parse.urlencode({'get_domain_validation': '1', 'token': TOKEN, 'domain': DOMAIN}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+result = json.loads(resp.read())
+print('Validation code:', result.get('validation_code', json.dumps(result, indent=2)))
+"
 ```
 
 ### Step 2: Set TXT record at current DNS provider
@@ -63,7 +90,17 @@ Create a TXT record: `_doxx-verify.mysite.com` with the validation code.
 ### Step 3: Import
 
 ```bash
-curl -s -X POST $API -d "import_domain=1&token=$TOKEN&domain=mysite.com"
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+DOMAIN = input('Domain to import: ')
+
+data = urllib.parse.urlencode({'import_domain': '1', 'token': TOKEN, 'domain': DOMAIN}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
 ### Step 4: Update nameservers at registrar
@@ -89,7 +126,19 @@ openssl req -new -key $DOMAIN.key -out $DOMAIN.csr -subj "/CN=$DOMAIN" 2>/dev/nu
 ### Step 2: Sign with doxx.net root CA
 
 ```bash
-curl -s -X POST $API -d "sign_certificate=1&token=$TOKEN&domain=$DOMAIN" --data-urlencode "csr=$(cat $DOMAIN.csr)" -o $DOMAIN.crt
+python3 -c "
+import urllib.request, urllib.parse, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+DOMAIN = input('Domain: ')
+
+csr = open(f'{DOMAIN}.csr').read()
+data = urllib.parse.urlencode({'sign_certificate': '1', 'token': TOKEN, 'domain': DOMAIN, 'csr': csr}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+open(f'{DOMAIN}.crt', 'wb').write(resp.read())
+print(f'Certificate written to {DOMAIN}.crt')
+"
 ```
 
 The certificate is automatically wildcarded: `*.domain` + `domain`. Valid for 365 days.
@@ -105,7 +154,7 @@ openssl x509 -in $DOMAIN.crt -noout -subject -ext subjectAltName
 Clients need the doxx.net root CA to trust these certificates:
 
 ```bash
-curl -o doxx-root-ca.crt https://a0x13.doxx.net/assets/doxx-root-ca.crt
+python3 -c "import urllib.request; urllib.request.urlretrieve('https://a0x13.doxx.net/assets/doxx-root-ca.crt', 'doxx-root-ca.crt')"
 ```
 
 - **macOS:** `sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain doxx-root-ca.crt`
@@ -119,17 +168,55 @@ curl -o doxx-root-ca.crt https://a0x13.doxx.net/assets/doxx-root-ca.crt
 
 **List all records:**
 ```bash
-curl -s -X POST $API -d "list_dns=1&token=$TOKEN&domain=$DOMAIN" | jq .records
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+DOMAIN = input('Domain: ')
+
+data = urllib.parse.urlencode({'list_dns': '1', 'token': TOKEN, 'domain': DOMAIN}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+result = json.loads(resp.read())
+print(json.dumps(result.get('records', result), indent=2))
+"
 ```
 
 **Update a record:**
 ```bash
-curl -s -X POST $API -d "update_dns_record=1&token=$TOKEN&domain=$DOMAIN&old_name=FQDN&old_type=A&old_content=OLD_IP&name=FQDN&content=NEW_IP&ttl=300"
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+DOMAIN = input('Domain: ')
+
+data = urllib.parse.urlencode({
+    'update_dns_record': '1', 'token': TOKEN, 'domain': DOMAIN,
+    'old_name': input('Old FQDN: '), 'old_type': input('Old type: '), 'old_content': input('Old content: '),
+    'name': input('New FQDN: '), 'content': input('New content: '), 'ttl': '300'
+}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
 **Delete a record:**
 ```bash
-curl -s -X POST $API -d "delete_dns_record=1&token=$TOKEN&domain=$DOMAIN&name=FQDN&type=A&content=IP"
+python3 -c "
+import urllib.request, urllib.parse, json, os
+
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ['DOXXNET_TOKEN']
+DOMAIN = input('Domain: ')
+
+data = urllib.parse.urlencode({
+    'delete_dns_record': '1', 'token': TOKEN, 'domain': DOMAIN,
+    'name': input('FQDN: '), 'type': input('Type: '), 'content': input('Content: ')
+}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
 Supported types: `A`, `AAAA`, `CNAME`, `MX`, `TXT`, `NS`, `SRV`, `PTR`.

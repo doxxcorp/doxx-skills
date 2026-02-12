@@ -3,7 +3,7 @@ name: manage-firewall
 description: Manage doxx.net firewall rules: open ports, link tunnels for mesh networking, manage access rules
 argument-hint: "[action] [details]"
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(jq *), Read
+allowed-tools: Bash(python3 *), Read
 ---
 
 # Manage doxx.net Firewall
@@ -12,16 +12,12 @@ You help users manage firewall rules on their doxx.net tunnels. This controls wh
 
 ## Setup
 
+All API calls use the helper script. Locate it first:
 ```bash
-API="https://config.doxx.net/v1/"
+DOXXNET_API=$(find ~/.claude/plugins -name "doxx-api.py" -path "*/doxxnet/*" 2>/dev/null | head -1)
 ```
 
-Before running commands, ensure `jq` is installed:
-```bash
-command -v jq >/dev/null 2>&1 || brew install jq
-```
-
-Use `$DOXXNET_TOKEN` if set, otherwise ask for the auth token.
+If `$DOXXNET_TOKEN` is not set in the environment, ask the user for their auth token.
 
 User request: $ARGUMENTS
 
@@ -29,31 +25,31 @@ User request: $ARGUMENTS
 
 ### List firewall rules
 ```bash
-curl -s -X POST $API -d "firewall_rule_list=1&token=$TOKEN" | jq .
+python3 $DOXXNET_API firewall_rule_list
 ```
 
 Returns `link_all_enabled` (mesh status), `rules[]`, and `count`.
 
 Filter by tunnel:
 ```bash
-curl -s -X POST $API -d "firewall_rule_list=1&token=$TOKEN&tunnel_token=$TUNNEL" | jq .
+python3 $DOXXNET_API firewall_rule_list tunnel_token=TUNNEL
 ```
 
 ### Link all tunnels (mesh networking)
 
 Enable:every tunnel can reach every other tunnel on the account:
 ```bash
-curl -s -X POST $API -d "firewall_link_all_toggle=1&token=$TOKEN&enabled=1"
+python3 $DOXXNET_API firewall_link_all_toggle enabled=1
 ```
 
 Disable:
 ```bash
-curl -s -X POST $API -d "firewall_link_all_toggle=1&token=$TOKEN&enabled=0"
+python3 $DOXXNET_API firewall_link_all_toggle enabled=0
 ```
 
 Check status:
 ```bash
-curl -s -X POST $API -d "firewall_link_all_status=1&token=$TOKEN" | jq .
+python3 $DOXXNET_API firewall_link_all_status
 ```
 
 ### Add a firewall rule
@@ -61,16 +57,16 @@ curl -s -X POST $API -d "firewall_link_all_status=1&token=$TOKEN" | jq .
 Open a port to the internet:
 ```bash
 # Open TCP port 443 on a tunnel to all sources
-curl -s -X POST $API -d "firewall_rule_add=1&token=$TOKEN&tunnel_token=$TUNNEL&protocol=TCP&src_ip=0.0.0.0/0&src_port=ALL&dst_ip=$TUNNEL_IP&dst_port=443"
+python3 $DOXXNET_API firewall_rule_add tunnel_token=TUNNEL protocol=TCP src_ip=0.0.0.0/0 src_port=ALL dst_ip=TUNNEL_IP dst_port=443
 ```
 
 Allow specific tunnel-to-tunnel access (selective mesh):
 ```bash
 # Allow Tunnel A (10.1.0.100) to reach Tunnel B (10.1.2.50) on all ports
-curl -s -X POST $API -d "firewall_rule_add=1&token=$TOKEN&tunnel_token=$TUNNEL_B_TOKEN&protocol=ALL&src_ip=10.1.0.100/32&src_port=ALL&dst_ip=10.1.2.50&dst_port=ALL"
+python3 $DOXXNET_API firewall_rule_add tunnel_token=TUNNEL_B_TOKEN protocol=ALL src_ip=10.1.0.100/32 src_port=ALL dst_ip=10.1.2.50 dst_port=ALL
 
 # Bidirectional: also allow B to reach A
-curl -s -X POST $API -d "firewall_rule_add=1&token=$TOKEN&tunnel_token=$TUNNEL_A_TOKEN&protocol=ALL&src_ip=10.1.2.50/32&src_port=ALL&dst_ip=10.1.0.100&dst_port=ALL"
+python3 $DOXXNET_API firewall_rule_add tunnel_token=TUNNEL_A_TOKEN protocol=ALL src_ip=10.1.2.50/32 src_port=ALL dst_ip=10.1.0.100 dst_port=ALL
 ```
 
 Parameters:
@@ -82,7 +78,7 @@ Parameters:
 
 ### Delete a firewall rule
 ```bash
-curl -s -X POST $API -d "firewall_rule_delete=1&token=$TOKEN&tunnel_token=$TUNNEL&protocol=TCP&src_ip=0.0.0.0/0&src_port=ALL&dst_ip=$TUNNEL_IP&dst_port=443"
+python3 $DOXXNET_API firewall_rule_delete tunnel_token=TUNNEL protocol=TCP src_ip=0.0.0.0/0 src_port=ALL dst_ip=TUNNEL_IP dst_port=443
 ```
 
 Same parameters as `firewall_rule_add`.
@@ -90,7 +86,7 @@ Same parameters as `firewall_rule_add`.
 ## Common patterns
 
 **Home server accessible from all devices:**
-1. Enable link-all: `firewall_link_all_toggle=1&enabled=1`
+1. Enable link-all: `python3 $DOXXNET_API firewall_link_all_toggle enabled=1`
 2. Open specific ports to internet if needed (e.g., 443 for web server)
 
 **Only laptop + phone can see each other:**
@@ -99,7 +95,7 @@ Same parameters as `firewall_rule_add`.
 
 **Open SSH on a server tunnel:**
 ```bash
-curl -s -X POST $API -d "firewall_rule_add=1&token=$TOKEN&tunnel_token=$TUNNEL&protocol=TCP&src_ip=0.0.0.0/0&src_port=ALL&dst_ip=$TUNNEL_IP&dst_port=22"
+python3 $DOXXNET_API firewall_rule_add tunnel_token=TUNNEL protocol=TCP src_ip=0.0.0.0/0 src_port=ALL dst_ip=TUNNEL_IP dst_port=22
 ```
 
 ## Guidelines

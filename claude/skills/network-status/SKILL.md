@@ -3,7 +3,7 @@ name: network-status
 description: Check doxx.net network status: bandwidth, connections, security alerts, tunnel status
 argument-hint: "[what to check]"
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(jq *), Bash(websocat *), Read
+allowed-tools: Bash(python3 *), Bash(websocat *), Bash(dig *), Read
 ---
 
 # doxx.net Network Status
@@ -12,17 +12,14 @@ You help users monitor their doxx.net network:bandwidth usage, active connection
 
 ## Setup
 
+All Config API calls use the helper script. Locate it first:
 ```bash
-API="https://config.doxx.net/v1/"
-STATS="https://secure-wss.doxx.net"
+DOXXNET_API=$(find ~/.claude/plugins -name "doxx-api.py" -path "*/doxxnet/*" 2>/dev/null | head -1)
 ```
 
-Before running commands, ensure `jq` is installed:
-```bash
-command -v jq >/dev/null 2>&1 || brew install jq
-```
+Stats API calls use Python directly (GET requests to a different endpoint).
 
-Use `$DOXXNET_TOKEN` if set, otherwise ask for the auth token.
+If `$DOXXNET_TOKEN` is not set in the environment, ask the user for their auth token.
 
 User request: $ARGUMENTS
 
@@ -30,32 +27,40 @@ User request: $ARGUMENTS
 
 ### Tunnel status
 ```bash
-curl -s -X POST $API -d "list_tunnels=1&token=$TOKEN" | jq '.tunnels[] | {name, assigned_ip, server, is_connected, connection_status}'
+python3 $DOXXNET_API list_tunnels
 ```
 
 ### Bandwidth (last hour)
 ```bash
-curl -s "$STATS/api/stats/bandwidth?token=$TOKEN&start=$(date -u -v-1H +%Y-%m-%dT%H:%M:%SZ)&end=$(date -u +%Y-%m-%dT%H:%M:%SZ)" | jq .
+python3 -c "
+import urllib.request, json, os
+from datetime import datetime, timedelta, timezone
+token = os.environ['DOXXNET_TOKEN']
+now = datetime.now(timezone.utc)
+start = (now - timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+end = now.strftime('%Y-%m-%dT%H:%M:%SZ')
+url = f'https://secure-wss.doxx.net/api/stats/bandwidth?token={token}&start={start}&end={end}'
+resp = urllib.request.urlopen(url)
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
-Filter by tunnel:
-```bash
-curl -s "$STATS/api/stats/bandwidth?token=$TOKEN&tunnel_token=$TUNNEL&start=$(date -u -v-1H +%Y-%m-%dT%H:%M:%SZ)&end=$(date -u +%Y-%m-%dT%H:%M:%SZ)" | jq .
-```
+Filter by tunnel — add `&tunnel_token=TUNNEL` to the URL.
 
 Time ranges:granularity auto-selects: `1s` (<5m), `1m` (<6h), `5m` (<48h), `1h` (<30d), `6h` (30d+).
 
 ### Security alerts
 ```bash
-# Last 24 hours
-curl -s "$STATS/api/stats/alerts?token=$TOKEN&last=1d" | jq .
-
-# Last 7 days
-curl -s "$STATS/api/stats/alerts?token=$TOKEN&last=7d" | jq .
-
-# Filter by type
-curl -s "$STATS/api/stats/alerts?token=$TOKEN&last=1d&type=dns_block" | jq .
+python3 -c "
+import urllib.request, json, os
+token = os.environ['DOXXNET_TOKEN']
+url = f'https://secure-wss.doxx.net/api/stats/alerts?token={token}&last=1d'
+resp = urllib.request.urlopen(url)
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
+
+Change `last=1d` to `last=7d` for weekly, or add `&type=dns_block` to filter.
 
 Alert types: `dns_block`, `security_event`, `dangerous_port`, `dns_bypass`, `doh_bypass`, `port_scan`, `dns_nxdomain`.
 
@@ -63,25 +68,35 @@ Returns: `totals` (counts per type), `block_count`, `category_counts` (ads, trac
 
 ### Summary
 ```bash
-curl -s "$STATS/api/stats/summary?token=$TOKEN&days=30" | jq .
+python3 -c "
+import urllib.request, json, os
+token = os.environ['DOXXNET_TOKEN']
+url = f'https://secure-wss.doxx.net/api/stats/summary?token={token}&days=30'
+resp = urllib.request.urlopen(url)
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
 ### DNS blocking stats
 ```bash
-curl -s -X POST $API -d "dns_blocklist_stats=1&token=$TOKEN" | jq .
+python3 $DOXXNET_API dns_blocklist_stats
 ```
 
 ### Firewall rules
 ```bash
-curl -s -X POST $API -d "firewall_rule_list=1&token=$TOKEN" | jq .
-curl -s -X POST $API -d "firewall_link_all_status=1&token=$TOKEN" | jq .
+python3 $DOXXNET_API firewall_rule_list
+python3 $DOXXNET_API firewall_link_all_status
 ```
 
 ### Active connections (Conntrack)
 
 Health check:
 ```bash
-curl -s https://conntrack.doxx.net/health | jq .
+python3 -c "
+import urllib.request, json
+resp = urllib.request.urlopen('https://conntrack.doxx.net/health')
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
 Real-time connections require WebSocket:
@@ -91,14 +106,18 @@ wss://conntrack.doxx.net/ws?token=$TOKEN
 
 If `websocat` is available:
 ```bash
-websocat "wss://conntrack.doxx.net/ws?token=$TOKEN" --ping-interval 30 -t
+websocat "wss://conntrack.doxx.net/ws?token=$DOXXNET_TOKEN" --ping-interval 30 -t
 ```
 
 Connection data includes: `protocol`, `state`, `src_ip`, `dst_ip`, `src_port`, `dst_port`, `bytes_sent`, `bytes_recv`, `upload_speed`, `download_speed`, `server`, `tunnel_name`.
 
 ### Global threat counter (no auth)
 ```bash
-curl -s "$STATS/api/stats/global" | jq .
+python3 -c "
+import urllib.request, json
+resp = urllib.request.urlopen('https://secure-wss.doxx.net/api/stats/global')
+print(json.dumps(json.loads(resp.read()), indent=2))
+"
 ```
 
 ## Common requests
@@ -116,7 +135,6 @@ curl -s "$STATS/api/stats/global" | jq .
 - Present data in a clear, readable format:tables or structured summaries
 - For bandwidth, convert to human-readable units (Mbps, GB)
 - For alerts, group by category and highlight anything unusual
-- On macOS, `date -v-1H` works for relative time. On Linux, use `date -d '1 hour ago'`
 - If websocat is not installed, explain that real-time connection tracking needs it, or suggest monitoring via the doxx.net portal
 
 For full API details, see [../../../api/reference.md](../../../api/reference.md).

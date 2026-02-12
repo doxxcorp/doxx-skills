@@ -99,6 +99,7 @@ No secrets are stored in this repo. Tokens are always provided by you at runtime
 ## TODO
 
 - [ ] Make repo public and switch install instructions to marketplace: `/plugin marketplace add doxxcorp/doxx-skills` + `/plugin install doxxnet`
+- [ ] VS Code/Cursor plugin manager can't uninstall non-user-scoped plugins from the UI — need to use CLI: `claude plugin uninstall doxxnet@doxx-skills --scope <scope>`
 
 ## License
 

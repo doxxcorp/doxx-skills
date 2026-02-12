@@ -3,7 +3,7 @@ name: manage-dns-blocking
 description: Manage doxx.net DNS blocking: enable blocklists, whitelist/blacklist domains, configure Secure DNS
 argument-hint: "[action] [domain or blocklist]"
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(jq *), Read
+allowed-tools: Bash(python3 *), Read
 ---
 
 # Manage doxx.net DNS Blocking
@@ -12,16 +12,12 @@ You help users configure DNS-level ad/tracker/malware blocking on their doxx.net
 
 ## Setup
 
+All API calls use the helper script. Locate it first:
 ```bash
-API="https://config.doxx.net/v1/"
+DOXXNET_API=$(find ~/.claude/plugins -name "doxx-api.py" -path "*/doxxnet/*" 2>/dev/null | head -1)
 ```
 
-Before running commands, ensure `jq` is installed:
-```bash
-command -v jq >/dev/null 2>&1 || brew install jq
-```
-
-Use `$DOXXNET_TOKEN` if set, otherwise ask for the auth token.
+If `$DOXXNET_TOKEN` is not set in the environment, ask the user for their auth token.
 
 User request: $ARGUMENTS
 
@@ -29,12 +25,12 @@ User request: $ARGUMENTS
 
 ### List available blocklists (no auth)
 ```bash
-curl -s -X POST $API -d "dns_get_options=1" | jq '.options[] | {name, display_name, description, category, domain_count, default_enabled}'
+python3 $DOXXNET_API dns_get_options
 ```
 
 ### Get tunnel's DNS config
 ```bash
-curl -s -X POST $API -d "dns_get_tunnel_config=1&token=$TOKEN&tunnel_token=$TUNNEL" | jq .
+python3 $DOXXNET_API dns_get_tunnel_config tunnel_token=TUNNEL
 ```
 
 Returns: `dns_blocking_enabled`, `base_protections[]`, `subscriptions[]`, `whitelists[]`, `blacklists[]`.
@@ -42,44 +38,44 @@ Returns: `dns_blocking_enabled`, `base_protections[]`, `subscriptions[]`, `white
 ### Enable/disable a blocklist
 ```bash
 # Enable
-curl -s -X POST $API -d "dns_set_subscription=1&token=$TOKEN&tunnel_token=$TUNNEL&subscription=BLOCKLIST_NAME&enabled=1"
+python3 $DOXXNET_API dns_set_subscription tunnel_token=TUNNEL subscription=BLOCKLIST_NAME enabled=1
 
 # Disable
-curl -s -X POST $API -d "dns_set_subscription=1&token=$TOKEN&tunnel_token=$TUNNEL&subscription=BLOCKLIST_NAME&enabled=0"
+python3 $DOXXNET_API dns_set_subscription tunnel_token=TUNNEL subscription=BLOCKLIST_NAME enabled=0
 
 # Apply to ALL tunnels
-curl -s -X POST $API -d "dns_set_subscription=1&token=$TOKEN&tunnel_token=$TUNNEL&subscription=BLOCKLIST_NAME&enabled=1&apply_to_all=1"
+python3 $DOXXNET_API dns_set_subscription tunnel_token=TUNNEL subscription=BLOCKLIST_NAME enabled=1 apply_to_all=1
 ```
 
 ### Whitelist a domain (stop blocking it)
 ```bash
-curl -s -X POST $API -d "dns_add_whitelist=1&token=$TOKEN&tunnel_token=$TUNNEL&domain=example.com"
+python3 $DOXXNET_API dns_add_whitelist tunnel_token=TUNNEL domain=example.com
 
 # Apply to all tunnels
-curl -s -X POST $API -d "dns_add_whitelist=1&token=$TOKEN&tunnel_token=$TUNNEL&domain=example.com&apply_to_all=1"
+python3 $DOXXNET_API dns_add_whitelist tunnel_token=TUNNEL domain=example.com apply_to_all=1
 ```
 
 ### Remove from whitelist
 ```bash
-curl -s -X POST $API -d "dns_remove_whitelist=1&token=$TOKEN&tunnel_token=$TUNNEL&domain=example.com"
+python3 $DOXXNET_API dns_remove_whitelist tunnel_token=TUNNEL domain=example.com
 ```
 
 ### Blacklist a domain (force block it)
 ```bash
-curl -s -X POST $API -d "dns_add_blacklist=1&token=$TOKEN&tunnel_token=$TUNNEL&domain=evil.com"
+python3 $DOXXNET_API dns_add_blacklist tunnel_token=TUNNEL domain=evil.com
 
 # Apply to all tunnels
-curl -s -X POST $API -d "dns_add_blacklist=1&token=$TOKEN&tunnel_token=$TUNNEL&domain=evil.com&apply_to_all=1"
+python3 $DOXXNET_API dns_add_blacklist tunnel_token=TUNNEL domain=evil.com apply_to_all=1
 ```
 
 ### Remove from blacklist
 ```bash
-curl -s -X POST $API -d "dns_remove_blacklist=1&token=$TOKEN&tunnel_token=$TUNNEL&domain=evil.com"
+python3 $DOXXNET_API dns_remove_blacklist tunnel_token=TUNNEL domain=evil.com
 ```
 
 ### Get blocklist stats
 ```bash
-curl -s -X POST $API -d "dns_blocklist_stats=1&token=$TOKEN" | jq .
+python3 $DOXXNET_API dns_blocklist_stats
 ```
 
 Returns: `total_domains`, `lists[]` with per-list domain counts and status.
@@ -88,7 +84,7 @@ Returns: `total_domains`, `lists[]` with per-list domain counts and status.
 
 Create a personalized DNS hash:
 ```bash
-curl -s -X POST $API -d "public_dns_create_hash=1&token=$TOKEN&tunnel_token=$TUNNEL" | jq .
+python3 $DOXXNET_API public_dns_create_hash tunnel_token=TUNNEL
 ```
 
 Returns `doh_url` and `dot_host`. Use these to get your tunnel's DNS blocking on any device without an encrypted tunnel:
@@ -100,12 +96,12 @@ Returns `doh_url` and `dot_host`. Use these to get your tunnel's DNS blocking on
 
 List existing hashes:
 ```bash
-curl -s -X POST $API -d "public_dns_list_hashes=1&token=$TOKEN" | jq .hashes
+python3 $DOXXNET_API public_dns_list_hashes
 ```
 
 Delete a hash:
 ```bash
-curl -s -X POST $API -d "public_dns_delete_hash=1&token=$TOKEN&host_hash=HASH"
+python3 $DOXXNET_API public_dns_delete_hash host_hash=HASH
 ```
 
 ## Guidelines

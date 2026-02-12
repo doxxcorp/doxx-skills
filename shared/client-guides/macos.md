@@ -3,49 +3,54 @@
 ## Prerequisites
 
 - WireGuard installed: `brew install wireguard-tools`
+- Python 3 (included with macOS)
 - Auth token and tunnel already created via the doxx.net API
 
 ## Setup
 
-### 1. Get WireGuard config from API
+### 1. Get WireGuard config and build .conf file
 
 ```bash
-API="https://config.doxx.net/v1/"
-CONFIG=$(curl -s -X POST $API -d "wireguard=1&token=$TOKEN&tunnel_token=$TUNNEL")
-```
+python3 -c "
+import urllib.request, urllib.parse, json, os
 
-### 2. Build the .conf file
+API = 'https://config.doxx.net/v1/'
+TOKEN = os.environ.get('DOXXNET_TOKEN') or input('Enter your auth token: ')
+TUNNEL = os.environ.get('TUNNEL_TOKEN') or input('Enter your tunnel token: ')
 
-```bash
-PRIVATE_KEY=$(echo $CONFIG | jq -r '.config.interface.private_key')
-ADDRESS=$(echo $CONFIG | jq -r '.config.interface.address')
-DNS=$(echo $CONFIG | jq -r '.config.interface.dns')
-PEER_KEY=$(echo $CONFIG | jq -r '.config.peer.public_key')
-ENDPOINT=$(echo $CONFIG | jq -r '.config.peer.endpoint')
-ALLOWED_IPS=$(echo $CONFIG | jq -r '.config.peer.allowed_ips')
+data = urllib.parse.urlencode({'wireguard': '1', 'token': TOKEN, 'tunnel_token': TUNNEL}).encode()
+resp = urllib.request.urlopen(urllib.request.Request(API, data=data, method='POST'))
+cfg = json.loads(resp.read())['config']
 
-sudo mkdir -p /etc/wireguard
-sudo tee /etc/wireguard/doxx.conf > /dev/null << EOF
-[Interface]
-PrivateKey = $PRIVATE_KEY
-Address = $ADDRESS
-DNS = $DNS
+iface = cfg['interface']
+peer = cfg['peer']
+
+conf = f'''[Interface]
+PrivateKey = {iface[\"private_key\"]}
+Address = {iface[\"address\"]}
+DNS = {iface[\"dns\"]}
 
 [Peer]
-PublicKey = $PEER_KEY
-AllowedIPs = $ALLOWED_IPS
-Endpoint = $ENDPOINT
-PersistentKeepalive = 25
-EOF
+PublicKey = {peer[\"public_key\"]}
+AllowedIPs = {peer[\"allowed_ips\"]}
+Endpoint = {peer[\"endpoint\"]}
+PersistentKeepalive = 25'''
+
+print(conf)
+open('/tmp/doxx.conf', 'w').write(conf)
+print('\nConfig written to /tmp/doxx.conf')
+"
 ```
 
-### 3. Connect
+### 2. Install config and connect
 
 ```bash
+sudo mkdir -p /etc/wireguard
+sudo cp /tmp/doxx.conf /etc/wireguard/doxx.conf
 sudo wg-quick up doxx
 ```
 
-### 4. Verify
+### 3. Verify
 
 ```bash
 # Check WireGuard status
@@ -97,6 +102,6 @@ sudo launchctl load /Library/LaunchDaemons/com.doxx.wireguard.plist
 ## Install doxx.net Root CA (for TLS with .doxx domains)
 
 ```bash
-curl -o /tmp/doxx-root-ca.crt https://a0x13.doxx.net/assets/doxx-root-ca.crt
+python3 -c "import urllib.request; urllib.request.urlretrieve('https://a0x13.doxx.net/assets/doxx-root-ca.crt', '/tmp/doxx-root-ca.crt')"
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/doxx-root-ca.crt
 ```
