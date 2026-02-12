@@ -17,7 +17,7 @@ API="https://config.doxx.net/v1/"
 STATS="https://secure-wss.doxx.net"
 ```
 
-Use `$DOXX_TOKEN` if set, otherwise ask for the auth token.
+Use `$DOXXNET_TOKEN` if set, otherwise ask for the auth token.
 
 User request: $ARGUMENTS
 

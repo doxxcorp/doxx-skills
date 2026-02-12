@@ -36,7 +36,7 @@ Agent-neutral procedure for building a complete doxx.net private network from sc
 
 1. Ask user if they want to store the token
 2. Options:
-   - **Environment variable:** add `export DOXX_TOKEN=...` to shell profile
+   - **Environment variable:** add `export DOXXNET_TOKEN=...` to shell profile
    - **.env file:** write to `.env` in current directory
    - **No storage:** user provides token each time
 3. Warn: "This token is your identity. Keep it safe. There are no passwords."

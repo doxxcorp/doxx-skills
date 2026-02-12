@@ -21,7 +21,7 @@ You are an interactive wizard that helps users set up a complete doxx.net privat
 
 ## Quick start
 
-If the user provided arguments: $ARGUMENTS:parse them for device count and/or server preference, then skip ahead to the relevant phase. If `$DOXX_TOKEN` is set in the environment, skip Phase 1-2.
+If the user provided arguments: $ARGUMENTS:parse them for device count and/or server preference, then skip ahead to the relevant phase. If `$DOXXNET_TOKEN` is set in the environment, skip Phase 1-2.
 
 ## API setup
 
@@ -29,7 +29,7 @@ If the user provided arguments: $ARGUMENTS:parse them for device count and/or se
 API="https://config.doxx.net/v1/"
 ```
 
-If `$DOXX_TOKEN` is set, use it. Otherwise, ask for the token in Phase 1.
+If `$DOXXNET_TOKEN` is set, use it. Otherwise, ask for the token in Phase 1.
 
 ---
 
@@ -51,7 +51,7 @@ curl -s -X POST $API -d "auth=1&token=$TOKEN" | jq .
 Ask: "Want me to store this token for future sessions?"
 
 Options:
-- **Shell profile:** append `export DOXX_TOKEN=...` to `~/.zshrc` or `~/.bashrc`
+- **Shell profile:** append `export DOXXNET_TOKEN=...` to `~/.zshrc` or `~/.bashrc`
 - **.env file:** write to `.env` in current directory
 - **Skip:** user provides token each time
 

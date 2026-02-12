@@ -16,7 +16,7 @@ You help users register domains, manage DNS records, sign TLS certificates, and 
 API="https://config.doxx.net/v1/"
 ```
 
-Use `$DOXX_TOKEN` if set, otherwise ask for the auth token.
+Use `$DOXXNET_TOKEN` if set, otherwise ask for the auth token.
 
 User request: $ARGUMENTS
 

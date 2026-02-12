@@ -10,30 +10,45 @@ AI agent skills for setting up and managing [doxx.net](https://doxx.net) private
 
 ## Getting Started
 
-### Claude Code (CLI)
+### Claude Code
 
-Run these commands inside [Claude Code](https://code.claude.com/):
+Clone the repo (required while the repo is private — once public, this will be replaced with a direct marketplace install):
 
+```bash
+git clone https://github.com/doxxcorp/doxx-skills.git
 ```
-/plugin marketplace add doxxcorp/doxx-skills
-/plugin install doxxnet
+
+**CLI:**
+
+```bash
+cd doxx-skills
+claude /plugin marketplace add ./claude
+claude /plugin install doxxnet
 ```
 
-The plugin is fetched directly from GitHub, no cloning needed. Once installed, use any skill as a slash command:
+**VS Code / Cursor:**
+
+1. Open the plugin manager with `/plugins`
+2. Switch to the **Marketplaces** tab and add the path to the `claude/` directory inside your clone (e.g. `~/doxx-skills/claude/`)
+3. Switch to the **Plugins** tab and search for "doxx" — **doxxnet** will appear
+4. Click **Install** and choose your scope
+
+**Set your auth token** so skills can authenticate automatically:
+
+```bash
+# Add to ~/.zshrc or ~/.bashrc
+export DOXXNET_TOKEN=your-token-here
+```
+
+If launching from an IDE, restart it after updating your shell profile so it picks up the new env var.
+
+Once installed, use any skill as a slash command:
 
 ```
 /doxxnet:network-wizard
 ```
 
-### Claude Code for Cursor / VS Code
-
-1. Open Claude Code in the editor
-2. Add the marketplace: `/plugin marketplace add doxxcorp/doxx-skills`
-3. Open the plugin manager: `/plugins`
-4. Switch to the **Plugins** tab: **doxxnet** will appear under available plugins
-5. Click **Install** and choose your scope (user, project, or local)
-
-Once installed, type `/doxxnet:network-wizard` in the chat to get started.
+If `DOXXNET_TOKEN` is not set, the skill will prompt you for it.
 
 ### Other Agents
 
@@ -83,6 +98,10 @@ doxx.net is anonymous by design. There are no usernames, passwords, or emails. Y
 4. WireGuard configs are generated and installed on your devices
 
 No secrets are stored in this repo. Tokens are always provided by you at runtime.
+
+## TODO
+
+- [ ] Make repo public and switch install instructions to marketplace: `/plugin marketplace add doxxcorp/doxx-skills` + `/plugin install doxxnet`
 
 ## License
 

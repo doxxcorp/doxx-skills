@@ -1,0 +1,17 @@
+{
+  "name": "doxxnet",
+  "owner": {
+    "name": "doxx.net",
+    "email": "hello@doxx.net"
+  },
+  "plugins": [
+    {
+      "name": "doxxnet",
+      "source": "./",
+      "description": "AI skills for setting up and managing doxx.net private networks",
+      "version": "0.1.0",
+      "license": "MIT",
+      "keywords": ["doxx", "doxxnet", "wireguard", "tunnel", "private-network", "dns-blocking", "mesh-networking"]
+    }
+  ]
+}

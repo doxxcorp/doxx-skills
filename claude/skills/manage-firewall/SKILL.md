@@ -16,7 +16,7 @@ You help users manage firewall rules on their doxx.net tunnels. This controls wh
 API="https://config.doxx.net/v1/"
 ```
 
-Use `$DOXX_TOKEN` if set, otherwise ask for the auth token.
+Use `$DOXXNET_TOKEN` if set, otherwise ask for the auth token.
 
 User request: $ARGUMENTS
 
