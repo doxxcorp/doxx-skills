@@ -2,13 +2,18 @@
 
 AI agent skills for setting up and managing [doxx.net](https://doxx.net) private networks through natural language.
 
-## Quick Start (Claude Code)
+## Install
 
-```bash
-# Install the plugin
-claude plugin install /path/to/doxx-skills/claude
+Add the marketplace and install the plugin from within Claude Code:
 
-# Run the network wizard
+```
+/plugin marketplace add doxxcorp/doxx-skills
+/plugin install doxx
+```
+
+Then use any skill as a slash command:
+
+```
 /doxx:network-wizard
 ```
 
