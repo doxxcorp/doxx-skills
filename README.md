@@ -37,15 +37,24 @@ claude /plugin install doxxnet
 3. Switch to the **Plugins** tab and search for "doxx" — **doxxnet** will appear
 4. Click **Install** and choose your scope
 
-**Set your auth token** so the MCP server can authenticate API calls. Add it to your shell profile so it persists:
+**Set your auth token** and **start the MCP server**:
 
 ```bash
 echo 'export DOXXNET_TOKEN=your-token-here' >> ~/.zshenv
+source ~/.zshenv
+cd doxx-skills
+python3 claude/scripts/mcp-server.py --daemon
 ```
 
-Then **fully quit and reopen** your terminal, IDE, or editor so it picks up the new env var.
+The MCP server runs as a background daemon on `localhost:19533`. It auto-exits if already running, so it's safe to run multiple times.
 
-Once installed, the plugin registers a local MCP server that provides ~39 tools for interacting with the doxx.net API. Skills use these tools directly — no permission prompts for API calls.
+To start it automatically on login, add to your shell profile:
+
+```bash
+echo 'python3 ~/doxx-skills/claude/scripts/mcp-server.py --daemon' >> ~/.zshenv
+```
+
+Once running, the plugin provides ~39 MCP tools for the doxx.net API. Skills use these tools directly — no permission prompts for API calls.
 
 Use any skill as a slash command:
 
@@ -69,7 +78,7 @@ Point your agent at the relevant file and provide your doxx.net auth token at ru
 
 ### Claude Code Plugin (`claude/`)
 
-The plugin bundles a local MCP server (`scripts/mcp-server.py`) that handles all doxx.net API communication. No external dependencies — Python 3 stdlib only.
+The plugin includes a local HTTP MCP server (`scripts/mcp-server.py`) that handles all doxx.net API communication. No external dependencies — Python 3 stdlib only. Runs as a background daemon on `localhost:19533`.
 
 Interactive skills with guided workflows:
 
@@ -103,7 +112,7 @@ No secrets are stored in this repo. Tokens are always provided by you at runtime
 ## TODO
 
 - [ ] Make repo public and switch install instructions to marketplace: `/plugin marketplace add doxxcorp/doxx-skills` + `/plugin install doxxnet`
-- [ ] VS Code/Cursor plugin manager can't uninstall non-user-scoped plugins from the UI — need to use CLI: `claude plugin uninstall doxxnet@doxx-skills --scope <scope>`
+- [ ] Uninstall only works for "Install for you" (user scope). "Install for this project" and "Install locally" fail to uninstall from the UI. Workaround: `claude plugin uninstall doxxnet@doxx-skills --scope <scope>`
 
 ## License
 

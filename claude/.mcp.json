@@ -1,9 +1,8 @@
 {
   "mcpServers": {
     "doxxnet": {
-      "type": "stdio",
-      "command": "python3",
-      "args": ["scripts/mcp-server.py"]
+      "type": "http",
+      "url": "http://127.0.0.1:19533/mcp"
     }
   }
 }

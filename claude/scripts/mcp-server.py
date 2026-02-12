@@ -1,20 +1,31 @@
 #!/usr/bin/env python3
-"""doxx.net MCP server for Claude Code.
+"""doxx.net MCP server (HTTP) for Claude Code.
 
 Provides tools for managing doxx.net private networks:
 tunnels, domains, DNS, firewall, DNS blocking, and stats.
 
 Reads DOXXNET_TOKEN from environment for authentication.
 No external dependencies — uses only Python 3 stdlib.
+
+Usage:
+    python3 mcp-server.py           # foreground on port 19533
+    python3 mcp-server.py --daemon  # background daemon
+    python3 mcp-server.py --stop    # stop running daemon
 """
 
 import json
 import sys
 import os
+import signal
+import socket
 import urllib.request
 import urllib.parse
 import urllib.error
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime, timedelta, timezone
+
+PORT = int(os.environ.get("DOXXNET_MCP_PORT", "19533"))
+PID_FILE = os.path.expanduser("~/.doxxnet-mcp.pid")
 
 CONFIG_API = "https://config.doxx.net/v1/"
 STATS_API = "https://secure-wss.doxx.net/api/stats/"
@@ -516,28 +527,12 @@ TOOL_MAP = {
 
 
 # ---------------------------------------------------------------------------
-# Server
+# MCP logic (transport-independent)
 # ---------------------------------------------------------------------------
 
 class DoxxMCP:
     def __init__(self):
         self.token = os.environ.get("DOXXNET_TOKEN", "")
-
-    def run(self):
-        """Main loop: read JSON-RPC messages from stdin, write responses to stdout."""
-        for line in sys.stdin:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                msg = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-
-            resp = self.handle(msg)
-            if resp is not None:
-                sys.stdout.write(json.dumps(resp) + "\n")
-                sys.stdout.flush()
 
     def handle(self, msg):
         method = msg.get("method", "")
@@ -548,7 +543,7 @@ class DoxxMCP:
             return self.rpc_result(msg_id, {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "doxxnet", "version": "0.1.0"}
+                "serverInfo": {"name": "doxxnet", "version": "0.2.0"}
             })
 
         if method == "notifications/initialized":
@@ -719,13 +714,144 @@ class DoxxMCP:
         return {"content": [{"type": "text", "text": text}], "isError": True}
 
 
-if __name__ == "__main__":
-    log = lambda msg: print(msg, file=sys.stderr)
-    log("doxxnet MCP server starting...")
+# ---------------------------------------------------------------------------
+# HTTP transport (MCP Streamable HTTP)
+# ---------------------------------------------------------------------------
+
+class MCPHandler(BaseHTTPRequestHandler):
+    """Handle MCP JSON-RPC over HTTP."""
+
+    mcp = DoxxMCP()
+
+    def do_POST(self):
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length)
+
+        try:
+            msg = json.loads(body)
+        except json.JSONDecodeError:
+            self.send_error(400, "Invalid JSON")
+            return
+
+        resp = self.mcp.handle(msg)
+
+        if resp is None:
+            # Notification — no response body
+            self.send_response(202)
+            self.end_headers()
+            return
+
+        result = json.dumps(resp).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(result)))
+        self.end_headers()
+        self.wfile.write(result)
+
+    def do_GET(self):
+        # Health check
+        body = json.dumps({"status": "ok", "server": "doxxnet", "version": "0.2.0"}).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, format, *args):
+        pass  # suppress per-request logging
+
+
+# ---------------------------------------------------------------------------
+# Lifecycle management
+# ---------------------------------------------------------------------------
+
+def is_port_in_use(port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(("127.0.0.1", port)) == 0
+
+
+def read_pid():
     try:
-        DoxxMCP().run()
+        with open(PID_FILE) as f:
+            return int(f.read().strip())
+    except (FileNotFoundError, ValueError):
+        return None
+
+
+def write_pid(pid):
+    with open(PID_FILE, "w") as f:
+        f.write(str(pid))
+
+
+def remove_pid():
+    try:
+        os.unlink(PID_FILE)
+    except FileNotFoundError:
+        pass
+
+
+def stop_daemon():
+    pid = read_pid()
+    if pid:
+        try:
+            os.kill(pid, signal.SIGTERM)
+            print(f"Stopped doxxnet MCP server (pid {pid})", file=sys.stderr)
+        except ProcessLookupError:
+            print("Server not running (stale pid file)", file=sys.stderr)
+        remove_pid()
+    else:
+        print("No pid file found", file=sys.stderr)
+
+
+def daemonize():
+    """Double-fork to detach from terminal."""
+    if os.fork() > 0:
+        sys.exit(0)
+    os.setsid()
+    if os.fork() > 0:
+        sys.exit(0)
+    sys.stdin.close()
+    sys.stdout.close()
+    sys.stderr.close()
+    devnull = os.open(os.devnull, os.O_RDWR)
+    os.dup2(devnull, 0)
+    os.dup2(devnull, 1)
+    os.dup2(devnull, 2)
+
+
+def run_server(daemon=False):
+    if is_port_in_use(PORT):
+        if daemon:
+            sys.exit(0)  # already running, silent exit
+        print(f"Port {PORT} already in use — server may already be running", file=sys.stderr)
+        sys.exit(1)
+
+    if daemon:
+        daemonize()
+
+    write_pid(os.getpid())
+
+    def cleanup(signum, frame):
+        remove_pid()
+        sys.exit(0)
+    signal.signal(signal.SIGTERM, cleanup)
+
+    if not daemon:
+        print(f"doxxnet MCP server listening on http://127.0.0.1:{PORT}/mcp", file=sys.stderr)
+
+    server = HTTPServer(("127.0.0.1", PORT), MCPHandler)
+    try:
+        server.serve_forever()
     except KeyboardInterrupt:
         pass
-    except Exception as e:
-        log(f"Fatal: {e}")
-        sys.exit(1)
+    finally:
+        remove_pid()
+
+
+if __name__ == "__main__":
+    if "--stop" in sys.argv:
+        stop_daemon()
+    elif "--daemon" in sys.argv:
+        run_server(daemon=True)
+    else:
+        run_server(daemon=False)

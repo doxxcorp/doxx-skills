@@ -1,6 +1,6 @@
 {
   "name": "doxxnet",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "AI skills for setting up and managing doxx.net private networks",
   "author": {
     "name": "doxx.net",
@@ -12,9 +12,8 @@
   "keywords": ["doxx", "doxxnet", "wireguard", "tunnel", "private-network", "dns-blocking", "mesh-networking"],
   "mcpServers": {
     "doxxnet": {
-      "type": "stdio",
-      "command": "python3",
-      "args": ["scripts/mcp-server.py"]
+      "type": "http",
+      "url": "http://127.0.0.1:19533/mcp"
     }
   },
   "commands": [
