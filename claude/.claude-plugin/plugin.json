@@ -1,6 +1,6 @@
 {
   "name": "doxxnet",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "AI skills for setting up and managing doxx.net private networks",
   "author": {
     "name": "doxx.net",
@@ -11,6 +11,7 @@
   "license": "MIT",
   "keywords": ["doxx", "doxxnet", "wireguard", "tunnel", "private-network", "dns-blocking", "mesh-networking"],
   "commands": [
+    "./skills/doxxnet/",
     "./skills/network-wizard/",
     "./skills/manage-tunnels/",
     "./skills/manage-domains/",

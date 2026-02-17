@@ -30,9 +30,9 @@ Token file: `~/.config/doxxnet/token`
 curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=TOKEN"
 ```
 
-**Stats API** — GET from `https://secure-wss.doxx.net/api/stats/`:
+**Stats API** — POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
 ```
-curl -s "https://secure-wss.doxx.net/api/stats/ENDPOINT?token=TOKEN&param=value"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: TOKEN" -d "param=value"
 ```
 
 Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat ...)` or any subshell.
@@ -98,7 +98,7 @@ Ask: "Want to enable ad/tracker blocking on your network?"
 
 Fetch options (no auth): `dns_get_options=1`. Recommend: ads, tracking, malware.
 
-Apply with `dns_set_subscription=1&tunnel_token=TT&subscription=NAME&enabled=1&apply_to_all=1`.
+Apply with `dns_set_subscription=1&tunnel_token=TT&blocklist_name=NAME&enabled=1&apply_to_all=1`.
 
 ## Phase 7: Client Installation
 

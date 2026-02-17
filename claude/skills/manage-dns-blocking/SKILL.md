@@ -34,7 +34,7 @@ Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat 
 
 - `dns_get_options` — list available blocklists (no auth needed)
 - `dns_get_tunnel_config` — get a tunnel's DNS blocking config. Params: `tunnel_token`
-- `dns_set_subscription` — enable/disable a blocklist. Params: `tunnel_token`, `subscription`, `enabled` (1/0). Optional: `apply_to_all`
+- `dns_set_subscription` — enable/disable a blocklist. Params: `tunnel_token`, `blocklist_name`, `enabled` (1/0). Optional: `apply_to_all`
 - `dns_add_whitelist` — whitelist a domain (stop blocking it). Params: `tunnel_token`, `domain`. Optional: `apply_to_all`
 - `dns_remove_whitelist` — remove from whitelist. Params: `tunnel_token`, `domain`
 - `dns_add_blacklist` — blacklist a domain (force block it). Params: `tunnel_token`, `domain`. Optional: `apply_to_all`

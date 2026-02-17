@@ -153,7 +153,7 @@ Returns: `dns_blocking_enabled`, `base_protections[]`, `subscriptions[]`, `white
 
 ### dns_set_subscription
 ```bash
-curl -s -X POST $API -d "dns_set_subscription=1&token=$TOKEN&tunnel_token=$TUNNEL&subscription=ads&enabled=1"
+curl -s -X POST $API -d "dns_set_subscription=1&token=$TOKEN&tunnel_token=$TUNNEL&blocklist_name=ads&enabled=1"
 ```
 Optional: `apply_to_all=1` to apply to all tunnels.
 
@@ -375,29 +375,6 @@ Returns: `version`, `download_url`.
 curl -s -X POST $API -d "generate_qr=1&data=TEXT_TO_ENCODE&size=512" -o qr.png
 ```
 `size`: 100-2048 pixels, default 512.
-
----
-
-## POW (Proof of Work)
-
-### doxxpow_challenge (no auth)
-Get a proof-of-work challenge.
-```bash
-curl -s -X POST $API -d "doxxpow_challenge=1"
-```
-
-### doxxpow_verify (no auth)
-Submit completed POW solution.
-```bash
-curl -s -X POST $API -d "doxxpow_verify=1&challenge_id=ID&samples=SAMPLES"
-```
-
-### doxxpow_validate_token
-Validate a POW token.
-```bash
-curl -s -X POST $API -d "doxxpow_validate_token=1&pow_token=TOKEN"
-```
-Returns: `valid`, `accuracy`.
 
 ---
 

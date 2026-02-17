@@ -1,0 +1,48 @@
+{
+  "skill_name": "doxxnet",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Show me my tunnels and current bandwidth usage",
+      "expected_output": "Tunnel list plus bandwidth stats",
+      "expectations": [
+        "Calls list_tunnels to get tunnel info",
+        "Calls /api/stats/bandwidth for recent bandwidth",
+        "Presents both tunnel status and bandwidth in a combined view"
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Enable ad blocking on all my devices and show me what's currently being blocked",
+      "expected_output": "DNS blocking enabled plus alert summary",
+      "expectations": [
+        "Calls dns_get_options to list available blocklists",
+        "Calls dns_set_subscription with apply_to_all to enable blocking",
+        "Calls /api/stats/alerts with last=1d to show current blocks",
+        "Shows category_counts and block_count"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Open port 443 on my server and check if the tunnel is connected",
+      "expected_output": "Firewall rule added and tunnel status shown",
+      "expectations": [
+        "Calls list_tunnels to find the server tunnel and its IP",
+        "Calls firewall_rule_add with protocol=TCP and dst_port=443",
+        "Shows tunnel connection status from list_tunnels response"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Give me a full overview of my network",
+      "expected_output": "Comprehensive network dashboard",
+      "expectations": [
+        "Calls list_tunnels for device status",
+        "Calls /api/stats/bandwidth for recent bandwidth",
+        "Calls /api/stats/alerts for security and blocking summary",
+        "Calls /api/stats/summary for peak stats",
+        "Presents a unified dashboard-style summary"
+      ]
+    }
+  ]
+}

@@ -63,6 +63,7 @@ Interactive skills with guided workflows:
 
 | Skill | What it does |
 |-------|-------------|
+| **doxxnet** | General-purpose: tunnels, firewall, domains, DNS blocking, stats — routes to the right API automatically |
 | **network-wizard** | Full guided setup: auth, servers, tunnels, mesh networking, domains, DNS blocking, client install |
 | **manage-tunnels** | Add/remove/move devices, get WireGuard configs |
 | **manage-domains** | Register domains, manage DNS records, sign TLS certificates |
