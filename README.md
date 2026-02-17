@@ -69,6 +69,7 @@ Interactive skills with guided workflows:
 | **manage-firewall** | Open ports, link tunnels, mesh networking rules |
 | **manage-dns-blocking** | Enable ad/tracker blocking, manage whitelists/blacklists |
 | **network-status** | Bandwidth stats, connection tracking, security alerts |
+| **network-stats** | Detailed bandwidth, security alerts, threat categories, peak throughput |
 
 Skills call the doxx.net API directly via `curl` — no intermediate server, no permission prompts.
 
