@@ -1,0 +1,61 @@
+{
+  "skill_name": "network-stats",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Give me a full overview of my network stats",
+      "expected_output": "Dashboard-style summary covering all stats endpoints",
+      "expectations": [
+        "Calls /api/stats/global for total threats blocked",
+        "Calls /api/stats/bandwidth for recent bandwidth usage",
+        "Calls /api/stats/alerts for block counts and category breakdown",
+        "Calls /api/stats/summary for peak bandwidth per tunnel",
+        "Presents results in a concise table or structured dashboard format"
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Show my bandwidth usage for the last hour",
+      "expected_output": "Per-tunnel and aggregate bandwidth stats for the past hour",
+      "expectations": [
+        "Calls /api/stats/bandwidth with appropriate start/end or default 1-hour range",
+        "Authenticates with token parameter",
+        "Presents peak_in and peak_out in Mbps",
+        "Shows per-tunnel breakdown and aggregate totals"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "What's being blocked on my network?",
+      "expected_output": "DNS block summary with category breakdown",
+      "expectations": [
+        "Calls /api/stats/alerts with last=1d or similar recent range",
+        "Shows block_count and category_counts (ads, tracking, malware)",
+        "Highlights the most blocked categories",
+        "Mentions total blocks across all tunnels"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Give me a monthly summary of my network",
+      "expected_output": "30-day peak bandwidth and alert totals per tunnel",
+      "expectations": [
+        "Calls /api/stats/summary with days=30",
+        "Shows peak_in_mbps and peak_out_mbps per tunnel",
+        "Shows alert_totals broken down by type",
+        "Calls list_tunnels to get tunnel names for labeling"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Are there any security threats? Show me the last week",
+      "expected_output": "Security alerts filtered to the past 7 days",
+      "expectations": [
+        "Calls /api/stats/alerts with last=7d",
+        "Focuses on security_event, dangerous_port, port_scan, doh_bypass types",
+        "Groups and summarizes by alert type",
+        "Highlights any concerning patterns or high counts"
+      ]
+    }
+  ]
+}

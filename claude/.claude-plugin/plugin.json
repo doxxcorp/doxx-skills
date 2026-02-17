@@ -16,6 +16,7 @@
     "./skills/manage-domains/",
     "./skills/manage-firewall/",
     "./skills/manage-dns-blocking/",
-    "./skills/network-status/"
+    "./skills/network-status/",
+    "./skills/network-stats/"
   ]
 }

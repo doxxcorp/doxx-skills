@@ -6,7 +6,7 @@ All Config API calls use `POST https://config.doxx.net/v1/` with `application/x-
 
 **Auth:** Most endpoints require `token=AUTH_TOKEN`. Exceptions noted with "(no auth)".
 
-**Responses:** JSON with `"status": "success"` or `"status": "error"`. HTTP 200 can still be an error:always check `status` field.
+**Responses:** JSON with `"status": "success"` or `"status": "error"`. HTTP 200 can still be an error — always check `status` field.
 
 **Variables used below:**
 ```
@@ -428,40 +428,6 @@ curl -s "https://secure-wss.doxx.net/api/stats/global"
 ```
 Returns: `total` (global threat counter), `ts`.
 
-### WebSocket:Real-time events
-```
-wss://secure-wss.doxx.net/ws?token=TOKEN[&tunnel_token=TUNNEL]
-```
-Event types: `dns_block`, `security_event`, `dangerous_port`, `dns_bypass`, `doh_bypass`, `bandwidth`, `dns_nxdomain`, `tunnel_status`, `port_scan`.
-
-Event fields: `tunnel_token`, `ts`, `type`, `action`, `category`, `value`, `count`, `display`.
-
-### WebSocket:Global threat counter (no auth)
-```
-wss://secure-wss.doxx.net/ws/global
-```
-
----
-
-## Conntrack API
-
-Real-time connection tracking across backbone nodes.
-
-### WebSocket
-```
-wss://conntrack.doxx.net/ws?token=TOKEN
-```
-First message: `type: "initial"` (all current connections). Then `type: "snapshot"` every 10s.
-
-Connection fields: `id`, `protocol`, `state`, `src_ip`, `dst_ip`, `src_port`, `dst_port`, `bytes_sent`, `bytes_recv`, `upload_speed`, `download_speed`, `server`, `tunnel_name`.
-
-Stats fields: `total_connections`, `total_upload`, `total_download`, `upload_speed`, `download_speed`, `protocol_breakdown`.
-
-### Health check (no auth)
-```bash
-curl -s https://conntrack.doxx.net/health
-```
-
 ---
 
 ## DNS Infrastructure
@@ -469,7 +435,7 @@ curl -s https://conntrack.doxx.net/health
 | Layer | Address | Purpose |
 |-------|---------|---------|
 | Tunnel Recursive | `10.10.10.10`, `fd53::` | Tunnel clients: personalized blocking, DNSSEC, resolves all .doxx TLDs |
-| Public Recursive | `207.207.200.200`, `207.207.201.201` | Anyone:resolves .doxx TLDs + internet domains |
+| Public Recursive | `207.207.200.200`, `207.207.201.201` | Anyone: resolves .doxx TLDs + internet domains |
 | Public Recursive IPv6 | `2602:f5c1::` (Americas), `2a11:46c0::` (Europe) | Same as above, IPv6 |
 | DoH | `https://doxx.net/dns-query` | DNS-over-HTTPS (public) |
 | DoT | `doxx.net:853` | DNS-over-TLS (public) |
