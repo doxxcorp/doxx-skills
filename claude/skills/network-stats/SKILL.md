@@ -28,9 +28,9 @@ If missing or auth fails, ask the user for their token, validate with `auth=1&to
 curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=TOKEN"
 ```
 
-**Stats API** — GET from `https://secure-wss.doxx.net/api/stats/`:
+**Stats API** — POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
 ```
-curl -s "https://secure-wss.doxx.net/api/stats/ENDPOINT?token=TOKEN&param=value"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: TOKEN" -d "param=value"
 ```
 
 Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat ...)` or any subshell.
@@ -40,7 +40,7 @@ Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat 
 ### bandwidth
 Bandwidth usage over time. Auto-selects granularity based on time range.
 ```
-curl -s "https://secure-wss.doxx.net/api/stats/bandwidth?token=TOKEN&start=ISO8601&end=ISO8601"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/bandwidth -H "X-Auth-Token: TOKEN" -d "start=ISO8601&end=ISO8601"
 ```
 Optional params: `tunnel_token` (filter to one tunnel), `start`, `end` (ISO 8601).
 
@@ -51,7 +51,7 @@ Returns: `data[]` with `tunnel_token`, `timestamp`, `peak_in` (Mbps), `peak_out`
 ### alerts
 Security alerts and DNS blocks.
 ```
-curl -s "https://secure-wss.doxx.net/api/stats/alerts?token=TOKEN&last=1d"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/alerts -H "X-Auth-Token: TOKEN" -d "last=1d"
 ```
 Optional params: `tunnel_token`, `last` (session/1m/1h/1d/7d/30d), `start`/`end` (ISO 8601), `type` (filter by event type).
 
@@ -60,7 +60,7 @@ Returns: `totals` (counts by type), `block_count`, `category_counts` (ads, track
 ### summary
 Peak bandwidth and alert totals for a period.
 ```
-curl -s "https://secure-wss.doxx.net/api/stats/summary?token=TOKEN&days=30"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/summary -H "X-Auth-Token: TOKEN" -d "days=30"
 ```
 Optional: `tunnel_token`, `days` (default: 30).
 

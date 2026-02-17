@@ -11,6 +11,7 @@ All Config API calls use `POST https://config.doxx.net/v1/` with `application/x-
 **Variables used below:**
 ```
 API="https://config.doxx.net/v1/"
+STATS="https://secure-wss.doxx.net/api/stats"
 TOKEN="your_auth_token"
 TUNNEL="your_tunnel_token"
 ```
@@ -404,22 +405,24 @@ Returns: `valid`, `accuracy`.
 
 Base URL: `https://secure-wss.doxx.net`
 
-### GET /api/stats/bandwidth
+**Auth:** `X-Auth-Token` header with the user's token. All authenticated endpoints accept both GET and POST.
+
+### POST /api/stats/bandwidth
 ```bash
-curl -s "https://secure-wss.doxx.net/api/stats/bandwidth?token=$TOKEN&start=$(date -u -v-1H +%Y-%m-%dT%H:%M:%SZ)&end=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+curl -s -X POST $STATS/bandwidth -H "X-Auth-Token: $TOKEN" -d "start=$(date -u -v-1H +%Y-%m-%dT%H:%M:%SZ)&end=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 ```
 Optional: `tunnel_token`, `start`, `end` (ISO 8601). Auto-granularity: 1s (<5m), 1m (<6h), 5m (<48h), 1h (<30d), 6h (30d+).
 
-### GET /api/stats/alerts
+### POST /api/stats/alerts
 ```bash
-curl -s "https://secure-wss.doxx.net/api/stats/alerts?token=$TOKEN&last=1d"
+curl -s -X POST $STATS/alerts -H "X-Auth-Token: $TOKEN" -d "last=1d"
 ```
 Optional: `tunnel_token`, `last` (session/1m/1h/1d/7d/30d), `start`/`end`, `type`.
 Returns: `totals`, `block_count`, `category_counts`, `data[]`.
 
-### GET /api/stats/summary
+### POST /api/stats/summary
 ```bash
-curl -s "https://secure-wss.doxx.net/api/stats/summary?token=$TOKEN&days=30"
+curl -s -X POST $STATS/summary -H "X-Auth-Token: $TOKEN" -d "days=30"
 ```
 
 ### GET /api/stats/global (no auth)
