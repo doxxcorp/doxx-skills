@@ -230,15 +230,8 @@ curl -s -X POST $API -d "create_saved_profile=1&token=$TOKEN&profile_name=NAME&p
 ```
 Required: `profile_name`, `profile_icon`, `profile_type`, `server`.
 
-### rename_saved_config
-Rename a saved profile.
-```bash
-curl -s -X POST $API -d "rename_saved_config=1&token=$TOKEN&profile_id=PROFILE_ID&profile_name=NEW_NAME"
-```
-Required: `profile_id`, `profile_name`.
-
 ### update_saved_profile
-Update profile settings.
+Update profile settings. Also used to rename a profile (pass `profile_name`).
 ```bash
 curl -s -X POST $API -d "update_saved_profile=1&token=$TOKEN&profile_id=PROFILE_ID&preferred_server=SERVER_HOSTNAME"
 ```

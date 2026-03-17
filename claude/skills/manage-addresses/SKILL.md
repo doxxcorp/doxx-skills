@@ -42,7 +42,6 @@ Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat 
 
 - `list_saved_profiles` — list all profiles. Returns `profiles[]` with: profile_id, profile_name, profile_icon, profile_type (ios/wireguard/android), preferred_server, domain_name, created_at, updated_at, ipv4_public_enabled, onion_enabled, proxy_enabled, ip_locked, settings_locked, in_use, in_use_by, in_use_device_icon, source_tunnel_name
 - `create_saved_profile` — create a profile. Params: `profile_name`, `profile_icon`, `profile_type` (wireguard), `server`
-- `rename_saved_config` — rename. Params: `profile_id`, `profile_name`
 - `update_saved_profile` — update settings. Params: `profile_id`. Optional: `profile_icon`, `profile_name`, `preferred_server`
 - `delete_saved_profile` — delete. Params: `profile_id`
 - `load_profile` — apply a profile to a tunnel. Params: `tunnel_token`, `profile_id`

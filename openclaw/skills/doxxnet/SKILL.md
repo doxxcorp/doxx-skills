@@ -114,7 +114,6 @@ DeviceInfo fields: device_hash, device_name, device_model, os_type, device_type,
 
 - `list_saved_profiles` — list profiles with settings and usage status
 - `create_saved_profile` — create. Params: `profile_name`, `profile_icon`, `profile_type`, `server`
-- `rename_saved_config` — rename. Params: `profile_id`, `profile_name`
 - `update_saved_profile` — update. Params: `profile_id`, and: `profile_icon`, `profile_name`, `preferred_server`
 - `delete_saved_profile` — delete. Params: `profile_id`
 - `load_profile` — apply profile to tunnel. Params: `tunnel_token`, `profile_id`
