@@ -56,7 +56,7 @@ else
   fail "invalid JSON"
 fi
 
-for field in name version description commands; do
+for field in name version description; do
   if python3 -c "import json; d=json.load(open('$PLUGIN')); assert '$field' in d" 2>/dev/null; then
     pass "has .$field"
   else
@@ -64,19 +64,20 @@ for field in name version description commands; do
   fi
 done
 
-# Check that every command path in plugin.json has a SKILL.md
-PLUGIN_DIR="$(dirname "$(dirname "$PLUGIN")")"
+# Check that every command path in marketplace.json has a SKILL.md
+MARKETPLACE="$REPO_ROOT/.claude-plugin/marketplace.json"
 while IFS= read -r cmd_path; do
+  # Strip leading ./ if present
+  cmd_path="${cmd_path#./}"
   # Strip trailing / if present
   cmd_path="${cmd_path%/}"
-  # Resolve relative to plugin directory
-  skill_md="$(cd "$PLUGIN_DIR" && cd "$(dirname "$cmd_path")" && pwd)/$(basename "$cmd_path")/SKILL.md"
+  skill_md="$REPO_ROOT/$cmd_path/SKILL.md"
   if [[ -f "$skill_md" ]]; then
-    pass "plugin.json → $cmd_path/SKILL.md exists"
+    pass "marketplace.json → $cmd_path/SKILL.md exists"
   else
-    fail "plugin.json → $cmd_path/SKILL.md not found"
+    fail "marketplace.json → $cmd_path/SKILL.md not found"
   fi
-done < <(python3 -c "import json; [print(c) for c in json.load(open('$PLUGIN'))['commands']]")
+done < <(python3 -c "import json; m=json.load(open('$MARKETPLACE')); [print(c) for p in m['plugins'] for c in p.get('commands', [])]")
 
 # ─── SKILL.md frontmatter ────────────────────────────────────────────────────
 
