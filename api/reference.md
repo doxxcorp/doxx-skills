@@ -76,6 +76,20 @@ curl -s -X POST $API -d "merge_account=1&token=$TOKEN&source_token=SOURCE_TOKEN"
 ```
 Returns: `new_token`, `merged_tunnels`, `merged_whitelist`, `merged_blacklist`.
 
+### subscription_status
+Check subscription tier, status, and pro features.
+```bash
+curl -s -X POST $API -d "subscription_status=1&token=$TOKEN"
+```
+Returns: `has_active_subscription`, `tier`, `subscription` (`original_transaction_id`, `product_id`, `tier`, `effective_tier`, `status`, `purchase_date`, `expires_date`, `is_trial`, `auto_renew`), `pro_features` map.
+
+### recover_account
+Recover an account using a recovery code. Alias for `verify_account_recovery`.
+```bash
+curl -s -X POST $API -d "recover_account=1&recovery_code=CODE"
+```
+Returns: `new_token`, `user_id`.
+
 ---
 
 ## Servers
@@ -133,6 +147,116 @@ Returns: `config.interface` (`private_key`, `address`, `dns`) + `config.peer` (`
 ```bash
 curl -s -X POST $API -d "disconnect_peer=1&token=$TOKEN&tunnel_token=$TUNNEL"
 ```
+
+---
+
+## Devices
+
+### device_list_unified
+List all devices with subscription info and guest accounts.
+```bash
+curl -s -X POST $API -d "device_list_unified=1&token=$TOKEN"
+```
+Returns: `my_devices[]` (each with `device_hash`, `device_name`, `device_model`, `os_type`, `device_type`, `device_icon`, `is_current`, `is_online`, `last_seen`, `tunnel_count`, `has_seat`, `is_owner`, `can_remove`, `can_rename`, `can_delete`), `guest_accounts[]`, `subscription` (`exists`, `tier`, `status`, `device_count`, `max_devices`, `is_account_owner`).
+
+### device_rename
+Rename a device or change its icon.
+```bash
+curl -s -X POST $API -d "device_rename=1&token=$TOKEN&device_hash=DEVICE_HASH&device_name=NEW_NAME"
+```
+Required: `device_hash`, `device_name`. Optional: `device_icon`.
+
+### device_delete
+Permanently delete a device (removes all tunnels, IPs, and seats).
+```bash
+curl -s -X POST $API -d "device_delete=1&token=$TOKEN&target_device_hash=DEVICE_HASH"
+```
+Required: `target_device_hash`.
+
+---
+
+## IP Addresses
+
+### list_addresses
+List all assigned IP addresses.
+```bash
+curl -s -X POST $API -d "list_addresses=1&token=$TOKEN"
+```
+Returns: `addresses[]` with `address`, `type` (`static_public`/`static_private`/`static_ipv6`), `site_id`, `location`, `profile_id`, `profile_name`, `tunnel_token`, `tunnel_name`, `connected`, `device_name`, `persistent`.
+
+### assign_address
+Assign an IP address to a profile.
+```bash
+curl -s -X POST $API -d "assign_address=1&token=$TOKEN&address=ADDRESS&type=static_public"
+```
+Required: `address`, `type`. Optional: `profile_id` (omit to unassign).
+
+### release_address
+Release an assigned IP address.
+```bash
+curl -s -X POST $API -d "release_address=1&token=$TOKEN&address=ADDRESS&type=static_public"
+```
+Required: `address`, `type`.
+
+### rotate_address
+Rotate to a new IP (releases current, assigns new).
+```bash
+curl -s -X POST $API -d "rotate_address=1&token=$TOKEN&address=ADDRESS&type=static_public"
+```
+Required: `address`, `type`.
+
+### lease_public_ipv4
+Lease a dedicated public IPv4 address.
+```bash
+curl -s -X POST $API -d "lease_public_ipv4=1&token=$TOKEN&profile_name=NAME&profile_icon=ICON&profile_type=wireguard&server=SERVER_HOSTNAME"
+```
+Required: `profile_name`, `profile_icon`, `profile_type`, `server`. Optional: `ip_type` (`ipv6`), `include_ipv6` (1).
+
+---
+
+## Saved Profiles
+
+### list_saved_profiles
+List all saved connection profiles.
+```bash
+curl -s -X POST $API -d "list_saved_profiles=1&token=$TOKEN"
+```
+Returns: `profiles[]` with `profile_id`, `profile_name`, `profile_icon`, `profile_type`, `preferred_server`, `domain_name`, `created_at`, `updated_at`, `ipv4_public_enabled`, `onion_enabled`, `proxy_enabled`, `ip_locked`, `settings_locked`, `in_use`, `in_use_by`, `in_use_device_icon`, `source_tunnel_name`.
+
+### create_saved_profile
+Create a new connection profile.
+```bash
+curl -s -X POST $API -d "create_saved_profile=1&token=$TOKEN&profile_name=NAME&profile_icon=ICON&profile_type=wireguard&server=SERVER_HOSTNAME"
+```
+Required: `profile_name`, `profile_icon`, `profile_type`, `server`.
+
+### rename_saved_config
+Rename a saved profile.
+```bash
+curl -s -X POST $API -d "rename_saved_config=1&token=$TOKEN&profile_id=PROFILE_ID&profile_name=NEW_NAME"
+```
+Required: `profile_id`, `profile_name`.
+
+### update_saved_profile
+Update profile settings.
+```bash
+curl -s -X POST $API -d "update_saved_profile=1&token=$TOKEN&profile_id=PROFILE_ID&preferred_server=SERVER_HOSTNAME"
+```
+Required: `profile_id`. Optional: `profile_icon`, `profile_name`, `preferred_server`.
+
+### delete_saved_config
+Delete a saved profile.
+```bash
+curl -s -X POST $API -d "delete_saved_config=1&token=$TOKEN&profile_id=PROFILE_ID"
+```
+Required: `profile_id`.
+
+### load_profile
+Apply a saved profile to a tunnel.
+```bash
+curl -s -X POST $API -d "load_profile=1&token=$TOKEN&tunnel_token=$TUNNEL&profile_id=PROFILE_ID"
+```
+Required: `tunnel_token`, `profile_id`.
 
 ---
 

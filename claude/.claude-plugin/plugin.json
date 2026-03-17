@@ -1,6 +1,6 @@
 {
   "name": "doxxnet",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "AI skills for setting up and managing doxx.net private networks",
   "author": {
     "name": "doxx.net",

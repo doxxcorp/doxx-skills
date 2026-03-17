@@ -1,9 +1,10 @@
 ---
 name: network-wizard
 description: "Set up a doxx.net private network: tunnels, mesh networking, domains, DNS blocking, and client installation"
-argument-hint: "[number of devices] [server location]"
+version: 1.0.0
+homepage: https://github.com/doxxcorp/doxx-skills
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo wg-quick *), Read, Write
+metadata.openclaw: {"env": ["DOXXNET_TOKEN"], "bins": ["curl", "openssl", "dig", "wg-quick"], "primaryEnv": "DOXXNET_TOKEN"}
 ---
 
 # doxx.net Network Wizard
@@ -18,41 +19,33 @@ You are an interactive wizard that helps users set up a complete doxx.net privat
 
 ## API convention
 
-Token file: `~/.config/doxxnet/token`
-
-**IMPORTANT — avoiding permission prompts:**
-- To read the token: use the `Read` tool on `~/.config/doxxnet/token`. Remember the token value and use it directly in curl commands below (substitute TOKEN with the actual value).
-- To save a token: use the `Write` tool to `~/.config/doxxnet/token`
-- NEVER use Bash for file operations — only `Read` and `Write` tools. Bash is ONLY for `curl` commands.
+Token is provided via `$DOXXNET_TOKEN` environment variable.
 
 **Config API** — POST to `https://config.doxx.net/v1/` with URL-encoded form data:
 ```
-curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=TOKEN"
+curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
 ```
 
 **Stats API** — POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
 ```
-curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: TOKEN" -d "param=value"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: $DOXXNET_TOKEN" -d "param=value"
 ```
-
-Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat ...)` or any subshell.
 
 **Special responses:** `sign_certificate` returns raw PEM (not JSON). `generate_qr` returns binary PNG — use `curl -s ... -o file.png`.
 
 ## Quick start
 
-If the user provided arguments: $ARGUMENTS — parse them for device count and/or server preference, then skip ahead to the relevant phase. If `~/.config/doxxnet/token` exists, skip Phase 1.
+If the user provided arguments: $ARGUMENTS — parse them for device count and/or server preference, then skip ahead to the relevant phase. If `$DOXXNET_TOKEN` is already set and valid, skip Phase 1.
 
 ---
 
 ## Phase 1: Authentication
 
-Use the `Read` tool on `~/.config/doxxnet/token` to check if a token exists. If it does, validate: `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=TOKEN"` (substitute the actual token value)
+Validate `$DOXXNET_TOKEN`: `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=$DOXXNET_TOKEN"`
 
-If no token or validation fails, ask: "Do you have a doxx.net auth token?"
+If `$DOXXNET_TOKEN` is not set or validation fails, tell the user to run `export DOXXNET_TOKEN=your-token` and try again.
 
-**If yes:** validate with `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=THEIR_TOKEN"`. On success, save it with the `Write` tool to `~/.config/doxxnet/token`.
-**If no:** tell them to create one at https://a0x13.doxx.net (human-only, POW required). Offer to wait.
+**If the user doesn't have a token yet:** tell them to create one at https://a0x13.doxx.net (human-only, POW required). Offer to wait.
 
 Warn: "This token is your identity. There are no passwords. Keep it safe."
 
@@ -69,8 +62,8 @@ Present grouped by continent. Ask which server is closest, or suggest based on c
 Ask: "How many devices will be on this network?"
 
 For each device, ask for a name and type, then create:
-- Desktop/server: `curl -s -X POST ... -d "create_tunnel=1&server=HOST&name=NAME&token=..."`
-- Mobile: `curl -s -X POST ... -d "create_tunnel_mobile=1&server=HOST&name=NAME&device_type=mobile&token=..."`
+- Desktop/server: `curl -s -X POST ... -d "create_tunnel=1&server=HOST&name=NAME&token=$DOXXNET_TOKEN"`
+- Mobile: `curl -s -X POST ... -d "create_tunnel_mobile=1&server=HOST&name=NAME&device_type=mobile&token=$DOXXNET_TOKEN"`
 
 List all tunnels to confirm: `list_tunnels=1`
 
@@ -106,7 +99,7 @@ Ask: "Which devices do you want to set up now?"
 
 For each device, get config with `wireguard=1&tunnel_token=TT`, build a .conf file.
 
-**macOS:** Write to `/etc/wireguard/doxx.conf`, run `sudo wg-quick up doxx`
+**macOS:** Write the config to `/etc/wireguard/doxx.conf` using shell commands, then run `sudo wg-quick up doxx`
 **iOS/Android:** Generate QR code with `curl -s -X POST ... -d "generate_qr=1&data=CONFIG" -o doxx-qr.png`, scan in WireGuard app
 
 ## Phase 8: Secure DNS (optional)

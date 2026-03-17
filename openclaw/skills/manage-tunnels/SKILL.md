@@ -1,9 +1,10 @@
 ---
 name: manage-tunnels
 description: "Manage doxx.net tunnels: create, update, move, delete devices and get WireGuard configs"
-argument-hint: "[action] [tunnel name]"
+version: 1.0.0
+homepage: https://github.com/doxxcorp/doxx-skills
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo wg-quick *), Read, Write
+metadata.openclaw: {"env": ["DOXXNET_TOKEN"], "bins": ["curl", "openssl", "dig", "wg-quick"], "primaryEnv": "DOXXNET_TOKEN"}
 ---
 
 # Manage doxx.net Tunnels
@@ -14,21 +15,12 @@ User request: $ARGUMENTS
 
 ## API convention
 
-Token file: `~/.config/doxxnet/token`
-
-**IMPORTANT — avoiding permission prompts:**
-- To read the token: use the `Read` tool on `~/.config/doxxnet/token`. Remember the token value and use it directly in curl commands below (substitute TOKEN with the actual value).
-- To save a token: use the `Write` tool to `~/.config/doxxnet/token`
-- NEVER use Bash for file operations — only `Read` and `Write` tools. Bash is ONLY for `curl` commands.
-
-If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it with the `Write` tool.
+Token is provided via `$DOXXNET_TOKEN` environment variable.
 
 **Config API** — POST to `https://config.doxx.net/v1/`:
 ```
-curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=TOKEN"
+curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
 ```
-
-Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat ...)` or any subshell.
 
 ## Endpoints
 

@@ -1,9 +1,10 @@
 ---
 name: doxxnet
 description: "Manage your doxx.net private network: tunnels, devices, firewall, domains, DNS blocking, IP addresses, profiles, account settings, bandwidth stats, and security alerts"
-argument-hint: "[what you want to do]"
+version: 1.0.0
+homepage: https://github.com/doxxcorp/doxx-skills
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo wg-quick *), Read, Write
+metadata.openclaw: {"env": ["DOXXNET_TOKEN"], "bins": ["curl", "openssl", "dig", "wg-quick"], "primaryEnv": "DOXXNET_TOKEN"}
 ---
 
 # doxx.net
@@ -14,26 +15,17 @@ User request: $ARGUMENTS
 
 ## API convention
 
-Token file: `~/.config/doxxnet/token`
-
-**IMPORTANT — avoiding permission prompts:**
-- To read the token: use the `Read` tool on `~/.config/doxxnet/token`. Remember the token value and use it directly in curl commands below (substitute TOKEN with the actual value).
-- To save a token: use the `Write` tool to `~/.config/doxxnet/token`
-- NEVER use Bash for file operations — only `Read` and `Write` tools. Bash is ONLY for `curl` commands.
-
-If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it with the `Write` tool.
+Token is provided via `$DOXXNET_TOKEN` environment variable. All curl commands use it directly.
 
 **Config API** — POST to `https://config.doxx.net/v1/`:
 ```
-curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=TOKEN"
+curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
 ```
 
 **Stats API** — POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
 ```
-curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: TOKEN" -d "param=value"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: $DOXXNET_TOKEN" -d "param=value"
 ```
-
-Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat ...)` or any subshell.
 
 **Special responses:** `sign_certificate` returns raw PEM (not JSON). `generate_qr` returns binary PNG — use `curl -s ... -o file.png`.
 
@@ -138,19 +130,19 @@ DeviceInfo fields: device_hash, device_name, device_model, os_type, device_type,
 
 - `bandwidth` — usage over time. Params: `start`, `end` (ISO 8601), optional: `tunnel_token`
   ```
-  curl -s -X POST https://secure-wss.doxx.net/api/stats/bandwidth -H "X-Auth-Token: TOKEN" -d "start=ISO8601&end=ISO8601"
+  curl -s -X POST https://secure-wss.doxx.net/api/stats/bandwidth -H "X-Auth-Token: $DOXXNET_TOKEN" -d "start=ISO8601&end=ISO8601"
   ```
   Returns: `data[]` with `peak_in`/`peak_out` (Mbps), `aggregate[]`
 
 - `alerts` — security alerts and DNS blocks. Params: `last` (session/1m/1h/1d/7d/30d), optional: `tunnel_token`, `type`
   ```
-  curl -s -X POST https://secure-wss.doxx.net/api/stats/alerts -H "X-Auth-Token: TOKEN" -d "last=1d"
+  curl -s -X POST https://secure-wss.doxx.net/api/stats/alerts -H "X-Auth-Token: $DOXXNET_TOKEN" -d "last=1d"
   ```
   Returns: `totals`, `block_count`, `category_counts` (ads, tracking, malware), `data[]`
 
 - `summary` — peak bandwidth + alert totals. Params: `days` (default: 30), optional: `tunnel_token`
   ```
-  curl -s -X POST https://secure-wss.doxx.net/api/stats/summary -H "X-Auth-Token: TOKEN" -d "days=30"
+  curl -s -X POST https://secure-wss.doxx.net/api/stats/summary -H "X-Auth-Token: $DOXXNET_TOKEN" -d "days=30"
   ```
 
 - `global` — global threat counter (no auth, GET only)

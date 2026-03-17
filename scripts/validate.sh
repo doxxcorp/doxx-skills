@@ -242,6 +242,101 @@ print(' '.join(missing))
   fi
 done
 
+# ─── OpenClaw skills ─────────────────────────────────────────────────────────
+
+OPENCLAW_DIR="$REPO_ROOT/openclaw/skills"
+
+if [[ -d "$OPENCLAW_DIR" ]]; then
+  section "OpenClaw skills"
+
+  for skill_dir in "$OPENCLAW_DIR"/*/; do
+    skill_name="$(basename "$skill_dir")"
+    skill_md="$skill_dir/SKILL.md"
+
+    if [[ ! -f "$skill_md" ]]; then
+      fail "openclaw/$skill_name: missing SKILL.md"
+      continue
+    fi
+
+    # Check starts with ---
+    if head -1 "$skill_md" | grep -q '^---$'; then
+      pass "openclaw/$skill_name: has frontmatter"
+    else
+      fail "openclaw/$skill_name: missing frontmatter (must start with ---)"
+      continue
+    fi
+
+    # Extract frontmatter
+    frontmatter=$(sed -n '2,/^---$/p' "$skill_md" | sed '$d')
+
+    fm_name=$(echo "$frontmatter" | grep '^name:' | sed 's/^name: *//' || true)
+    fm_desc=$(echo "$frontmatter" | grep '^description:' | sed 's/^description: *//' || true)
+    fm_meta=$(echo "$frontmatter" | grep '^metadata\.openclaw:' | sed 's/^metadata\.openclaw: *//' || true)
+
+    if [[ -n "$fm_name" ]]; then
+      pass "openclaw/$skill_name: has name ($fm_name)"
+    else
+      fail "openclaw/$skill_name: missing name field"
+    fi
+
+    if [[ -n "$fm_desc" ]]; then
+      desc_len=${#fm_desc}
+      if [[ $desc_len -le 200 ]]; then
+        pass "openclaw/$skill_name: description ok ($desc_len chars)"
+      else
+        fail "openclaw/$skill_name: description too long ($desc_len > 200 chars)"
+      fi
+    else
+      fail "openclaw/$skill_name: missing description field"
+    fi
+
+    # Check name matches directory
+    if [[ "$fm_name" == "$skill_name" ]]; then
+      pass "openclaw/$skill_name: name matches directory"
+    else
+      fail "openclaw/$skill_name: name '$fm_name' doesn't match directory"
+    fi
+
+    # Check metadata.openclaw is present and valid JSON
+    if [[ -n "$fm_meta" ]]; then
+      if python3 -c "import json; json.loads('$fm_meta')" 2>/dev/null; then
+        pass "openclaw/$skill_name: metadata.openclaw valid JSON"
+      else
+        fail "openclaw/$skill_name: metadata.openclaw invalid JSON"
+      fi
+    else
+      fail "openclaw/$skill_name: missing metadata.openclaw"
+    fi
+
+    # API consistency for OpenClaw skills
+    skill_endpoints_curl=$(grep -o '"[a-z_]*=1' "$skill_md" 2>/dev/null | sed 's/^"//; s/=1$//' | sort -u || true)
+    skill_endpoints_list=$(grep -oE '^\- `[a-z_]+`' "$skill_md" 2>/dev/null | sed 's/^- `//; s/`$//' | sort -u || true)
+    oc_all_endpoints=$(printf "%s\n%s" "$skill_endpoints_curl" "$skill_endpoints_list" | sort -u)
+
+    for ep in $oc_all_endpoints; do
+      [[ -z "$ep" ]] && continue
+      case "$ep" in
+        enabled|apply_to_all) continue ;;
+      esac
+
+      if echo "$ref_endpoints" | grep -qx "$ep"; then
+        pass "openclaw/$skill_name: $ep in reference"
+      else
+        fail "openclaw/$skill_name: $ep not found in api/reference.md"
+      fi
+    done
+  done
+
+  # Check OpenClaw skill count matches Claude skill count
+  claude_count=$(find "$SKILLS_DIR" -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')
+  openclaw_count=$(find "$OPENCLAW_DIR" -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')
+  if [[ "$claude_count" -eq "$openclaw_count" ]]; then
+    pass "openclaw skill count ($openclaw_count) matches claude ($claude_count)"
+  else
+    fail "openclaw skill count ($openclaw_count) != claude ($claude_count)"
+  fi
+fi
+
 # ─── Summary ─────────────────────────────────────────────────────────────────
 
 echo ""
