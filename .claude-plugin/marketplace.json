@@ -14,24 +14,9 @@
       "author": {
         "name": "doxx.net"
       },
-      "source": "./plugins/doxxnet",
+      "source": "./",
       "category": "networking",
-      "license": "MIT",
-      "homepage": "https://github.com/doxxcorp/doxx-skills",
-      "keywords": ["doxx", "doxxnet", "wireguard", "tunnel", "private-network", "dns-blocking", "mesh-networking", "device-management", "ip-addresses"],
-      "commands": [
-        "./claude/skills/doxxnet/",
-        "./claude/skills/network-wizard/",
-        "./claude/skills/manage-tunnels/",
-        "./claude/skills/manage-domains/",
-        "./claude/skills/manage-firewall/",
-        "./claude/skills/manage-dns-blocking/",
-        "./claude/skills/manage-devices/",
-        "./claude/skills/manage-addresses/",
-        "./claude/skills/manage-account/",
-        "./claude/skills/network-status/",
-        "./claude/skills/network-stats/"
-      ]
+      "homepage": "https://github.com/doxxcorp/doxx-skills"
     }
   ]
 }

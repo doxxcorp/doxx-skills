@@ -25,7 +25,7 @@ EXPECTED_FILES=(
   README.md
   LICENSE
   api/reference.md
-  plugins/doxxnet/.claude-plugin/plugin.json
+  .claude-plugin/plugin.json
 )
 
 for f in "${EXPECTED_FILES[@]}"; do
@@ -48,7 +48,7 @@ done < <(find "$REPO_ROOT" -name '*.md' -not -path '*/.git/*' -not -path '*/.ven
 
 section "plugin.json"
 
-PLUGIN="$REPO_ROOT/plugins/doxxnet/.claude-plugin/plugin.json"
+PLUGIN="$REPO_ROOT/.claude-plugin/plugin.json"
 
 if python3 -c "import json; json.load(open('$PLUGIN'))" 2>/dev/null; then
   pass "valid JSON"
@@ -56,7 +56,7 @@ else
   fail "invalid JSON"
 fi
 
-for field in name version description; do
+for field in name version description commands; do
   if python3 -c "import json; d=json.load(open('$PLUGIN')); assert '$field' in d" 2>/dev/null; then
     pass "has .$field"
   else
@@ -64,8 +64,7 @@ for field in name version description; do
   fi
 done
 
-# Check that every command path in marketplace.json has a SKILL.md
-MARKETPLACE="$REPO_ROOT/.claude-plugin/marketplace.json"
+# Check that every command path in plugin.json has a SKILL.md
 while IFS= read -r cmd_path; do
   # Strip leading ./ if present
   cmd_path="${cmd_path#./}"
@@ -73,11 +72,11 @@ while IFS= read -r cmd_path; do
   cmd_path="${cmd_path%/}"
   skill_md="$REPO_ROOT/$cmd_path/SKILL.md"
   if [[ -f "$skill_md" ]]; then
-    pass "marketplace.json → $cmd_path/SKILL.md exists"
+    pass "plugin.json → $cmd_path/SKILL.md exists"
   else
-    fail "marketplace.json → $cmd_path/SKILL.md not found"
+    fail "plugin.json → $cmd_path/SKILL.md not found"
   fi
-done < <(python3 -c "import json; m=json.load(open('$MARKETPLACE')); [print(c) for p in m['plugins'] for c in p.get('commands', [])]")
+done < <(python3 -c "import json; [print(c) for c in json.load(open('$PLUGIN'))['commands']]")
 
 # ─── SKILL.md frontmatter ────────────────────────────────────────────────────
 

@@ -36,7 +36,7 @@ allowed-tools: Bash(curl *), Read, Write
 ```
 
 5. If your skill references API endpoints, ensure they are documented in `api/reference.md`.
-6. Register the skill in `plugins/doxxnet/.claude-plugin/plugin.json` under the `commands` array.
+6. Register the skill in `.claude-plugin/plugin.json` under the `commands` array.
 7. If adding an OpenClaw version, create a matching `openclaw/skills/your-skill-name/SKILL.md`.
 
 ## Running Validation
