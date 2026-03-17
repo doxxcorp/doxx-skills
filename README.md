@@ -91,7 +91,15 @@ No secrets are stored in this repo. Your token stays on your machine.
 ## TODO
 
 - [ ] Make repo public and switch install instructions to marketplace: `/plugin marketplace add doxxcorp/doxx-skills` + `/plugin install doxxnet`
-- [ ] Uninstall only works for "Install for you" (user scope). "Install for this project" and "Install locally" fail to uninstall from the UI. Workaround: `claude plugin uninstall doxxnet@doxx-skills --scope <scope>`
+
+## Known Limitations
+
+- **Uninstall only works for user scope from the UI.** "Install for this project" and "Install locally" cannot be uninstalled from the `/plugin` UI due to [upstream scope-tracking bugs](https://github.com/anthropics/claude-code/issues/14202) in Claude Code's plugin system ([#14202](https://github.com/anthropics/claude-code/issues/14202), [#26513](https://github.com/anthropics/claude-code/issues/26513), [#25613](https://github.com/anthropics/claude-code/issues/25613)). Use the CLI as a workaround:
+
+  ```bash
+  claude plugin uninstall doxxnet@doxx-skills --scope project
+  claude plugin uninstall doxxnet@doxx-skills --scope local
+  ```
 
 ## License
 
