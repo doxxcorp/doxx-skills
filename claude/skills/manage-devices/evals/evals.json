@@ -1,0 +1,50 @@
+{
+  "skill_name": "manage-devices",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Show me all my devices",
+      "expected_output": "Lists all devices with status and subscription info",
+      "expectations": [
+        "Calls device_list_unified with the user's auth token",
+        "Displays device name, model, OS, online status, tunnel count, and seat status",
+        "Shows subscription tier and device_count/max_devices",
+        "Groups guest accounts separately if present"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Rename my MacBook to Work Laptop",
+      "expected_output": "Finds the MacBook device and renames it to Work Laptop",
+      "expectations": [
+        "Calls device_list_unified to find the MacBook's device_hash",
+        "Checks can_rename flag before proceeding",
+        "Calls device_rename with the correct device_hash and device_name=Work Laptop",
+        "Confirms the rename was successful"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Change the icon on my iPhone",
+      "expected_output": "Finds the iPhone and updates its icon",
+      "expectations": [
+        "Calls device_list_unified to find the iPhone's device_hash",
+        "Asks the user what icon they want or suggests options",
+        "Calls device_rename with device_hash and device_icon parameter",
+        "Confirms the icon change was successful"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Delete my old iPad from the network",
+      "expected_output": "Finds the iPad, confirms deletion, and removes it",
+      "expectations": [
+        "Calls device_list_unified to find the iPad's device_hash",
+        "Checks can_delete flag before proceeding",
+        "Warns user that deletion is permanent and removes tunnels, IPs, and seats",
+        "Asks for confirmation before proceeding",
+        "Calls device_delete with the correct target_device_hash"
+      ]
+    }
+  ]
+}

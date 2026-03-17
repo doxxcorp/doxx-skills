@@ -1,6 +1,6 @@
 {
   "name": "doxxnet",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "AI skills for setting up and managing doxx.net private networks",
   "author": {
     "name": "doxx.net",
@@ -9,7 +9,7 @@
   "homepage": "https://github.com/doxxcorp/doxx-skills",
   "repository": "https://github.com/doxxcorp/doxx-skills",
   "license": "MIT",
-  "keywords": ["doxx", "doxxnet", "wireguard", "tunnel", "private-network", "dns-blocking", "mesh-networking"],
+  "keywords": ["doxx", "doxxnet", "wireguard", "tunnel", "private-network", "dns-blocking", "mesh-networking", "device-management", "ip-addresses"],
   "commands": [
     "./skills/doxxnet/",
     "./skills/network-wizard/",
@@ -17,6 +17,9 @@
     "./skills/manage-domains/",
     "./skills/manage-firewall/",
     "./skills/manage-dns-blocking/",
+    "./skills/manage-devices/",
+    "./skills/manage-addresses/",
+    "./skills/manage-account/",
     "./skills/network-status/",
     "./skills/network-stats/"
   ]

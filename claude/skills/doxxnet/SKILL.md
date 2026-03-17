@@ -1,6 +1,6 @@
 ---
 name: doxxnet
-description: "Manage your doxx.net private network: tunnels, firewall, domains, DNS blocking, bandwidth stats, and security alerts"
+description: "Manage your doxx.net private network: tunnels, devices, firewall, domains, DNS blocking, IP addresses, profiles, account settings, bandwidth stats, and security alerts"
 argument-hint: "[what you want to do]"
 user-invocable: true
 allowed-tools: Bash(curl *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo *), Read, Write
@@ -102,6 +102,38 @@ TLS workflow: `openssl ecparam -genkey -name prime256v1 -o D.key` → `openssl r
 - `public_dns_create_hash` — create hash. Params: `tunnel_token`
 - `public_dns_list_hashes` / `public_dns_delete_hash` (params: `host_hash`)
 
+## Devices
+
+- `device_list_unified` — list all devices with subscription info and guest accounts. Returns: `my_devices[]`, `guest_accounts[]`, `subscription`
+- `device_rename` — rename or change icon. Params: `device_hash`, `device_name`. Optional: `device_icon`
+- `device_delete` — permanently delete device (removes tunnels, IPs, seats). Params: `target_device_hash`
+
+DeviceInfo fields: device_hash, device_name, device_model, os_type, device_type, device_icon, is_current, is_online, last_seen, tunnel_count, has_seat, is_owner, can_remove, can_rename, can_delete
+
+## IP Addresses
+
+- `list_addresses` — list assigned IPs with type, location, tunnel, profile, connection status
+- `assign_address` — assign IP to profile. Params: `address`, `type`. Optional: `profile_id`
+- `release_address` — release IP. Params: `address`, `type`
+- `rotate_address` — rotate to new IP. Params: `address`, `type`
+- `lease_public_ipv4` — lease dedicated public IPv4. Params: `profile_name`, `profile_icon`, `profile_type`, `server`. Optional: `ip_type`, `include_ipv6`
+
+## Saved Profiles
+
+- `list_saved_profiles` — list profiles with settings and usage status
+- `create_saved_profile` — create. Params: `profile_name`, `profile_icon`, `profile_type`, `server`
+- `rename_saved_config` — rename. Params: `profile_id`, `profile_name`
+- `update_saved_profile` — update. Params: `profile_id`, and: `profile_icon`, `profile_name`, `preferred_server`
+- `delete_saved_config` — delete. Params: `profile_id`
+- `load_profile` — apply profile to tunnel. Params: `tunnel_token`, `profile_id`
+
+## Account
+
+- `get_profile` — get recovery email/phone, notification preferences, recovery code count
+- `update_profile` — update. Params: `recovery_email`, `recovery_phone`, `notifications`
+- `create_account_recovery` — generate recovery codes. Returns: `codes[]`
+- `subscription_status` — check subscription tier, status, pro features
+
 ## Stats
 
 - `bandwidth` — usage over time. Params: `start`, `end` (ISO 8601), optional: `tunnel_token`
@@ -134,6 +166,10 @@ Time range shortcuts: "last hour" → `last=1h`, "today" → `last=1d`, "this we
 
 - Always list current state before making changes (`list_tunnels`, `list_domains`, `firewall_rule_list`)
 - Call `list_tunnels` when you need tunnel names, IPs, or tokens
+- Call `device_list_unified` when you need device info
+- Call `list_addresses` for IP address queries
+- Call `list_saved_profiles` for profile queries
+- Confirm before device deletion and address release
 - Confirm with user before destructive operations (delete tunnel, delete domain)
 - Present stats in clear tables — convert bandwidth to Mbps, group alerts by category
 - For multi-tunnel users, offer to filter by tunnel or show all

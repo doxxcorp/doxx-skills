@@ -1,0 +1,60 @@
+{
+  "skill_name": "manage-addresses",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Show me all my IP addresses",
+      "expected_output": "Lists all IPs grouped by type with tunnel, location, and connection status",
+      "expectations": [
+        "Calls list_addresses with the user's auth token",
+        "Groups addresses by type (static_public, static_private, static_ipv6)",
+        "Shows address, location, tunnel name, connection status, and persistence",
+        "Presents output in a readable table format"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Get me a dedicated public IP on the London server",
+      "expected_output": "Leases a dedicated public IPv4 on the London server",
+      "expectations": [
+        "Calls servers endpoint to find the London server hostname",
+        "Calls lease_public_ipv4 with the correct server and profile params",
+        "Explains that the dedicated IP persists across reconnections",
+        "Shows the newly assigned IP address"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Rotate my public IP",
+      "expected_output": "Rotates the user's public IP to a new address",
+      "expectations": [
+        "Calls list_addresses to find the current public IP",
+        "Warns user that the old IP will be released and a new one assigned",
+        "Asks for confirmation before rotating",
+        "Calls rotate_address with the correct address and type"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Create a profile called Gaming and apply it to my desktop tunnel",
+      "expected_output": "Creates a Gaming profile and applies it to the desktop tunnel",
+      "expectations": [
+        "Calls servers to list available servers for the user to choose",
+        "Calls create_saved_profile with profile_name=Gaming",
+        "Calls list_tunnels to find the desktop tunnel's tunnel_token",
+        "Calls load_profile with the tunnel_token and new profile_id"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Show my saved profiles and delete the unused one",
+      "expected_output": "Lists profiles and deletes the unused profile after confirmation",
+      "expectations": [
+        "Calls list_saved_profiles to list all profiles",
+        "Identifies profiles where in_use is false",
+        "Asks user to confirm which profile to delete",
+        "Calls delete_saved_config with the correct profile_id"
+      ]
+    }
+  ]
+}

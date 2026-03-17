@@ -43,6 +43,39 @@
         "Calls /api/stats/summary for peak stats",
         "Presents a unified dashboard-style summary"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "Show me all my devices and which ones are online",
+      "expected_output": "Lists all devices with online/offline status",
+      "expectations": [
+        "Calls device_list_unified with the user's auth token",
+        "Shows each device with name, model, OS, and online status",
+        "Highlights which devices are currently online",
+        "Shows subscription device count"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Show me my IP addresses and rotate my public one",
+      "expected_output": "Lists IPs and rotates the public address",
+      "expectations": [
+        "Calls list_addresses to show all assigned IPs",
+        "Identifies the static_public address",
+        "Warns that rotation releases the old IP",
+        "Calls rotate_address with the correct address and type"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "What subscription am I on and generate recovery codes",
+      "expected_output": "Shows subscription status and generates recovery codes",
+      "expectations": [
+        "Calls subscription_status to show tier and features",
+        "Calls create_account_recovery to generate new codes",
+        "Displays recovery codes with security warning",
+        "Reminds user to save codes securely"
+      ]
     }
   ]
 }

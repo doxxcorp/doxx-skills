@@ -1,0 +1,46 @@
+{
+  "skill_name": "manage-account",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Show me my account settings",
+      "expected_output": "Shows account profile and subscription status",
+      "expectations": [
+        "Calls get_profile to show recovery email, phone, and notification settings",
+        "Calls subscription_status to show current tier and features",
+        "Presents both profile and subscription info in a clear format"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Set my recovery email to me@example.com",
+      "expected_output": "Updates the recovery email after showing current settings",
+      "expectations": [
+        "Calls get_profile to show current recovery settings",
+        "Calls update_profile with recovery_email=me@example.com",
+        "Confirms the update was successful"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Generate recovery codes",
+      "expected_output": "Generates and displays recovery codes with security warning",
+      "expectations": [
+        "Calls create_account_recovery to generate new codes",
+        "Displays codes clearly for the user to save",
+        "Strongly warns user to save codes securely",
+        "Reminds user that doxx.net has no passwords and these codes are their backup"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "What subscription plan am I on?",
+      "expected_output": "Shows subscription tier and pro features",
+      "expectations": [
+        "Calls subscription_status with the user's auth token",
+        "Shows tier, status, expiry date, and auto-renew status",
+        "Explains what the current tier includes using pro_features map"
+      ]
+    }
+  ]
+}
