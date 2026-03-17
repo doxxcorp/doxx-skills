@@ -98,6 +98,39 @@ The same 11 skills ported for [OpenClaw](https://openclaw.org). Uses `$DOXXNET_T
 
 - **api/reference.md**: Every doxx.net API endpoint with curl examples — works with any AI agent or can be followed manually
 
+## Examples
+
+```
+Set up a new tunnel in New York and install WireGuard on my Mac
+```
+```
+Make a profile and lease an IPv4 address and apply the profile to my iPhone tunnel
+```
+```
+Show me my bandwidth usage for the last 7 days and any security alerts
+```
+```
+Block ads and tracking on all my tunnels
+```
+```
+Add a firewall rule to open port 443 TCP on my home tunnel
+```
+```
+Register a .vpn domain and create an A record pointing to my tunnel IP
+```
+```
+Link all my tunnels together for mesh networking
+```
+```
+Show me which devices are connected and when they last checked in
+```
+```
+Rotate my static IP address and update any DNS records that reference it
+```
+```
+Generate a WireGuard QR code for my iPhone tunnel
+```
+
 ## How It Works
 
 doxx.net is anonymous by design. There are no usernames, passwords, or emails. Your auth token **is** your identity.
