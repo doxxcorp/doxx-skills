@@ -44,7 +44,7 @@ Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat 
 - `create_saved_profile` — create a profile. Params: `profile_name`, `profile_icon`, `profile_type` (wireguard), `server`
 - `rename_saved_config` — rename. Params: `profile_id`, `profile_name`
 - `update_saved_profile` — update settings. Params: `profile_id`. Optional: `profile_icon`, `profile_name`, `preferred_server`
-- `delete_saved_config` — delete. Params: `profile_id`
+- `delete_saved_profile` — delete. Params: `profile_id`
 - `load_profile` — apply a profile to a tunnel. Params: `tunnel_token`, `profile_id`
 
 ## Context Endpoints

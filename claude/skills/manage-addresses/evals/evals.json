@@ -53,7 +53,7 @@
         "Calls list_saved_profiles to list all profiles",
         "Identifies profiles where in_use is false",
         "Asks user to confirm which profile to delete",
-        "Calls delete_saved_config with the correct profile_id"
+        "Calls delete_saved_profile with the correct profile_id"
       ]
     }
   ]

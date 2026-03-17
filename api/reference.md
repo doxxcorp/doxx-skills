@@ -244,10 +244,10 @@ curl -s -X POST $API -d "update_saved_profile=1&token=$TOKEN&profile_id=PROFILE_
 ```
 Required: `profile_id`. Optional: `profile_icon`, `profile_name`, `preferred_server`.
 
-### delete_saved_config
+### delete_saved_profile
 Delete a saved profile.
 ```bash
-curl -s -X POST $API -d "delete_saved_config=1&token=$TOKEN&profile_id=PROFILE_ID"
+curl -s -X POST $API -d "delete_saved_profile=1&token=$TOKEN&profile_id=PROFILE_ID"
 ```
 Required: `profile_id`.
 
