@@ -25,7 +25,7 @@ EXPECTED_FILES=(
   README.md
   LICENSE
   api/reference.md
-  .claude-plugin/plugin.json
+  plugins/doxxnet/.claude-plugin/plugin.json
 )
 
 for f in "${EXPECTED_FILES[@]}"; do
@@ -48,7 +48,7 @@ done < <(find "$REPO_ROOT" -name '*.md' -not -path '*/.git/*' -not -path '*/.ven
 
 section "plugin.json"
 
-PLUGIN="$REPO_ROOT/.claude-plugin/plugin.json"
+PLUGIN="$REPO_ROOT/plugins/doxxnet/.claude-plugin/plugin.json"
 
 if python3 -c "import json; json.load(open('$PLUGIN'))" 2>/dev/null; then
   pass "valid JSON"
@@ -65,12 +65,12 @@ for field in name version description commands; do
 done
 
 # Check that every command path in plugin.json has a SKILL.md
+PLUGIN_DIR="$(dirname "$(dirname "$PLUGIN")")"
 while IFS= read -r cmd_path; do
-  # Strip leading ./ if present
-  cmd_path="${cmd_path#./}"
   # Strip trailing / if present
   cmd_path="${cmd_path%/}"
-  skill_md="$REPO_ROOT/$cmd_path/SKILL.md"
+  # Resolve relative to plugin directory
+  skill_md="$(cd "$PLUGIN_DIR" && cd "$(dirname "$cmd_path")" && pwd)/$(basename "$cmd_path")/SKILL.md"
   if [[ -f "$skill_md" ]]; then
     pass "plugin.json → $cmd_path/SKILL.md exists"
   else
