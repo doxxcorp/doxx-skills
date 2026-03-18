@@ -42,11 +42,12 @@ Always check the `status` field in JSON responses — HTTP 200 can still be an e
 ## Tunnels
 
 - `list_tunnels` — list all tunnels with IPs, servers, connection status
-- `create_tunnel` — params: `server` (required), `name`
-- `create_tunnel_mobile` — params: `server`, `name`, `device_type` (mobile/web)
+- `create_tunnel` — create a generic WireGuard tunnel (desktop/server). Params: `server` (required), `name`
+- `create_tunnel_mobile` — create a generic WireGuard mobile tunnel (non-native clients). Params: `server`, `name`, `device_type` (mobile/web)
+- `create_native_tunnel` — create/refresh a tunnel for the doxx.net native iOS/Android app (build 555+). Enforces subscription. Params: same as `create_tunnel_mobile`. NOTE: native app tunnels do NOT use WireGuard QR codes — the app manages its own connection.
 - `update_tunnel` — params: `tunnel_token` (required), `name`, `server`, `firewall`, `ipv6_enabled`, `block_bad_dns`
 - `delete_tunnel` — params: `tunnel_token` (permanent, confirm first)
-- `wireguard` — get WireGuard config. Params: `tunnel_token`
+- `wireguard` — get WireGuard config (generic WireGuard tunnels only — do NOT call on native tunnels). Params: `tunnel_token`
 - `disconnect_peer` — force-disconnect. Params: `tunnel_token`
 - `servers` — list available servers (no auth)
 - `generate_qr` — QR code (binary PNG, no auth). Params: `data`, optional: `size`. Use `-o file.png`
@@ -64,7 +65,7 @@ AllowedIPs = {allowed_ips}
 Endpoint = {endpoint}
 PersistentKeepalive = 25
 ```
-macOS: write to `/etc/wireguard/doxx.conf`, run `sudo wg-quick up doxx`. iOS/Android: generate QR, scan in WireGuard app.
+macOS: write to `/etc/wireguard/doxx.conf`, run `sudo wg-quick up doxx`. iOS/Android (generic WireGuard client): generate QR, scan in WireGuard app.
 
 ## Firewall
 
@@ -162,6 +163,11 @@ Alert types: `dns_block`, `security_event`, `dangerous_port`, `dns_bypass`, `doh
 Time range shortcuts: "last hour" → `last=1h`, "today" → `last=1d`, "this week" → `last=7d`, "this month" → `last=30d`
 
 ## Guidelines
+
+**Tunnel type guide — important:**
+- doxx.net native iOS/Android app → `create_native_tunnel`. No WireGuard config or QR code needed/produced.
+- Generic WireGuard client (any platform, WireGuard app, etc.) → `create_tunnel` or `create_tunnel_mobile`, then `wireguard` to fetch config, then `generate_qr` for QR code.
+- Never call `wireguard` on a native tunnel — it will fail. If a user asks for a WireGuard QR and has a native tunnel, clarify which type they need.
 
 - Always list current state before making changes (`list_tunnels`, `list_domains`, `firewall_rule_list`)
 - Call `list_tunnels` when you need tunnel names, IPs, or tokens
