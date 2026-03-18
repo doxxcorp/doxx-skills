@@ -125,6 +125,13 @@ curl -s -X POST $API -d "create_tunnel_mobile=1&token=$TOKEN&server=SERVER_HOSTN
 Optional: `device_hash`, `device_type` (`mobile`, `desktop`, `server`, `web`).
 Returns: `tunnel_token`, `assigned_ip`, `assigned_v6`, `public_key`, `private_key`.
 
+### create_native_tunnel
+```bash
+curl -s -X POST $API -d "create_native_tunnel=1&token=$TOKEN&device_hash=DEVICE_HASH&server=SERVER_HOSTNAME&device_type=mobile"
+```
+Required: `device_hash` (from `device_list_unified` or `list_tunnels`), `server`, `device_type` (`mobile`, `web`). Optional: `name`.
+Creates/refreshes a tunnel for the doxx.net native iOS/Android app (build 555+). Enforces subscription. Does NOT use WireGuard QR codes — the app manages its own connection. Clears `active_profile_id` on the tunnel.
+
 ### update_tunnel
 ```bash
 curl -s -X POST $API -d "update_tunnel=1&token=$TOKEN&tunnel_token=$TUNNEL&name=NEW_NAME"
