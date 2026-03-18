@@ -35,7 +35,7 @@ Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat 
 - `list_tunnels` — list all tunnels with IPs, servers, and connection status
 - `create_tunnel` — create a generic WireGuard tunnel (desktop/server). Params: `server` (required), `name`
 - `create_tunnel_mobile` — create a generic WireGuard mobile tunnel (non-native clients). Params: `server`, `name`, `device_type` (mobile/web)
-- `create_native_tunnel` — create/refresh a tunnel for the doxx.net native iOS/Android app (build 555+). Enforces subscription. Params: same as `create_tunnel_mobile`. NOTE: native app tunnels do NOT use WireGuard QR codes — the app manages its own connection.
+- `create_native_tunnel` — create/refresh a tunnel for the doxx.net native iOS/Android app (build 555+). Enforces subscription. Required params: `device_hash` (from `device_list_unified` or `list_tunnels`), `server`, `device_type` (mobile/web). Optional: `name`. NOTE: native app tunnels do NOT use WireGuard QR codes — the app manages its own connection. Clears `active_profile_id` on the tunnel.
 - `update_tunnel` — update settings. Params: `tunnel_token` (required), `name`, `server`, `firewall`, `ipv6_enabled`, `block_bad_dns`
 - `delete_tunnel` — delete a tunnel (permanent). Params: `tunnel_token`
 - `wireguard` — get WireGuard config (generic WireGuard tunnels only — do NOT call on native tunnels). Params: `tunnel_token`
@@ -66,9 +66,10 @@ PersistentKeepalive = 25
 ## Guidelines
 
 **Tunnel type guide — important:**
-- doxx.net native iOS/Android app → `create_native_tunnel`. No WireGuard config or QR code needed/produced.
-- Generic WireGuard client (any platform, WireGuard app, etc.) → `create_tunnel` or `create_tunnel_mobile`, then `wireguard` to fetch config, then `generate_qr` for QR code.
-- Never call `wireguard` on a native tunnel — it will fail. If a user asks for a WireGuard QR and has a native tunnel, clarify which type they need.
+- doxx.net native iOS/Android app → `create_native_tunnel` (requires `device_hash` from `device_list_unified` or `list_tunnels`). No WireGuard config or QR code needed — app handles connection. The tunnel record `type` field will still show `"wireguard"` (the protocol); the "native" distinction is at the client level, not the record.
+- Generic WireGuard client (WireGuard app, any platform) → `create_tunnel` or `create_tunnel_mobile`, then `wireguard` to fetch config, then `generate_qr` for QR code.
+- Never call `wireguard` endpoint on a native-app tunnel — it will fail if `assigned_ip` is NULL. If a user asks for a WireGuard QR and they have a native tunnel, clarify which type they need.
+- `create_native_tunnel` clears `active_profile_id` on the tunnel — do not apply profiles after calling it.
 
 - Always list tunnels first to show current state before making changes
 - When creating tunnels, suggest the nearest server based on the user's context
