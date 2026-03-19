@@ -60,6 +60,24 @@ export DOXXNET_TOKEN=your-token
 
 See [openclaw/README.md](openclaw/README.md) for full setup.
 
+### Codex
+
+Run Codex from a skill directory — it auto-loads `AGENTS.md` as its instructions:
+
+```bash
+export DOXXNET_TOKEN=your-token
+cd agents/codex/skills/doxxnet
+codex
+```
+
+Or pass a request directly with `codex exec`:
+
+```bash
+codex exec "Show me my tunnels and bandwidth usage"
+```
+
+See [agents/codex/README.md](agents/codex/README.md) for full setup.
+
 ### Other Agents
 
 Any AI agent with shell access can use the API reference directly:
@@ -93,6 +111,10 @@ Skills call the doxx.net API directly via `curl` — no intermediate server, no 
 ### OpenClaw Skills (`openclaw/`)
 
 The same 11 skills ported for [OpenClaw](https://openclaw.org). Uses `$DOXXNET_TOKEN` environment variable instead of file-based token storage. See [openclaw/README.md](openclaw/README.md).
+
+### Codex Agent Skills (`agents/codex/`)
+
+The same 11 skills ported for [OpenAI Codex CLI](https://github.com/openai/codex). Uses `AGENTS.md` files (Codex's native instruction format, auto-loaded on startup) and `$DOXXNET_TOKEN` environment variable. See [agents/codex/README.md](agents/codex/README.md).
 
 ### API Reference (`api/`)
 

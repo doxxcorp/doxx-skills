@@ -337,6 +337,67 @@ if [[ -d "$OPENCLAW_DIR" ]]; then
   fi
 fi
 
+# ─── Codex agent skills ───────────────────────────────────────────────────────
+
+CODEX_DIR="$REPO_ROOT/agents/codex/skills"
+
+if [[ -d "$CODEX_DIR" ]]; then
+  section "Codex agent skills"
+
+  for skill_dir in "$CODEX_DIR"/*/; do
+    skill_name="$(basename "$skill_dir")"
+    agents_md="$skill_dir/AGENTS.md"
+
+    if [[ ! -f "$agents_md" ]]; then
+      fail "codex/$skill_name: missing AGENTS.md"
+      continue
+    fi
+
+    pass "codex/$skill_name: AGENTS.md exists"
+
+    # Check AGENTS.md has no frontmatter (should NOT start with ---)
+    if head -1 "$agents_md" | grep -q '^---$'; then
+      fail "codex/$skill_name: AGENTS.md should not have YAML frontmatter"
+    else
+      pass "codex/$skill_name: no frontmatter (correct)"
+    fi
+
+    # Check DOXXNET_TOKEN is referenced
+    if grep -q 'DOXXNET_TOKEN' "$agents_md"; then
+      pass "codex/$skill_name: references DOXXNET_TOKEN"
+    else
+      fail "codex/$skill_name: missing DOXXNET_TOKEN reference"
+    fi
+
+    # API consistency for Codex skills
+    skill_endpoints_curl=$(grep -o '"[a-z_]*=1' "$agents_md" 2>/dev/null | sed 's/^"//; s/=1$//' | sort -u || true)
+    skill_endpoints_list=$(grep -oE '^\- `[a-z_]+`' "$agents_md" 2>/dev/null | sed 's/^- `//; s/`$//' | sort -u || true)
+    codex_all_endpoints=$(printf "%s\n%s" "$skill_endpoints_curl" "$skill_endpoints_list" | sort -u)
+
+    for ep in $codex_all_endpoints; do
+      [[ -z "$ep" ]] && continue
+      case "$ep" in
+        enabled|apply_to_all) continue ;;
+      esac
+
+      if echo "$ref_endpoints" | grep -qx "$ep"; then
+        pass "codex/$skill_name: $ep in reference"
+      else
+        fail "codex/$skill_name: $ep not found in api/reference.md"
+      fi
+    done
+  done
+
+  # Check Codex skill count matches Claude skill count
+  claude_count=$(find "$SKILLS_DIR" -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')
+  codex_count=$(find "$CODEX_DIR" -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')
+  if [[ "$claude_count" -eq "$codex_count" ]]; then
+    pass "codex skill count ($codex_count) matches claude ($claude_count)"
+  else
+    fail "codex skill count ($codex_count) != claude ($claude_count)"
+  fi
+fi
+
 # ─── Summary ─────────────────────────────────────────────────────────────────
 
 echo ""
