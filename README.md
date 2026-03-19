@@ -66,7 +66,7 @@ Run Codex from a skill directory — it auto-loads `AGENTS.md` as its instructio
 
 ```bash
 export DOXXNET_TOKEN=your-token
-cd agents/codex/skills/doxxnet
+cd codex/skills/doxxnet
 codex
 ```
 
@@ -76,7 +76,7 @@ Or pass a request directly with `codex exec`:
 codex exec "Show me my tunnels and bandwidth usage"
 ```
 
-See [agents/codex/README.md](agents/codex/README.md) for full setup.
+See [codex/README.md](codex/README.md) for full setup.
 
 ### Other Agents
 
@@ -114,7 +114,7 @@ The same 11 skills ported for [OpenClaw](https://openclaw.org). Uses `$DOXXNET_T
 
 ### Codex Agent Skills (`agents/codex/`)
 
-The same 11 skills ported for [OpenAI Codex CLI](https://github.com/openai/codex). Uses `AGENTS.md` files (Codex's native instruction format, auto-loaded on startup) and `$DOXXNET_TOKEN` environment variable. See [agents/codex/README.md](agents/codex/README.md).
+The same 11 skills ported for [OpenAI Codex CLI](https://github.com/openai/codex). Uses `AGENTS.md` files (Codex's native instruction format, auto-loaded on startup) and `$DOXXNET_TOKEN` environment variable. See [codex/README.md](codex/README.md).
 
 ### API Reference (`api/`)
 

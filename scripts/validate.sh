@@ -339,7 +339,7 @@ fi
 
 # ─── Codex agent skills ───────────────────────────────────────────────────────
 
-CODEX_DIR="$REPO_ROOT/agents/codex/skills"
+CODEX_DIR="$REPO_ROOT/codex/skills"
 
 if [[ -d "$CODEX_DIR" ]]; then
   section "Codex agent skills"
