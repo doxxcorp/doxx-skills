@@ -116,7 +116,7 @@ Returns: `tunnels[]` with `tunnel_token`, `name`, `server`, `assigned_ip`, `assi
 ```bash
 curl -s -X POST $API -d "create_tunnel=1&token=$TOKEN&name=NAME&server=SERVER_HOSTNAME"
 ```
-Required: `server`. Optional: `name`.
+Required: `server`. Optional: `name`, `device_hash` (for mobile), `profile_id`, `type` (`wireguard` or `wireslammer`), `bandwidth_stats` (1/0), `security_stats` (1/0), `block_bad_dns` (1/0), `block_doh_dot` (1/0).
 
 ### create_tunnel_mobile
 ```bash
@@ -136,7 +136,7 @@ Creates/refreshes a tunnel for the doxx.net native iOS/Android app (build 555+).
 ```bash
 curl -s -X POST $API -d "update_tunnel=1&token=$TOKEN&tunnel_token=$TUNNEL&name=NEW_NAME"
 ```
-Optional: `name`, `server`, `firewall` (1/0), `ipv6_enabled` (1/0), `block_bad_dns` (1/0).
+Optional: `name`, `server`, `firewall` (1/0), `ipv6_enabled` (1/0), `block_bad_dns` (1/0), `block_doh_dot` (1/0), `type` (`wireguard` or `wireslammer`), `bandwidth_stats` (1/0), `security_stats` (1/0).
 
 ### delete_tunnel
 ```bash
@@ -189,7 +189,8 @@ List all assigned IP addresses.
 ```bash
 curl -s -X POST $API -d "list_addresses=1&token=$TOKEN"
 ```
-Returns: `addresses[]` with `address`, `type` (`static_public`/`static_private`/`static_ipv6`), `site_id`, `location`, `profile_id`, `profile_name`, `tunnel_token`, `tunnel_name`, `connected`, `device_name`, `persistent`.
+Optional: `tunnel_token` (filter by tunnel), `device_hash`.
+Returns: `addresses[]` with `address`, `type` (`static_public`/`static_private`/`static_ipv6`), `site_id`, `location`, `profile_id`, `profile_name`, `tunnel_token`, `tunnel_name`, `connected`, `device_name`, `persistent`. Also returns `public_ipv4_used`, `public_ipv4_max`.
 
 ### assign_address
 Assign an IP address to a profile.
@@ -213,11 +214,29 @@ curl -s -X POST $API -d "rotate_address=1&token=$TOKEN&address=ADDRESS&type=stat
 Required: `address`, `type`.
 
 ### lease_public_ipv4
-Lease a dedicated public IPv4 address.
+Lease a dedicated public IPv4 address. Three modes:
+- **Mode 1 (existing profile):** `profile_id`
+- **Mode 2 (new profile):** `profile_name` + `server`
+- **Mode 3 (pool-only):** `server` alone
 ```bash
 curl -s -X POST $API -d "lease_public_ipv4=1&token=$TOKEN&profile_name=NAME&profile_icon=ICON&profile_type=wireguard&server=SERVER_HOSTNAME"
 ```
-Required: `profile_name`, `profile_icon`, `profile_type`, `server`. Optional: `ip_type` (`ipv6`), `include_ipv6` (1).
+Optional: `ip_type` (`ipv6`), `include_ipv6` (1), `profile_icon`, `profile_type`, `tunnel_token` (for in-use detection).
+Returns: `ip_address`, `ipv6_address` (if allocated), `site_id`, `server`, `profile_id`, flags: `pool_only`, `profile_created`, `requires_reconnect`.
+
+### list_ip_reservations
+List all dedicated public IPv4 reservations with slot usage.
+```bash
+curl -s -X POST $API -d "list_ip_reservations=1&token=$TOKEN"
+```
+Returns: `reservations[]` with `ip_address`, `server`, `profile_id`, `profile_name`, plus `slots_used` and `slots_max`.
+
+### release_ip_reservation
+Release a dedicated public IPv4 reservation, returning it to the pool.
+```bash
+curl -s -X POST $API -d "release_ip_reservation=1&token=$TOKEN&ip_address=ADDRESS"
+```
+Required: `ip_address`. Disables public IPv4 on the profile.
 
 ---
 
@@ -238,11 +257,25 @@ curl -s -X POST $API -d "create_saved_profile=1&token=$TOKEN&profile_name=NAME&p
 Required: `profile_name`, `profile_icon`, `profile_type`, `server`.
 
 ### update_saved_profile
-Update profile settings. Also used to rename a profile (pass `profile_name`).
+Update profile metadata or re-snapshot settings from a tunnel.
 ```bash
 curl -s -X POST $API -d "update_saved_profile=1&token=$TOKEN&profile_id=PROFILE_ID&preferred_server=SERVER_HOSTNAME"
 ```
-Required: `profile_id`. Optional: `profile_icon`, `profile_name`, `preferred_server`.
+Required: `profile_id`. Optional: `profile_icon`, `profile_name`, `preferred_server`. For re-snapshot: `re_snapshot=1`, `tunnel_token`.
+
+### lock_profile
+Lock a profile to prevent IP and/or settings changes.
+```bash
+curl -s -X POST $API -d "lock_profile=1&token=$TOKEN&profile_id=PROFILE_ID"
+```
+Required: `profile_id` or `tunnel_token`. Optional: `lock_type` (`ip`, `settings`, or omit for both).
+
+### unlock_profile
+Unlock a previously locked profile.
+```bash
+curl -s -X POST $API -d "unlock_profile=1&token=$TOKEN&profile_id=PROFILE_ID"
+```
+Required: `profile_id` or `tunnel_token`. Optional: `lock_type` (`ip`, `settings`, or omit for both).
 
 ### delete_saved_profile
 Delete a saved profile.
@@ -250,6 +283,14 @@ Delete a saved profile.
 curl -s -X POST $API -d "delete_saved_profile=1&token=$TOKEN&profile_id=PROFILE_ID"
 ```
 Required: `profile_id`.
+
+### save_profile
+Snapshot current tunnel settings (DNS blocklists, firewall, proxy, transport) into a new profile. Unlike `create_saved_profile` (empty), this captures live state.
+```bash
+curl -s -X POST $API -d "save_profile=1&token=$TOKEN&tunnel_token=$TUNNEL&profile_name=NAME"
+```
+Required: `tunnel_token`, `profile_name`. Optional: `profile_icon`, `profile_notes`, `save_preferred_server` (1), `lock_after_save` (1).
+Returns: `profile_id`.
 
 ### load_profile
 Apply a saved profile to a tunnel.
@@ -279,7 +320,7 @@ Returns: `dns_blocking_enabled`, `base_protections[]`, `subscriptions[]`, `white
 ```bash
 curl -s -X POST $API -d "dns_set_subscription=1&token=$TOKEN&tunnel_token=$TUNNEL&blocklist_name=ads&enabled=1"
 ```
-Optional: `apply_to_all=1` to apply to all tunnels.
+Optional: `apply_to_all=1` to apply to all tunnels. For batch mode, pass `changes` as a JSON array: `[{"blocklist_name":"ads","enabled":1},{"blocklist_name":"tracking","enabled":1}]`.
 
 ### dns_add_whitelist
 ```bash
@@ -347,6 +388,13 @@ Returns: `link_all_tunnels` (0 or 1).
 
 ## Domains
 
+### list_tlds (no auth)
+List all available TLDs with categories.
+```bash
+curl -s -X POST $API -d "list_tlds=1"
+```
+Returns: `tlds[]` with `tld`, `category`. 196 TLDs available.
+
 ### list_domains
 ```bash
 curl -s -X POST $API -d "list_domains=1&token=$TOKEN"
@@ -380,6 +428,21 @@ Get TXT verification code for domain import.
 curl -s -X POST $API -d "get_domain_validation=1&token=$TOKEN&domain=mysite.com"
 ```
 Returns: `validation_code`.
+
+### link_profile_domain
+Link a saved profile to a domain by creating A/AAAA DNS records that auto-update when the profile's IPs change.
+```bash
+curl -s -X POST $API -d "link_profile_domain=1&token=$TOKEN&domain=mysite.doxx&hostname=home&profile_id=PROFILE_ID"
+```
+Required: `domain`, `hostname` (subdomain label, e.g. `home` creates `home.mysite.doxx`), `profile_id`.
+Returns: the full FQDN created.
+
+### unlink_profile_domain
+Remove the DNS records linking a profile to a domain.
+```bash
+curl -s -X POST $API -d "unlink_profile_domain=1&token=$TOKEN&profile_id=PROFILE_ID"
+```
+Required: `profile_id`.
 
 ---
 
@@ -473,15 +536,15 @@ Root CA download: `curl -o doxx-root-ca.crt https://a0x13.doxx.net/assets/doxx-r
 
 ### get_mobile_options
 ```bash
-curl -s -X POST $API -d "get_mobile_options=1&token=$TOKEN"
+curl -s -X POST $API -d "get_mobile_options=1&token=$TOKEN&tunnel_token=$TUNNEL"
 ```
-Returns: `connect_on_startup`, `kill_switch`, `transport`, `proxy_enabled`, `onion_enabled`.
+Required: `tunnel_token`. Returns: `connect_on_startup`, `kill_switch`, `transport` (normal/stealth/obfuscated), `port`, `proxy_enabled`, `onion_enabled`, `connection_profile` (security/speed).
 
 ### set_mobile_options
 ```bash
-curl -s -X POST $API -d "set_mobile_options=1&token=$TOKEN&connect_on_startup=1&kill_switch=1"
+curl -s -X POST $API -d "set_mobile_options=1&token=$TOKEN&tunnel_token=$TUNNEL&connect_on_startup=1&kill_switch=1"
 ```
-Optional: `connect_on_startup`, `kill_switch`, `proxy_enabled`, `onion_enabled` (all 1/0).
+Required: `tunnel_token`. Optional: `connect_on_startup` (1/0), `kill_switch` (1/0), `proxy_enabled` (1/0), `onion_enabled` (1/0), `transport` (normal/stealth/obfuscated), `port` (1-65535), `connection_profile` (security/speed).
 
 ---
 

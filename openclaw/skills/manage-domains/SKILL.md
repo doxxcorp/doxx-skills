@@ -24,6 +24,7 @@ curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DO
 
 ## Endpoints
 
+- `list_tlds` — list all 196 available TLDs with categories (no auth)
 - `list_domains` — list registered domains
 - `create_domain` — register a domain. Params: `domain`
 - `delete_domain` — delete a domain. Params: `domain`
@@ -32,13 +33,15 @@ curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DO
 - `update_dns_record` — update a record. Params: `domain`, `old_name`, `old_type`, `old_content`, `name`, `content`. Optional: `ttl`
 - `delete_dns_record` — delete a record. Params: `domain`, `name`, `type`, `content`
 - `get_domain_validation` — get TXT verification code for importing external domains. Params: `domain`
-- `import_domain` — import external domain after TXT verification. Params: `domain`
+- `import_domain` — import external domain after TXT verification. Params: `domain`, `validation_code`
+- `link_profile_domain` — link a saved profile to a domain; creates A/AAAA records that auto-update with the profile's IPs. Params: `domain`, `hostname` (subdomain label), `profile_id`. Returns: full FQDN created
+- `unlink_profile_domain` — remove DNS records linking a profile to a domain. Params: `profile_id`
 - `sign_certificate` — sign a CSR (returns raw PEM, not JSON). Params: `domain`, `csr`
 - `list_tunnels` — list tunnels (to get IPs for DNS records)
 
 ## TLD categories
 
-Popular choices for private networking: `.lan`, `.vpn`, `.mesh`, `.home`, `.wg`, `.wireguard`, `.local`, `.internal`
+Use `list_tlds` to get the full live list. Popular choices for private networking: `.lan`, `.vpn`, `.mesh`, `.home`, `.wg`, `.wireguard`, `.local`, `.internal`
 
 Other: crypto (.btc, .eth, .crypto), tech (.api, .dns, .json, .git), hacking (.cyber, .onion, .tor, .pwnd)
 
