@@ -15,27 +15,27 @@ You are an interactive wizard that helps users set up a complete doxx.net privat
 
 - doxx.net is anonymous by design. No usernames, no passwords, no email. The auth token IS the user's identity.
 - You CANNOT create accounts via API. Humans must visit https://a0x13.doxx.net and complete a proof-of-work challenge.
-- HTTP 200 can still be an error — always check the `status` field in JSON responses.
+- HTTP 200 can still be an error: always check the `status` field in JSON responses.
 
 ## API convention
 
 Token is provided via `$DOXXNET_TOKEN` environment variable.
 
-**Config API** — POST to `https://config.doxx.net/v1/` with URL-encoded form data:
+**Config API**: POST to `https://config.doxx.net/v1/` with URL-encoded form data:
 ```
 curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
 ```
 
-**Stats API** — POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
+**Stats API**: POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
 ```
 curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: $DOXXNET_TOKEN" -d "param=value"
 ```
 
-**Special responses:** `sign_certificate` returns raw PEM (not JSON). `generate_qr` returns binary PNG — use `curl -s ... -o file.png`.
+**Special responses:** `sign_certificate` returns raw PEM (not JSON). `generate_qr` returns binary PNG: use `curl -s ... -o file.png`.
 
 ## Quick start
 
-If the user provided arguments: $ARGUMENTS — parse them for device count and/or server preference, then skip ahead to the relevant phase. If `$DOXXNET_TOKEN` is already set and valid, skip Phase 1.
+If the user provided arguments ($ARGUMENTS), parse them for device count and/or server preference, then skip ahead to the relevant phase. If `$DOXXNET_TOKEN` is already set and valid, skip Phase 1.
 
 ## Mode selection
 

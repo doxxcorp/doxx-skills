@@ -17,19 +17,19 @@ User request: $ARGUMENTS
 
 Token is provided via `$DOXXNET_TOKEN` environment variable.
 
-**Config API** — POST to `https://config.doxx.net/v1/`:
+**Config API**: POST to `https://config.doxx.net/v1/`:
 ```
 curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
 ```
 
 ## Endpoints
 
-- `device_list_unified` — list all devices with subscription info and guest accounts. Returns:
+- `device_list_unified`: list all devices with subscription info and guest accounts. Returns:
   - `my_devices[]`: each has device_hash, device_name, device_model, os_type (ios/macos/android/windows/linux), device_type (mobile/server/desktop/tablet), device_icon, is_current, is_online, last_seen, tunnel_count, has_seat, is_owner, can_remove, can_rename, can_delete
   - `guest_accounts[]`: each has profile_name, devices[]
   - `subscription`: { exists, tier, status, device_count, max_devices, is_account_owner }
-- `device_rename` — rename device or change icon. Params: `device_hash`, `device_name`. Optional: `device_icon`
-- `device_delete` — permanently delete a device (removes all tunnels, IPs, and seats). Params: `target_device_hash`
+- `device_rename`: rename device or change icon. Params: `device_hash`, `device_name`. Optional: `device_icon`
+- `device_delete`: permanently delete a device (removes all tunnels, IPs, and seats). Params: `target_device_hash`
 
 ## Guidelines
 

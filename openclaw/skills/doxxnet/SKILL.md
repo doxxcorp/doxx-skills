@@ -37,32 +37,32 @@ doxx.net -- what can I help with?
 
 Token is provided via `$DOXXNET_TOKEN` environment variable. All curl commands use it directly.
 
-**Config API** — POST to `https://config.doxx.net/v1/`:
+**Config API**: POST to `https://config.doxx.net/v1/`:
 ```
 curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
 ```
 
-**Stats API** — POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
+**Stats API**: POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
 ```
 curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: $DOXXNET_TOKEN" -d "param=value"
 ```
 
-**Special responses:** `sign_certificate` returns raw PEM (not JSON). `generate_qr` returns binary PNG — use `curl -s ... -o file.png`.
+**Special responses:** `sign_certificate` returns raw PEM (not JSON). `generate_qr` returns binary PNG: use `curl -s ... -o file.png`.
 
-Always check the `status` field in JSON responses — HTTP 200 can still be an error.
+Always check the `status` field in JSON responses: HTTP 200 can still be an error.
 
 ## Tunnels
 
-- `list_tunnels` — list all tunnels with IPs, servers, connection status
-- `create_tunnel` — create a generic WireGuard tunnel (desktop/server). Params: `server` (required), `name`
-- `create_tunnel_mobile` — create a generic WireGuard mobile tunnel (non-native clients). Params: `server`, `name`, `device_type` (mobile/web)
-- `create_native_tunnel` — create/refresh a tunnel for the doxx.net native iOS/Android app (build 555+). Enforces subscription. Required params: `device_hash` (from `device_list_unified` or `list_tunnels`), `server`, `device_type` (mobile/web). Optional: `name`. NOTE: native app tunnels do NOT use WireGuard QR codes — the app manages its own connection. Clears `active_profile_id` on the tunnel.
-- `update_tunnel` — params: `tunnel_token` (required), `name`, `server`, `firewall`, `ipv6_enabled`, `block_bad_dns`
-- `delete_tunnel` — params: `tunnel_token` (permanent, confirm first)
-- `wireguard` — get WireGuard config (generic WireGuard tunnels only — do NOT call on native tunnels). Params: `tunnel_token`
-- `disconnect_peer` — force-disconnect. Params: `tunnel_token`
-- `servers` — list available servers (no auth)
-- `generate_qr` — QR code (binary PNG, no auth). Params: `data`, optional: `size`. Use `-o file.png`
+- `list_tunnels`: list all tunnels with IPs, servers, connection status
+- `create_tunnel`: create a generic WireGuard tunnel (desktop/server). Params: `server` (required), `name`
+- `create_tunnel_mobile`: create a generic WireGuard mobile tunnel (non-native clients). Params: `server`, `name`, `device_type` (mobile/web)
+- `create_native_tunnel`: create/refresh a tunnel for the doxx.net native iOS/Android app (build 555+). Enforces subscription. Required params: `device_hash` (from `device_list_unified` or `list_tunnels`), `server`, `device_type` (mobile/web). Optional: `name`. NOTE: native app tunnels do NOT use WireGuard QR codes: the app manages its own connection. Clears `active_profile_id` on the tunnel.
+- `update_tunnel`: params: `tunnel_token` (required), `name`, `server`, `firewall`, `ipv6_enabled`, `block_bad_dns`
+- `delete_tunnel`: params: `tunnel_token` (permanent, confirm first)
+- `wireguard`: get WireGuard config (generic WireGuard tunnels only: do NOT call on native tunnels). Params: `tunnel_token`
+- `disconnect_peer`: force-disconnect. Params: `tunnel_token`
+- `servers`: list available servers (no auth)
+- `generate_qr`: QR code (binary PNG, no auth). Params: `data`, optional: `size`. Use `-o file.png`
 
 WireGuard config format:
 ```
@@ -81,11 +81,11 @@ macOS: write to `/etc/wireguard/doxx.conf`, run `sudo wg-quick up doxx`. iOS/And
 
 ## Firewall
 
-- `firewall_rule_list` — list rules. Optional: `tunnel_token`
-- `firewall_rule_add` — params: `tunnel_token`, `protocol` (TCP/UDP/ICMP/ALL), `src_ip`, `src_port`, `dst_ip`, `dst_port`
-- `firewall_rule_delete` — same params as add
-- `firewall_link_all_toggle` — mesh networking on/off. Params: `enabled` (1/0)
-- `firewall_link_all_status` — check mesh status
+- `firewall_rule_list`: list rules. Optional: `tunnel_token`
+- `firewall_rule_add`: params: `tunnel_token`, `protocol` (TCP/UDP/ICMP/ALL), `src_ip`, `src_port`, `dst_ip`, `dst_port`
+- `firewall_rule_delete`: same params as add
+- `firewall_link_all_toggle`: mesh networking on/off. Params: `enabled` (1/0)
+- `firewall_link_all_status`: check mesh status
 
 For mesh between two tunnels, create bidirectional rules (A->B and B->A). Prefer link-all for full mesh.
 
@@ -94,9 +94,9 @@ For mesh between two tunnels, create bidirectional rules (A->B and B->A). Prefer
 - `list_domains`, `create_domain` (params: `domain`), `delete_domain`
 - `list_dns` (params: `domain`), `create_dns_record`, `update_dns_record`, `delete_dns_record`
   - Record params: `domain`, `name` (FQDN), `type` (A/AAAA/CNAME/MX/TXT/NS/SRV/PTR), `content`. Optional: `ttl`, `prio`
-- `get_domain_validation` — TXT code for external domain import
-- `import_domain` — import after TXT verification
-- `sign_certificate` — sign a CSR (returns raw PEM). Params: `domain`, `csr`
+- `get_domain_validation`: TXT code for external domain import
+- `import_domain`: import after TXT verification
+- `sign_certificate`: sign a CSR (returns raw PEM). Params: `domain`, `csr`
 
 Popular TLDs: `.lan`, `.vpn`, `.mesh`, `.home`, `.wg`, `.doxx`. Default is `.doxx`.
 
@@ -104,32 +104,32 @@ TLS workflow: `openssl ecparam -genkey -name prime256v1 -o D.key` → `openssl r
 
 ## DNS Blocking
 
-- `dns_get_options` — list available blocklists (no auth)
-- `dns_get_tunnel_config` — current blocking config. Params: `tunnel_token`
-- `dns_set_subscription` — enable/disable blocklist. Params: `tunnel_token`, `blocklist_name`, `enabled` (1/0). Optional: `apply_to_all`
-- `dns_add_whitelist` / `dns_remove_whitelist` — params: `tunnel_token`, `domain`. Optional: `apply_to_all`
-- `dns_add_blacklist` / `dns_remove_blacklist` — params: `tunnel_token`, `domain`. Optional: `apply_to_all`
-- `dns_blocklist_stats` — blocklist statistics (no auth)
+- `dns_get_options`: list available blocklists (no auth)
+- `dns_get_tunnel_config`: current blocking config. Params: `tunnel_token`
+- `dns_set_subscription`: enable/disable blocklist. Params: `tunnel_token`, `blocklist_name`, `enabled` (1/0). Optional: `apply_to_all`
+- `dns_add_whitelist` / `dns_remove_whitelist`: params: `tunnel_token`, `domain`. Optional: `apply_to_all`
+- `dns_add_blacklist` / `dns_remove_blacklist`: params: `tunnel_token`, `domain`. Optional: `apply_to_all`
+- `dns_blocklist_stats`: blocklist statistics (no auth)
 
 **Secure DNS (DoH/DoT)** for devices not on the tunnel:
-- `public_dns_create_hash` — create hash. Params: `tunnel_token`
+- `public_dns_create_hash`: create hash. Params: `tunnel_token`
 - `public_dns_list_hashes` / `public_dns_delete_hash` (params: `host_hash`)
 
 ## Devices
 
-- `device_list_unified` — list all devices with subscription info and guest accounts. Returns: `my_devices[]`, `guest_accounts[]`, `subscription`
-- `device_rename` — rename or change icon. Params: `device_hash`, `device_name`. Optional: `device_icon`
-- `device_delete` — permanently delete device (removes tunnels, IPs, seats). Params: `target_device_hash`
+- `device_list_unified`: list all devices with subscription info and guest accounts. Returns: `my_devices[]`, `guest_accounts[]`, `subscription`
+- `device_rename`: rename or change icon. Params: `device_hash`, `device_name`. Optional: `device_icon`
+- `device_delete`: permanently delete device (removes tunnels, IPs, seats). Params: `target_device_hash`
 
 DeviceInfo fields: device_hash, device_name, device_model, os_type, device_type, device_icon, is_current, is_online, last_seen, tunnel_count, has_seat, is_owner, can_remove, can_rename, can_delete
 
 ## IP Addresses
 
-- `list_addresses` — list assigned IPs with type, location, tunnel, profile, connection status
-- `assign_address` — assign IP to profile. Params: `address`, `type`. Optional: `profile_id`
-- `release_address` — release IP. Params: `address`, `type`
-- `rotate_address` — rotate to new IP. Params: `address`, `type`
-- `lease_public_ipv4` — lease dedicated public IPv4. Params: `profile_name`, `profile_icon`, `profile_type`, `server`. Optional: `ip_type`, `include_ipv6`
+- `list_addresses`: list assigned IPs with type, location, tunnel, profile, connection status
+- `assign_address`: assign IP to profile. Params: `address`, `type`. Optional: `profile_id`
+- `release_address`: release IP. Params: `address`, `type`
+- `rotate_address`: rotate to new IP. Params: `address`, `type`
+- `lease_public_ipv4`: lease dedicated public IPv4. Params: `profile_name`, `profile_icon`, `profile_type`, `server`. Optional: `ip_type`, `include_ipv6`
 
 **Transparent profile handling for IPv4 leasing:**
 When the user asks to lease a dedicated IP for a tunnel (without mentioning profiles):
@@ -144,39 +144,39 @@ Note: `create_native_tunnel` auto-creates a profile; `create_tunnel`/`create_tun
 
 ## Saved Profiles
 
-- `list_saved_profiles` — list profiles with settings and usage status
-- `create_saved_profile` — create. Params: `profile_name`, `profile_icon`, `profile_type`, `server`
-- `update_saved_profile` — update. Params: `profile_id`, and: `profile_icon`, `profile_name`, `preferred_server`
-- `delete_saved_profile` — delete. Params: `profile_id`
-- `load_profile` — apply profile to tunnel. Params: `tunnel_token`, `profile_id`
+- `list_saved_profiles`: list profiles with settings and usage status
+- `create_saved_profile`: create. Params: `profile_name`, `profile_icon`, `profile_type`, `server`
+- `update_saved_profile`: update. Params: `profile_id`, and: `profile_icon`, `profile_name`, `preferred_server`
+- `delete_saved_profile`: delete. Params: `profile_id`
+- `load_profile`: apply profile to tunnel. Params: `tunnel_token`, `profile_id`
 
 ## Account
 
-- `get_profile` — get recovery email/phone, notification preferences, recovery code count
-- `update_profile` — update. Params: `recovery_email`, `recovery_phone`, `notifications`
-- `create_account_recovery` — generate recovery codes. Returns: `codes[]`
-- `subscription_status` — check subscription tier, status, pro features
+- `get_profile`: get recovery email/phone, notification preferences, recovery code count
+- `update_profile`: update. Params: `recovery_email`, `recovery_phone`, `notifications`
+- `create_account_recovery`: generate recovery codes. Returns: `codes[]`
+- `subscription_status`: check subscription tier, status, pro features
 
 ## Stats
 
-- `bandwidth` — usage over time. Params: `start`, `end` (ISO 8601), optional: `tunnel_token`
+- `bandwidth`: usage over time. Params: `start`, `end` (ISO 8601), optional: `tunnel_token`
   ```
   curl -s -X POST https://secure-wss.doxx.net/api/stats/bandwidth -H "X-Auth-Token: $DOXXNET_TOKEN" -d "start=ISO8601&end=ISO8601"
   ```
   Returns: `data[]` with `peak_in`/`peak_out` (Mbps), `aggregate[]`
 
-- `alerts` — security alerts and DNS blocks. Params: `last` (session/1m/1h/1d/7d/30d), optional: `tunnel_token`, `type`
+- `alerts`: security alerts and DNS blocks. Params: `last` (session/1m/1h/1d/7d/30d), optional: `tunnel_token`, `type`
   ```
   curl -s -X POST https://secure-wss.doxx.net/api/stats/alerts -H "X-Auth-Token: $DOXXNET_TOKEN" -d "last=1d"
   ```
   Returns: `totals`, `block_count`, `category_counts` (ads, tracking, malware), `data[]`
 
-- `summary` — peak bandwidth + alert totals. Params: `days` (default: 30), optional: `tunnel_token`
+- `summary`: peak bandwidth + alert totals. Params: `days` (default: 30), optional: `tunnel_token`
   ```
   curl -s -X POST https://secure-wss.doxx.net/api/stats/summary -H "X-Auth-Token: $DOXXNET_TOKEN" -d "days=30"
   ```
 
-- `global` — global threat counter (no auth, GET only)
+- `global`: global threat counter (no auth, GET only)
   ```
   curl -s "https://secure-wss.doxx.net/api/stats/global"
   ```
@@ -187,11 +187,11 @@ Time range shortcuts: "last hour" → `last=1h`, "today" → `last=1d`, "this we
 
 ## Guidelines
 
-**Tunnel type guide — important:**
-- doxx.net native iOS/Android app → `create_native_tunnel` (requires `device_hash` from `device_list_unified` or `list_tunnels`). No WireGuard config or QR code needed — app handles connection. The tunnel record `type` field will still show `"wireguard"` (the protocol); the "native" distinction is at the client level, not the record.
+**Tunnel type guide: important:**
+- doxx.net native iOS/Android app → `create_native_tunnel` (requires `device_hash` from `device_list_unified` or `list_tunnels`). No WireGuard config or QR code needed: app handles connection. The tunnel record `type` field will still show `"wireguard"` (the protocol); the "native" distinction is at the client level, not the record.
 - Generic WireGuard client (WireGuard app, any platform) → `create_tunnel` or `create_tunnel_mobile`, then `wireguard` to fetch config, then `generate_qr` for QR code.
-- Never call `wireguard` endpoint on a native-app tunnel — it will fail if `assigned_ip` is NULL. If a user asks for a WireGuard QR and they have a native tunnel, clarify which type they need.
-- `create_native_tunnel` clears `active_profile_id` on the tunnel — do not apply profiles after calling it.
+- Never call `wireguard` endpoint on a native-app tunnel: it will fail if `assigned_ip` is NULL. If a user asks for a WireGuard QR and they have a native tunnel, clarify which type they need.
+- `create_native_tunnel` clears `active_profile_id` on the tunnel: do not apply profiles after calling it.
 
 - Always list current state before making changes (`list_tunnels`, `list_domains`, `firewall_rule_list`)
 - Call `list_tunnels` when you need tunnel names, IPs, or tokens
@@ -200,12 +200,12 @@ Time range shortcuts: "last hour" → `last=1h`, "today" → `last=1d`, "this we
 - Call `list_saved_profiles` for profile queries
 - Confirm before device deletion and address release
 - Confirm with user before destructive operations (delete tunnel, delete domain)
-- Present stats in clear tables — convert bandwidth to Mbps, group alerts by category
+- Present stats in clear tables: convert bandwidth to Mbps, group alerts by category
 - For multi-tunnel users, offer to filter by tunnel or show all
 - When the request spans multiple areas, make all relevant API calls and present a unified answer
 
-**"Build me a VPN" routing:**
-If the user's request is to create, build, or set up a new private network from scratch ("build me a VPN", "set up a network", "I want a private network", "create a VPN"), respond:
+**Private network setup routing:**
+If the user's request is to create, build, or set up a new private network from scratch ("build me a private network", "set up a network for my devices", "I want a private network", "set up a secure network"), respond:
 
 > "I can walk you through that. Quick setup (connect a few devices, 5 min) or full setup (mesh network, custom domain, DNS blocking)?"
 

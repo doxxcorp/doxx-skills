@@ -16,14 +16,14 @@ User request: $ARGUMENTS
 
 Token file: `~/.config/doxxnet/token`
 
-**IMPORTANT — avoiding permission prompts:**
+**IMPORTANT: avoiding permission prompts:**
 - To read the token: use the `Read` tool on `~/.config/doxxnet/token`. Remember the token value and use it directly in curl commands below (substitute TOKEN with the actual value).
 - To save a token: use the `Write` tool to `~/.config/doxxnet/token`
-- NEVER use Bash for file operations — only `Read` and `Write` tools. Bash is ONLY for `curl` commands.
+- NEVER use Bash for file operations: only `Read` and `Write` tools. Bash is ONLY for `curl` commands.
 
 If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it with the `Write` tool.
 
-**Config API** — POST to `https://config.doxx.net/v1/`:
+**Config API**: POST to `https://config.doxx.net/v1/`:
 ```
 curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=TOKEN"
 ```
@@ -32,18 +32,18 @@ Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat 
 
 ## Endpoints
 
-- `dns_get_options` — list available blocklists (no auth needed)
-- `dns_get_tunnel_config` — get a tunnel's DNS blocking config. Params: `tunnel_token`
-- `dns_set_subscription` — enable/disable a blocklist. Params: `tunnel_token`, `blocklist_name`, `enabled` (1/0). Optional: `apply_to_all`
-- `dns_add_whitelist` — whitelist a domain (stop blocking it). Params: `tunnel_token`, `domain`. Optional: `apply_to_all`
-- `dns_remove_whitelist` — remove from whitelist. Params: `tunnel_token`, `domain`
-- `dns_add_blacklist` — blacklist a domain (force block it). Params: `tunnel_token`, `domain`. Optional: `apply_to_all`
-- `dns_remove_blacklist` — remove from blacklist. Params: `tunnel_token`, `domain`
-- `dns_blocklist_stats` — blocklist statistics (no auth needed)
-- `public_dns_create_hash` — create Secure DNS hash. Params: `tunnel_token`
-- `public_dns_list_hashes` — list Secure DNS hashes
-- `public_dns_delete_hash` — delete a hash. Params: `host_hash`
-- `list_tunnels` — list tunnels (to find tunnel tokens)
+- `dns_get_options`: list available blocklists (no auth needed)
+- `dns_get_tunnel_config`: get a tunnel's DNS blocking config. Params: `tunnel_token`
+- `dns_set_subscription`: enable/disable a blocklist. Params: `tunnel_token`, `blocklist_name`, `enabled` (1/0). Optional: `apply_to_all`
+- `dns_add_whitelist`: whitelist a domain (stop blocking it). Params: `tunnel_token`, `domain`. Optional: `apply_to_all`
+- `dns_remove_whitelist`: remove from whitelist. Params: `tunnel_token`, `domain`
+- `dns_add_blacklist`: blacklist a domain (force block it). Params: `tunnel_token`, `domain`. Optional: `apply_to_all`
+- `dns_remove_blacklist`: remove from blacklist. Params: `tunnel_token`, `domain`
+- `dns_blocklist_stats`: blocklist statistics (no auth needed)
+- `public_dns_create_hash`: create Secure DNS hash. Params: `tunnel_token`
+- `public_dns_list_hashes`: list Secure DNS hashes
+- `public_dns_delete_hash`: delete a hash. Params: `host_hash`
+- `list_tunnels`: list tunnels (to find tunnel tokens)
 
 ## Secure DNS setup
 

@@ -8,7 +8,7 @@
 
 AI agent skills for setting up and managing [doxx.net](https://doxx.net) private networks through natural language.
 
-No external dependencies — skills use `curl` for API calls. No Python, no servers, no daemons.
+No external dependencies: skills use `curl` for API calls. No Python, no servers, no daemons.
 
 ## Requirements
 
@@ -28,8 +28,8 @@ claude /plugin install doxxnet
 **VS Code / Cursor:**
 
 1. Open the plugin manager with `/plugins`
-2. Switch to the **Marketplaces** tab and click **Add** — enter `doxxcorp/doxx-skills`
-3. Switch to the **Plugins** tab and search for "doxx" — **doxxnet** will appear
+2. Switch to the **Marketplaces** tab and click **Add**: enter `doxxcorp/doxx-skills`
+3. Switch to the **Plugins** tab and search for "doxx": **doxxnet** will appear
 4. Click **Install** and choose your scope
 
 Use any skill as a slash command:
@@ -38,7 +38,7 @@ Use any skill as a slash command:
 /doxxnet:network-wizard
 ```
 
-On first use, the skill will ask for your auth token. It validates it and saves it locally to `~/.config/doxxnet/token` — no manual setup needed.
+On first use, the skill will ask for your auth token. It validates it and saves it locally to `~/.config/doxxnet/token`: no manual setup needed.
 
 ### OpenClaw
 
@@ -62,7 +62,7 @@ See [openclaw/README.md](openclaw/README.md) for full setup.
 
 ### Codex
 
-Run Codex from a skill directory — it auto-loads `AGENTS.md` as its instructions:
+Run Codex from a skill directory: it auto-loads `AGENTS.md` as its instructions:
 
 ```bash
 export DOXXNET_TOKEN=your-token
@@ -94,10 +94,10 @@ Two commands cover everything:
 
 | Command | What it does |
 |---------|-------------|
-| **doxxnet** | Manage anything: tunnels, firewall, domains, DNS blocking, IP addresses, devices, account, stats — just describe what you want |
+| **doxxnet** | Manage anything: tunnels, firewall, domains, DNS blocking, IP addresses, devices, account, stats: just describe what you want |
 | **network-wizard** | Guided setup: walks through auth, server selection, tunnel creation, mesh networking, client install, and optional domain/DNS/blocking config |
 
-Skills call the doxx.net API directly via `curl` — no intermediate server, no background processes.
+Skills call the doxx.net API directly via `curl`: no intermediate server, no background processes.
 
 ### OpenClaw Skills (`openclaw/`)
 
@@ -109,12 +109,12 @@ Native [OpenAI Codex CLI](https://github.com/openai/codex) skills using `AGENTS.
 
 ### API Reference (`api/`)
 
-- **api/reference.md**: Every doxx.net API endpoint with curl examples — works with any AI agent or can be followed manually
+- **api/reference.md**: Every doxx.net API endpoint with curl examples: works with any AI agent or can be followed manually
 
 ## Examples
 
 ```
-Build me a VPN
+Build me a private network
 ```
 ```
 Set up a new tunnel in New York and install WireGuard on my Mac
@@ -153,7 +153,7 @@ doxx.net is anonymous by design. There are no usernames, passwords, or emails. Y
 
 1. You create an account at [a0x13.doxx.net](https://a0x13.doxx.net) (human-only, proof-of-work gated)
 2. You give your auth token to the agent
-3. The agent makes API calls on your behalf — your token stays on your machine, nothing is stored in this repo
+3. The agent makes API calls on your behalf: your token stays on your machine, nothing is stored in this repo
 
 ## Known Limitations
 

@@ -16,14 +16,14 @@ User request: $ARGUMENTS
 
 Token file: `~/.config/doxxnet/token`
 
-**IMPORTANT — avoiding permission prompts:**
+**IMPORTANT: avoiding permission prompts:**
 - To read the token: use the `Read` tool on `~/.config/doxxnet/token`. Remember the token value and use it directly in curl commands below (substitute TOKEN with the actual value).
 - To save a token: use the `Write` tool to `~/.config/doxxnet/token`
-- NEVER use Bash for file operations — only `Read` and `Write` tools. Bash is ONLY for `curl` commands.
+- NEVER use Bash for file operations: only `Read` and `Write` tools. Bash is ONLY for `curl` commands.
 
 If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it with the `Write` tool.
 
-**Config API** — POST to `https://config.doxx.net/v1/`:
+**Config API**: POST to `https://config.doxx.net/v1/`:
 ```
 curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=TOKEN"
 ```
@@ -32,12 +32,12 @@ Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat 
 
 ## Endpoints
 
-- `firewall_rule_list` — list all firewall rules. Optional: `tunnel_token`
-- `firewall_rule_add` — add a rule. Params: `tunnel_token`, `protocol` (TCP/UDP/ICMP/ALL), `src_ip`, `src_port`, `dst_ip`, `dst_port`
-- `firewall_rule_delete` — delete a rule. Same params as add.
-- `firewall_link_all_toggle` — toggle mesh networking. Params: `enabled` (1 or 0)
-- `firewall_link_all_status` — check if mesh networking is enabled
-- `list_tunnels` — list tunnels (to get assigned IPs for rules)
+- `firewall_rule_list`: list all firewall rules. Optional: `tunnel_token`
+- `firewall_rule_add`: add a rule. Params: `tunnel_token`, `protocol` (TCP/UDP/ICMP/ALL), `src_ip`, `src_port`, `dst_ip`, `dst_port`
+- `firewall_rule_delete`: delete a rule. Same params as add.
+- `firewall_link_all_toggle`: toggle mesh networking. Params: `enabled` (1 or 0)
+- `firewall_link_all_status`: check if mesh networking is enabled
+- `list_tunnels`: list tunnels (to get assigned IPs for rules)
 
 ## Common patterns
 
@@ -55,7 +55,7 @@ Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat 
 ## Guidelines
 
 - Always list current rules before making changes
-- Get tunnel IPs from `list_tunnels` — you need the `assigned_ip` for rules
+- Get tunnel IPs from `list_tunnels`: you need the `assigned_ip` for rules
 - For mesh networking between two tunnels, always create bidirectional rules (A->B and B->A)
 - Confirm with the user before deleting rules
 - Prefer link-all over manual rules when the user wants full mesh

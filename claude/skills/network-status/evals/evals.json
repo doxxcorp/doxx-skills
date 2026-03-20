@@ -39,7 +39,7 @@
       "expectations": [
         "Calls list_tunnels and checks is_connected / connection_status",
         "Clearly shows which tunnels are connected and which are not",
-        "Suggests dig @10.10.10.10 to verify DNS is working through the VPN"
+        "Suggests dig @10.10.10.10 to verify DNS is working through the tunnel"
       ]
     }
   ]

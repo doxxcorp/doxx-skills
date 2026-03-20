@@ -30,7 +30,7 @@
         "Calls public_dns_create_hash to generate DoH/DoT URLs",
         "Provides the DoH URL and DoT hostname",
         "Gives platform-specific setup instructions (iOS or Android)",
-        "Explains this works without the VPN connection"
+        "Explains this works without the tunnel"
       ]
     },
     {

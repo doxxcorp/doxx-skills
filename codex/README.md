@@ -4,7 +4,7 @@ doxx.net skills for [OpenAI Codex CLI](https://github.com/openai/codex). Each sk
 
 ## Requirements
 
-- A doxx.net account — create one at [a0x13.doxx.net](https://a0x13.doxx.net)
+- A doxx.net account: create one at [a0x13.doxx.net](https://a0x13.doxx.net)
 - Your doxx.net auth token set as an environment variable:
 
 ```bash
@@ -17,7 +17,7 @@ Add this to your shell profile (`~/.zshrc`, `~/.bashrc`) to persist across sessi
 
 ### Interactive
 
-Run Codex from a skill directory — it auto-loads `AGENTS.md`:
+Run Codex from a skill directory: it auto-loads `AGENTS.md`:
 
 ```bash
 cd agents/codex/skills/doxxnet
@@ -63,6 +63,6 @@ codex exec "Create a tunnel in New York named laptop"
 
 ## Authentication
 
-doxx.net is anonymous by design — no usernames, no passwords, no email. Your auth token IS your identity. `DOXXNET_TOKEN` is used directly in all API calls.
+doxx.net is anonymous by design: no usernames, no passwords, no email. Your auth token IS your identity. `DOXXNET_TOKEN` is used directly in all API calls.
 
 If you don't have a token, create an account at [a0x13.doxx.net](https://a0x13.doxx.net) (human-only, proof-of-work gated).

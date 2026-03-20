@@ -17,12 +17,12 @@ User request: $ARGUMENTS
 
 Token is provided via `$DOXXNET_TOKEN` environment variable.
 
-**Config API** — POST to `https://config.doxx.net/v1/`:
+**Config API**: POST to `https://config.doxx.net/v1/`:
 ```
 curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
 ```
 
-**Stats API** — POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
+**Stats API**: POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
 ```
 curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: $DOXXNET_TOKEN" -d "param=value"
 ```
@@ -67,7 +67,7 @@ Returns: `total` (cumulative threats blocked), `ts`.
 
 ## Config API endpoints (for context)
 
-- `list_tunnels` — list tunnels with IPs and connection status (useful for identifying tunnel_tokens)
+- `list_tunnels`: list tunnels with IPs and connection status (useful for identifying tunnel_tokens)
 
 ## Alert types
 

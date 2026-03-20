@@ -10,19 +10,19 @@ Requires `DOXXNET_TOKEN` environment variable. If not set, tell the user to run 
 
 Token is provided via `$DOXXNET_TOKEN` environment variable.
 
-**Config API** — POST to `https://config.doxx.net/v1/`:
+**Config API**: POST to `https://config.doxx.net/v1/`:
 ```
 curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
 ```
 
 ## Endpoints
 
-- `firewall_rule_list` — list all firewall rules. Optional: `tunnel_token`
-- `firewall_rule_add` — add a rule. Params: `tunnel_token`, `protocol` (TCP/UDP/ICMP/ALL), `src_ip`, `src_port`, `dst_ip`, `dst_port`
-- `firewall_rule_delete` — delete a rule. Same params as add.
-- `firewall_link_all_toggle` — toggle mesh networking. Params: `enabled` (1 or 0)
-- `firewall_link_all_status` — check if mesh networking is enabled
-- `list_tunnels` — list tunnels (to get assigned IPs for rules)
+- `firewall_rule_list`: list all firewall rules. Optional: `tunnel_token`
+- `firewall_rule_add`: add a rule. Params: `tunnel_token`, `protocol` (TCP/UDP/ICMP/ALL), `src_ip`, `src_port`, `dst_ip`, `dst_port`
+- `firewall_rule_delete`: delete a rule. Same params as add.
+- `firewall_link_all_toggle`: toggle mesh networking. Params: `enabled` (1 or 0)
+- `firewall_link_all_status`: check if mesh networking is enabled
+- `list_tunnels`: list tunnels (to get assigned IPs for rules)
 
 ## Common patterns
 
@@ -40,7 +40,7 @@ curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DO
 ## Guidelines
 
 - Always list current rules before making changes
-- Get tunnel IPs from `list_tunnels` — you need the `assigned_ip` for rules
+- Get tunnel IPs from `list_tunnels`: you need the `assigned_ip` for rules
 - For mesh networking between two tunnels, always create bidirectional rules (A->B and B->A)
 - Confirm with the user before deleting rules
 - Prefer link-all over manual rules when the user wants full mesh

@@ -16,19 +16,19 @@ User request: $ARGUMENTS
 
 Token file: `~/.config/doxxnet/token`
 
-**IMPORTANT — avoiding permission prompts:**
+**IMPORTANT: avoiding permission prompts:**
 - To read the token: use the `Read` tool on `~/.config/doxxnet/token`. Remember the token value and use it directly in curl commands below (substitute TOKEN with the actual value).
 - To save a token: use the `Write` tool to `~/.config/doxxnet/token`
-- NEVER use Bash for file operations — only `Read` and `Write` tools. Bash is ONLY for `curl` commands.
+- NEVER use Bash for file operations: only `Read` and `Write` tools. Bash is ONLY for `curl` commands.
 
 If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it with the `Write` tool.
 
-**Config API** — POST to `https://config.doxx.net/v1/`:
+**Config API**: POST to `https://config.doxx.net/v1/`:
 ```
 curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=TOKEN"
 ```
 
-**Stats API** — POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
+**Stats API**: POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
 ```
 curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: TOKEN" -d "param=value"
 ```
@@ -75,7 +75,7 @@ Returns: `total` (cumulative threats blocked), `ts`.
 
 ## Config API endpoints (for context)
 
-- `list_tunnels` — list tunnels with IPs and connection status (useful for identifying tunnel_tokens)
+- `list_tunnels`: list tunnels with IPs and connection status (useful for identifying tunnel_tokens)
 
 ## Alert types
 
@@ -95,7 +95,7 @@ Returns: `total` (cumulative threats blocked), `ts`.
 
 ## Common requests
 
-**"Full overview" / "Show me everything":** Call all four endpoints — global (total threats), bandwidth (last hour), alerts (last 24h with category breakdown), and summary (7-day peaks). Present as a concise dashboard table.
+**"Full overview" / "Show me everything":** Call all four endpoints: global (total threats), bandwidth (last hour), alerts (last 24h with category breakdown), and summary (7-day peaks). Present as a concise dashboard table.
 
 **"Show my bandwidth":** Call bandwidth endpoint with last hour, present per-tunnel and aggregate in Mbps.
 

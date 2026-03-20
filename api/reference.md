@@ -6,7 +6,7 @@ All Config API calls use `POST https://config.doxx.net/v1/` with `application/x-
 
 **Auth:** Most endpoints require `token=AUTH_TOKEN`. Exceptions noted with "(no auth)".
 
-**Responses:** JSON with `"status": "success"` or `"status": "error"`. HTTP 200 can still be an error — always check `status` field.
+**Responses:** JSON with `"status": "success"` or `"status": "error"`. HTTP 200 can still be an error: always check `status` field.
 
 **Variables used below:**
 ```
@@ -130,7 +130,7 @@ Returns: `tunnel_token`, `assigned_ip`, `assigned_v6`, `public_key`, `private_ke
 curl -s -X POST $API -d "create_native_tunnel=1&token=$TOKEN&device_hash=DEVICE_HASH&server=SERVER_HOSTNAME&device_type=mobile"
 ```
 Required: `device_hash` (from `device_list_unified` or `list_tunnels`), `server`, `device_type` (`mobile`, `web`). Optional: `name`.
-Creates/refreshes a tunnel for the doxx.net native iOS/Android app (build 555+). Enforces subscription. Does NOT use WireGuard QR codes — the app manages its own connection. Clears `active_profile_id` on the tunnel.
+Creates/refreshes a tunnel for the doxx.net native iOS/Android app (build 555+). Enforces subscription. Does NOT use WireGuard QR codes: the app manages its own connection. Clears `active_profile_id` on the tunnel.
 
 ### update_tunnel
 ```bash
