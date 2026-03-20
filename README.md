@@ -97,7 +97,7 @@ Two commands cover everything:
 | **doxxnet** | Manage anything: tunnels, firewall, domains, DNS blocking, IP addresses, devices, account, stats — just describe what you want |
 | **network-wizard** | Guided setup: walks through auth, server selection, tunnel creation, mesh networking, client install, and optional domain/DNS/blocking config |
 
-Skills call the doxx.net API directly via `curl` — no intermediate server, no permission prompts.
+Skills call the doxx.net API directly via `curl` — no intermediate server, no background processes.
 
 ### OpenClaw Skills (`openclaw/`)
 
@@ -153,11 +153,11 @@ doxx.net is anonymous by design. There are no usernames, passwords, or emails. Y
 
 1. You create an account at [a0x13.doxx.net](https://a0x13.doxx.net) (human-only, proof-of-work gated)
 2. You give your auth token to the agent
-3. The agent saves it locally to `~/.config/doxxnet/token` and makes API calls on your behalf
-
-No secrets are stored in this repo. Your token stays on your machine.
+3. The agent makes API calls on your behalf — your token stays on your machine, nothing is stored in this repo
 
 ## Known Limitations
+
+### Claude Code
 
 - **Uninstall only works for user scope from the UI.** "Install for this project" and "Install locally" cannot be uninstalled from the `/plugin` UI due to [upstream scope-tracking bugs](https://github.com/anthropics/claude-code/issues/14202) in Claude Code's plugin system ([#14202](https://github.com/anthropics/claude-code/issues/14202), [#26513](https://github.com/anthropics/claude-code/issues/26513), [#25613](https://github.com/anthropics/claude-code/issues/25613)). Use the CLI as a workaround:
 
