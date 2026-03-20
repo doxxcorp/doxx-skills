@@ -155,7 +155,7 @@ doxx.net is anonymous by design. There are no usernames, passwords, or emails. Y
 
 1. You create an account at [a0x13.doxx.net](https://a0x13.doxx.net) (human-only, proof-of-work gated)
 2. You give your auth token to the agent
-3. The agent makes API calls on your behalf: your token stays on your machine, nothing is stored in this repo
+3. The agent makes API calls on your behalf: your token stays on your machine
 
 ## Known Limitations
 
