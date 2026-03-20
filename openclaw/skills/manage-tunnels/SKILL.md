@@ -3,7 +3,7 @@ name: manage-tunnels
 description: "Manage doxx.net tunnels: create, update, move, delete devices and get WireGuard configs"
 version: 1.0.0
 homepage: https://github.com/doxxcorp/doxx-skills
-user-invocable: true
+user-invocable: false
 metadata.openclaw: {"env": ["DOXXNET_TOKEN"], "bins": ["curl", "openssl", "dig", "wg-quick"], "primaryEnv": "DOXXNET_TOKEN"}
 ---
 

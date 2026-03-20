@@ -1,7 +1,7 @@
 ---
 name: network-wizard
 description: "Set up a doxx.net private network: tunnels, mesh networking, domains, DNS blocking, and client installation"
-argument-hint: "[number of devices] [server location]"
+argument-hint: "[--quick] [number of devices] [server location]"
 user-invocable: true
 allowed-tools: Bash(curl *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo wg-quick *), Read, Write
 ---
@@ -42,6 +42,22 @@ Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat 
 ## Quick start
 
 If the user provided arguments: $ARGUMENTS — parse them for device count and/or server preference, then skip ahead to the relevant phase. If `~/.config/doxxnet/token` exists, skip Phase 1.
+
+## Mode selection
+
+If `$ARGUMENTS` contains `--quick` or `--simple`, use **Quick mode** automatically.
+
+Otherwise, ask upfront:
+
+> "Quick setup or full setup?
+> - **Quick**: connect 1-3 devices, no custom domain (5 min)
+> - **Full**: mesh network, custom domain, DNS blocking, TLS certs, secure DNS (15-30 min)"
+
+**Quick mode** runs phases 1, 2, 3, 4, 7, 9 -- silently skips phases 5 (domain), 6 (DNS blocking), 8 (secure DNS) without asking.
+**Full mode** runs all 9 phases, prompting the user for each optional feature before proceeding.
+
+If the user says "simple", "basic", "just connect my devices", "quick", or similar -- use Quick mode.
+If the user says "full", "everything", "with domain", "ad blocking", or is a power user -- use Full mode.
 
 ---
 

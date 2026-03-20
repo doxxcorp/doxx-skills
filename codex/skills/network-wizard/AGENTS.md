@@ -32,6 +32,22 @@ curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token:
 
 If `$DOXXNET_TOKEN` is already set and valid, skip Phase 1.
 
+## Mode selection
+
+If the invocation contains `--quick` or `--simple`, use **Quick mode** automatically.
+
+Otherwise, ask upfront:
+
+> "Quick setup or full setup?
+> - **Quick**: connect 1-3 devices, no custom domain (5 min)
+> - **Full**: mesh network, custom domain, DNS blocking, TLS certs, secure DNS (15-30 min)"
+
+**Quick mode** runs phases 1, 2, 3, 4, 7, 9 -- silently skips phases 5 (domain), 6 (DNS blocking), 8 (secure DNS) without asking.
+**Full mode** runs all 9 phases, prompting the user for each optional feature before proceeding.
+
+If the user says "simple", "basic", "just connect my devices", "quick", or similar -- use Quick mode.
+If the user says "full", "everything", "with domain", "ad blocking", or is a power user -- use Full mode.
+
 ---
 
 ## Phase 1: Authentication

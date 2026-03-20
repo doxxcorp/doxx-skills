@@ -2,6 +2,17 @@
   "skill_name": "doxxnet",
   "evals": [
     {
+      "id": -1,
+      "prompt": "/doxxnet help",
+      "expected_output": "Prints the capability menu and asks what the user wants to do",
+      "expectations": [
+        "Displays all 9 capability areas with short descriptions",
+        "Mentions /network-wizard for guided setup",
+        "Does not make any API calls",
+        "Asks the user what they want to do"
+      ]
+    },
+    {
       "id": 0,
       "prompt": "Show me my tunnels and current bandwidth usage",
       "expected_output": "Tunnel list plus bandwidth stats",
@@ -75,6 +86,100 @@
         "Calls create_account_recovery to generate new codes",
         "Displays recovery codes with security warning",
         "Reminds user to save codes securely"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "build me a VPN",
+      "expected_output": "Asks whether the user wants quick or full setup, then runs the wizard inline",
+      "expectations": [
+        "Recognizes setup intent from natural language without an explicit command",
+        "Offers quick vs full mode choice with descriptions",
+        "Checks for an existing auth token before proceeding",
+        "Follows the appropriate wizard phases based on the user's mode choice"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Set up a new tunnel in New York and install WireGuard on my Mac",
+      "expected_output": "Creates a tunnel on a New York server, writes the WireGuard config to /etc/wireguard/doxx.conf, and activates it",
+      "expectations": [
+        "Calls servers endpoint and selects a New York server",
+        "Calls create_tunnel with the New York server",
+        "Calls wireguard endpoint to get the config",
+        "Writes config to /etc/wireguard/doxx.conf using the Write tool",
+        "Runs sudo wg-quick up doxx to activate the tunnel"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Lease a dedicated IPv4 address for my iPhone tunnel",
+      "expected_output": "Leases a dedicated public IPv4 and applies it to the iPhone tunnel without asking the user about profiles",
+      "expectations": [
+        "Calls list_tunnels to identify the iPhone tunnel",
+        "Checks the tunnel's profile_id to see if a profile already exists",
+        "Creates a saved profile silently if none exists",
+        "Calls lease_public_ipv4 with the profile details",
+        "Calls load_profile to apply the profile to the tunnel",
+        "Presents the leased IP address to the user without mentioning profiles"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Show me my bandwidth usage for the last 7 days and any security alerts",
+      "expected_output": "Returns bandwidth stats for the 7-day window plus a security alert summary",
+      "expectations": [
+        "Calls /api/stats/bandwidth with a 7-day date range",
+        "Calls /api/stats/alerts with last=7d",
+        "Presents bandwidth peak and aggregate data",
+        "Groups alerts by category (ads, tracking, malware)"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Register a .vpn domain and create an A record pointing to my tunnel IP",
+      "expected_output": "Registers a .vpn domain and creates a DNS A record pointing to the tunnel's assigned IP",
+      "expectations": [
+        "Asks for or infers a domain name with .vpn TLD",
+        "Calls create_domain to register the domain",
+        "Calls list_tunnels to get the tunnel's assigned IP",
+        "Calls create_dns_record with type=A and the tunnel IP as content",
+        "Confirms the domain and record are created"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "Link all my tunnels together for mesh networking",
+      "expected_output": "Enables full mesh networking across all tunnels",
+      "expectations": [
+        "Calls list_tunnels to confirm tunnels exist",
+        "Calls firewall_link_all_toggle with enabled=1",
+        "Confirms mesh is active via firewall_link_all_status",
+        "Reports which tunnels are now linked"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "Rotate my static IP address and update any DNS records that reference it",
+      "expected_output": "Rotates the static IP and updates all DNS A records that pointed to the old IP",
+      "expectations": [
+        "Calls list_addresses to identify the static_public address",
+        "Warns the user that the old IP will be released",
+        "Calls rotate_address to get the new IP",
+        "Calls list_domains and list_dns for each domain to find A records pointing to the old IP",
+        "Calls update_dns_record for each affected record with the new IP"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "Generate a WireGuard QR code for my iPhone tunnel",
+      "expected_output": "Generates a QR code PNG for the iPhone tunnel's WireGuard config",
+      "expectations": [
+        "Calls list_tunnels to identify the iPhone tunnel",
+        "Verifies the tunnel is a generic WireGuard tunnel (not a native app tunnel)",
+        "Calls wireguard endpoint to get the config",
+        "Calls generate_qr with the config data and saves to a .png file",
+        "Instructs the user to scan it in the WireGuard iOS app"
       ]
     }
   ]

@@ -3,7 +3,7 @@ name: manage-addresses
 description: "Manage doxx.net IP addresses and saved profiles: assign, release, rotate IPs, lease dedicated IPv4, create and manage connection profiles"
 version: 1.0.0
 homepage: https://github.com/doxxcorp/doxx-skills
-user-invocable: true
+user-invocable: false
 metadata.openclaw: {"env": ["DOXXNET_TOKEN"], "bins": ["curl"], "primaryEnv": "DOXXNET_TOKEN"}
 ---
 

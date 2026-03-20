@@ -123,10 +123,13 @@ The same 11 skills ported for [OpenAI Codex CLI](https://github.com/openai/codex
 ## Examples
 
 ```
+Build me a VPN
+```
+```
 Set up a new tunnel in New York and install WireGuard on my Mac
 ```
 ```
-Make a profile and lease an IPv4 address and apply the profile to my iPhone tunnel
+Lease a dedicated IPv4 address for my iPhone tunnel
 ```
 ```
 Show me my bandwidth usage for the last 7 days and any security alerts

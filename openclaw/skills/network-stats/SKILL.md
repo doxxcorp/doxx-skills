@@ -3,7 +3,7 @@ name: network-stats
 description: "View doxx.net network stats: bandwidth usage, security alerts, threat categories, peak throughput"
 version: 1.0.0
 homepage: https://github.com/doxxcorp/doxx-skills
-user-invocable: true
+user-invocable: false
 metadata.openclaw: {"env": ["DOXXNET_TOKEN"], "bins": ["curl"], "primaryEnv": "DOXXNET_TOKEN"}
 ---
 

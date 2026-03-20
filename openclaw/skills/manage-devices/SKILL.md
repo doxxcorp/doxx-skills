@@ -3,7 +3,7 @@ name: manage-devices
 description: "Manage doxx.net devices: list, rename, change icons, and delete devices"
 version: 1.0.0
 homepage: https://github.com/doxxcorp/doxx-skills
-user-invocable: true
+user-invocable: false
 metadata.openclaw: {"env": ["DOXXNET_TOKEN"], "bins": ["curl"], "primaryEnv": "DOXXNET_TOKEN"}
 ---
 

@@ -47,6 +47,30 @@
         "Generates a QR code using the generate_qr endpoint",
         "Provides step-by-step WireGuard iOS app instructions"
       ]
+    },
+    {
+      "id": 5,
+      "prompt": "/network-wizard --quick 2 us-east",
+      "expected_output": "Creates 2 tunnels on a US East server with mesh enabled and WireGuard configs generated, skipping domain, DNS blocking, and secure DNS phases",
+      "expectations": [
+        "Detects --quick flag and skips mode selection question",
+        "Uses a US East server without asking for server preference",
+        "Creates 2 tunnels without asking for device count",
+        "Enables mesh networking via firewall_link_all_toggle",
+        "Fetches WireGuard config for each tunnel",
+        "Does not ask about custom domain, DNS blocking, or secure DNS",
+        "Prints a summary card"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "/network-wizard",
+      "expected_output": "Asks the user to choose between quick and full setup before proceeding",
+      "expectations": [
+        "Presents quick vs full setup options with time estimates",
+        "Does not begin Phase 1 before getting a mode answer from the user",
+        "Describes what each mode includes and excludes"
+      ]
     }
   ]
 }
