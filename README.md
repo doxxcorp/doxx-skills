@@ -144,7 +144,7 @@ Show me which devices are connected and when they last checked in
 Rotate my static IP address and update any DNS records that reference it
 ```
 ```
-Generate a WireGuard QR code for my iPhone tunnel
+Set up my tunnel in the WireGuard app on my phone
 ```
 
 ## How It Works

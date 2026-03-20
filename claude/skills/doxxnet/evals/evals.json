@@ -172,14 +172,14 @@
     },
     {
       "id": 14,
-      "prompt": "Generate a WireGuard QR code for my iPhone tunnel",
-      "expected_output": "Generates a QR code PNG for the iPhone tunnel's WireGuard config",
+      "prompt": "Set up my tunnel in the WireGuard app on my phone",
+      "expected_output": "Generates a WireGuard QR code for the user to scan in the WireGuard app",
       "expectations": [
-        "Calls list_tunnels to identify the iPhone tunnel",
-        "Verifies the tunnel is a generic WireGuard tunnel (not a native app tunnel)",
+        "Calls list_tunnels to identify the relevant tunnel",
+        "Verifies the tunnel is a generic WireGuard tunnel (not a native doxx.net app tunnel)",
         "Calls wireguard endpoint to get the config",
         "Calls generate_qr with the config data and saves to a .png file",
-        "Instructs the user to scan it in the WireGuard iOS app"
+        "Instructs the user to scan it in the WireGuard app"
       ]
     }
   ]
