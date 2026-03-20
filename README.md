@@ -88,9 +88,7 @@ Point your agent at the reference file and provide your doxx.net auth token at r
 
 ## What's Inside
 
-### Claude Code Plugin (`claude/`)
-
-Two commands cover everything:
+Two commands cover everything, available across all three platforms:
 
 | Command | What it does |
 |---------|-------------|
@@ -99,13 +97,17 @@ Two commands cover everything:
 
 Skills call the doxx.net API directly via `curl`: no intermediate server, no background processes.
 
+### Claude Code Plugin (`claude/`)
+
+See the Getting Started section above for installation and usage.
+
 ### OpenClaw Skills (`openclaw/`)
 
-Native [OpenClaw](https://openclaw.org) skills with the same `doxxnet` and `network-wizard` commands. Uses `$DOXXNET_TOKEN` environment variable. See [openclaw/README.md](openclaw/README.md).
+Native [OpenClaw](https://openclaw.org) skills. Uses `$DOXXNET_TOKEN` environment variable. See [openclaw/README.md](openclaw/README.md).
 
 ### Codex Agent Skills (`codex/`)
 
-Native [OpenAI Codex CLI](https://github.com/openai/codex) skills using `AGENTS.md` (auto-loaded on startup) with the same `doxxnet` and `network-wizard` commands. Uses `$DOXXNET_TOKEN` environment variable. See [codex/README.md](codex/README.md).
+Native [OpenAI Codex CLI](https://github.com/openai/codex) skills using `AGENTS.md` (auto-loaded on startup). Uses `$DOXXNET_TOKEN` environment variable. See [codex/README.md](codex/README.md).
 
 ### API Reference (`api/`)
 
