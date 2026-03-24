@@ -84,14 +84,17 @@ For mesh between two tunnels, create bidirectional rules (A->B and B->A). Prefer
 
 ## Domains & DNS
 
+- `list_tlds` — list all 196 available TLDs with categories (no auth)
 - `list_domains`, `create_domain` (params: `domain`), `delete_domain`
 - `list_dns` (params: `domain`), `create_dns_record`, `update_dns_record`, `delete_dns_record`
   - Record params: `domain`, `name` (FQDN), `type` (A/AAAA/CNAME/MX/TXT/NS/SRV/PTR), `content`. Optional: `ttl`, `prio`
 - `get_domain_validation`: TXT code for external domain import
-- `import_domain`: import after TXT verification
+- `import_domain`: import after TXT verification. Params: `domain`, `validation_code`
+- `link_profile_domain`: link a profile to a domain; creates A/AAAA records auto-updating with the profile's IPs. Params: `domain`, `hostname`, `profile_id`
+- `unlink_profile_domain`: remove profile-domain link. Params: `profile_id`
 - `sign_certificate`: sign a CSR (returns raw PEM). Params: `domain`, `csr`
 
-Popular TLDs: `.lan`, `.vpn`, `.mesh`, `.home`, `.wg`, `.doxx`. Default is `.doxx`.
+Popular TLDs: `.lan`, `.vpn`, `.mesh`, `.home`, `.wg`, `.doxx`. Default is `.doxx`. Use `list_tlds` for the full list.
 
 TLS workflow: `openssl ecparam -genkey -name prime256v1 -o D.key` → `openssl req -new -key D.key -out D.csr -subj "/CN=D"` → `sign_certificate`
 
@@ -118,11 +121,13 @@ DeviceInfo fields: device_hash, device_name, device_model, os_type, device_type,
 
 ## IP Addresses
 
-- `list_addresses`: list assigned IPs with type, location, tunnel, profile, connection status
+- `list_addresses`: list assigned IPs with type, location, tunnel, profile, connection status. Optional: `tunnel_token`, `device_hash`. Returns `public_ipv4_used`, `public_ipv4_max`
 - `assign_address`: assign IP to profile. Params: `address`, `type`. Optional: `profile_id`
 - `release_address`: release IP. Params: `address`, `type`
-- `rotate_address`: rotate to new IP. Params: `address`, `type`
-- `lease_public_ipv4`: lease dedicated public IPv4. Params: `profile_name`, `profile_icon`, `profile_type`, `server`. Optional: `ip_type`, `include_ipv6`
+- `rotate_address`: rotate to new IP. Params: `address`, `type` (static_private or static_ipv6 only)
+- `lease_public_ipv4`: lease dedicated public IPv4. Modes: (1) `profile_id`, (2) `profile_name`+`server`, (3) `server` alone. Optional: `ip_type`, `include_ipv6`
+- `list_ip_reservations`: list dedicated IPv4 reservations with `slots_used`, `slots_max`
+- `release_ip_reservation`: release a dedicated IP reservation. Params: `ip_address`
 
 **Transparent profile handling for IPv4 leasing:**
 When the user asks to lease a dedicated IP for a tunnel (without mentioning profiles):
@@ -138,10 +143,13 @@ Note: `create_native_tunnel` auto-creates a profile; `create_tunnel`/`create_tun
 ## Saved Profiles
 
 - `list_saved_profiles`: list profiles with settings and usage status
-- `create_saved_profile`: create. Params: `profile_name`, `profile_icon`, `profile_type`, `server`
-- `update_saved_profile`: update. Params: `profile_id`, and: `profile_icon`, `profile_name`, `preferred_server`
+- `save_profile`: snapshot current tunnel settings into a new profile. Params: `tunnel_token`, `profile_name`. Optional: `profile_icon`, `save_preferred_server` (1), `lock_after_save` (1)
+- `create_saved_profile`: create empty profile. Params: `profile_name`, `profile_icon`, `profile_type`, `server`
+- `update_saved_profile`: update. Params: `profile_id`, and: `profile_icon`, `profile_name`, `preferred_server`. Re-snapshot: add `re_snapshot=1`, `tunnel_token`
 - `delete_saved_profile`: delete. Params: `profile_id`
 - `load_profile`: apply profile to tunnel. Params: `tunnel_token`, `profile_id`
+- `lock_profile`: lock profile (IP/settings). Params: `profile_id` or `tunnel_token`. Optional: `lock_type` (`ip`/`settings`)
+- `unlock_profile`: unlock profile. Params: `profile_id` or `tunnel_token`. Optional: `lock_type`
 
 ## Account
 

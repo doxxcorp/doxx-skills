@@ -24,19 +24,24 @@ curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DO
 
 ## IP Address Endpoints
 
-- `list_addresses`: list all assigned IPs. Returns `addresses[]` with: address, type (static_public/static_private/static_ipv6), site_id, location, profile_id, profile_name, tunnel_token, tunnel_name, connected, device_name, persistent
+- `list_addresses`: list all assigned IPs. Optional: `tunnel_token`, `device_hash`. Returns `addresses[]` with: address, type (static_public/static_private/static_ipv6), site_id, location, profile_id, profile_name, tunnel_token, tunnel_name, connected, device_name, persistent. Also returns `public_ipv4_used`, `public_ipv4_max`.
 - `assign_address`: assign IP to a profile. Params: `address`, `type`. Optional: `profile_id` (omit to unassign)
 - `release_address`: release an assigned IP. Params: `address`, `type`
-- `rotate_address`: rotate to a new IP (releases current, assigns new). Params: `address`, `type`
-- `lease_public_ipv4`: lease a dedicated public IPv4. Params: `profile_name`, `profile_icon`, `profile_type` (wireguard), `server`. Optional: `ip_type` (ipv6), `include_ipv6` (1)
+- `rotate_address`: rotate to a new IP (releases current, assigns new). Params: `address`, `type` (static_private or static_ipv6 only -- public IPv4 cannot be rotated)
+- `lease_public_ipv4`: lease a dedicated public IPv4. Three modes: (1) `profile_id` for existing profile, (2) `profile_name` + `server` to create new profile, (3) `server` alone for pool-only. Optional: `ip_type` (ipv6), `include_ipv6` (1). Returns: `ip_address`, `profile_id`, flags: `pool_only`, `profile_created`, `requires_reconnect`
+- `list_ip_reservations`: list all dedicated public IPv4 reservations with slot usage. Returns `reservations[]` with `ip_address`, `server`, `profile_id`, `profile_name`, plus `slots_used`, `slots_max`
+- `release_ip_reservation`: release a dedicated IP reservation (returns IP to pool, different from `release_address`). Params: `ip_address`
 
 ## Saved Profile Endpoints
 
 - `list_saved_profiles`: list all profiles. Returns `profiles[]` with: profile_id, profile_name, profile_icon, profile_type (ios/wireguard/android), preferred_server, domain_name, created_at, updated_at, ipv4_public_enabled, onion_enabled, proxy_enabled, ip_locked, settings_locked, in_use, in_use_by, in_use_device_icon, source_tunnel_name
-- `create_saved_profile`: create a profile. Params: `profile_name`, `profile_icon`, `profile_type` (wireguard), `server`
-- `update_saved_profile`: update settings. Params: `profile_id`. Optional: `profile_icon`, `profile_name`, `preferred_server`
+- `save_profile`: snapshot current tunnel settings (DNS blocklists, firewall, proxy, transport) into a new profile. Params: `tunnel_token`, `profile_name`. Optional: `profile_icon`, `save_preferred_server` (1), `lock_after_save` (1). Returns: `profile_id`
+- `create_saved_profile`: create an empty profile (for static IP management). Params: `profile_name`, `profile_icon`, `profile_type` (wireguard), `server`
+- `update_saved_profile`: update profile metadata. Params: `profile_id`. Optional: `profile_icon`, `profile_name`, `preferred_server`. For re-snapshot from tunnel: add `re_snapshot=1`, `tunnel_token`
 - `delete_saved_profile`: delete. Params: `profile_id`
 - `load_profile`: apply a profile to a tunnel. Params: `tunnel_token`, `profile_id`
+- `lock_profile`: lock a profile to prevent IP/settings changes. Params: `profile_id` or `tunnel_token`. Optional: `lock_type` (`ip`, `settings`, or omit for both)
+- `unlock_profile`: unlock a locked profile. Params: `profile_id` or `tunnel_token`. Optional: `lock_type`
 
 ## Context Endpoints
 
