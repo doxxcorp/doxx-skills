@@ -174,15 +174,15 @@ Note: `create_native_tunnel` auto-creates a profile; `create_tunnel`/`create_tun
 - `update_profile`: update. Params: `recovery_email`, `recovery_phone`, `notifications`
 - `create_account_recovery`: generate recovery codes. Returns: `codes[]`
 - `subscription_status`: check subscription tier, status, pro features
-- See also: token management is a separate capability -- use `list_tokens`, `create_token`, `revoke_token`, `update_token`, and fence/scope endpoints for API key management
+- See also: token management is a separate capability -- use `user_list_tokens`, `create_token`, `revoke_token`, `update_token`, and fence/scope endpoints for API key management
 
 ## Tokens
 
-Most token endpoints require **admin** role. `list_tokens` is available to any role.
+Most token endpoints require **admin** role. `user_list_tokens` is available to any role.
 
-- `list_tokens`: list all tokens with role, expiry, revocation status, geo/IP fences, and tunnel scope. `is_current` flags the calling token
+- `user_list_tokens`: list all tokens with role, expiry, revocation status, geo/IP fences, and tunnel scope. Returns full token string. `is_current` flags the calling token
 - `create_token`: create a new token. Optional: `label`, `role` (`admin`/`net-admin`/`read-only`, default `admin`), `expires_at` (RFC3339). Returns: `new_token` (shown once only)
-- `revoke_token`: revoke a token. Params: `target_token` (full string). Cannot revoke your own active token
+- `revoke_token`: revoke a token. Params: `target_token` (full string). Cannot revoke your own active token or the last admin token on the account
 - `update_token`: update label, role, or expiry. Params: `target_token`. Optional: `label`, `role`, `expires_at` (RFC3339 or `never`)
 - `add_geo_fence` / `remove_geo_fence`: restrict token by country. Params: `target_token`, `country` (ISO 3166-1 alpha-2). Removing all entries removes restriction
 - `add_ip_fence` / `remove_ip_fence`: restrict token by IP/CIDR. Params: `target_token`, `cidr`. Removing all entries removes restriction

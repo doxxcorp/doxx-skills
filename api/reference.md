@@ -315,12 +315,12 @@ Create and manage auth tokens with role-based access, expiration, geo fencing, I
 
 **Roles:** `admin` (full access), `net-admin` (tunnels/network, no token management), `read-only` (read-only access).
 
-### list_tokens
+### user_list_tokens
 List all tokens for the account. Available to any role.
 ```bash
-curl -s -X POST $API -d "list_tokens=1&token=$TOKEN"
+curl -s -X POST $API -d "user_list_tokens=1&token=$TOKEN"
 ```
-Returns: `tokens[]` with `token_preview`, `label`, `role`, `created_at`, `expires_at`, `revoked_at`, `is_current`, `geo_fence[]`, `ip_fence[]`, `tunnel_scope[]`.
+Returns: `tokens[]` with `token` (full token string -- use directly as `target_token` in other operations), `label`, `role`, `created_at`, `expires_at`, `revoked_at`, `is_current`, `geo_fence[]`, `ip_fence[]`, `tunnel_scope[]`.
 
 ### create_token (admin only)
 Create a new auth token. Full token string is returned once only -- store it securely.
@@ -331,7 +331,7 @@ Optional: `label` (max 64 chars), `role` (`admin`/`net-admin`/`read-only`, defau
 Returns: `new_token`.
 
 ### revoke_token (admin only)
-Revoke a token immediately. It remains in `list_tokens` with a `revoked_at` timestamp. Cannot revoke your own active token.
+Revoke a token immediately. It remains in `user_list_tokens` with a `revoked_at` timestamp. Cannot revoke your own active token or the last admin token on the account.
 ```bash
 curl -s -X POST $API -d "revoke_token=1&token=$TOKEN&target_token=TARGET_TOKEN"
 ```

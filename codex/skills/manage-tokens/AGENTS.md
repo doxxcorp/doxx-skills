@@ -15,17 +15,17 @@ Token is provided via `$DOXXNET_TOKEN` environment variable.
 curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
 ```
 
-Most token management endpoints require **admin** role. `list_tokens` is available to all roles.
+Most token management endpoints require **admin** role. `user_list_tokens` is available to all roles.
 
 ## Endpoints
 
 ### Listing
-- `list_tokens`: list all tokens for the account. Returns: `tokens[]` with `token_preview`, `label`, `role`, `created_at`, `expires_at`, `revoked_at`, `is_current`, `geo_fence[]`, `ip_fence[]`, `tunnel_scope[]`
+- `user_list_tokens`: list all tokens for the account. Returns: `tokens[]` with `token` (full token string -- use directly as `target_token` in other operations), `label`, `role`, `created_at`, `expires_at`, `revoked_at`, `is_current`, `geo_fence[]`, `ip_fence[]`, `tunnel_scope[]`
 
 ### Creating and updating (admin only)
 - `create_token`: create a new token. Optional params: `label` (max 64 chars), `role` (`admin`/`net-admin`/`read-only`, default `admin`), `expires_at` (RFC3339). Returns: `new_token` (shown once, store securely)
 - `update_token`: update label, role, or expiry. Params: `target_token` (required), optional: `label`, `role`, `expires_at` (RFC3339 or `never`). Can reactivate expired tokens.
-- `revoke_token`: revoke immediately. Params: `target_token` (required). Cannot revoke your own active token. Revoked tokens appear in `list_tokens` with `revoked_at` set.
+- `revoke_token`: revoke immediately. Params: `target_token` (required). Cannot revoke your own active token or the last admin token on the account. Revoked tokens appear in `user_list_tokens` with `revoked_at` set.
 
 ### Geo fencing (admin only)
 When a token has geo fence entries, it can only be used from those countries (GeoIP lookup).
@@ -52,7 +52,7 @@ When a token has tunnel scope entries, it can only view and modify those tunnels
 
 ## Guidelines
 
-- Always call `list_tokens` first to show the current token landscape before making changes
+- Always call `user_list_tokens` first to show the current token landscape before making changes
 - When creating tokens for AI agents or automation: suggest `net-admin` role + expiration + IP fence for least privilege
 - Strongly warn users when they revoke a token that is currently in use (they will need to update their configuration)
 - `new_token` from `create_token` is shown only once -- remind users to store it securely before moving on
