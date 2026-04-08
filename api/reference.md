@@ -299,6 +299,93 @@ curl -s -X POST $API -d "load_profile=1&token=$TOKEN&tunnel_token=$TUNNEL&profil
 ```
 Required: `tunnel_token`, `profile_id`.
 
+### apply_mode
+Apply a connection mode template directly to a tunnel without creating or loading a saved profile. Replaces DNS blocklists, whitelists, blacklists, and settings in a single transaction. Detaches any bound profile.
+```bash
+curl -s -X POST $API -d "apply_mode=1&token=$TOKEN&tunnel_token=$TUNNEL&template_key=security" --data-urlencode 'settings={}' --data-urlencode 'dns={}'
+```
+Required: `tunnel_token`, `settings` (JSON). Optional: `template_key`, `dns` (JSON).
+Returns: `template_key`, `mode`.
+
+---
+
+## Tokens
+
+Create and manage auth tokens with role-based access, expiration, geo fencing, IP fencing, and tunnel scoping.
+
+**Roles:** `admin` (full access), `net-admin` (tunnels/network, no token management), `read-only` (read-only access).
+
+### list_tokens
+List all tokens for the account. Available to any role.
+```bash
+curl -s -X POST $API -d "list_tokens=1&token=$TOKEN"
+```
+Returns: `tokens[]` with `token_preview`, `label`, `role`, `created_at`, `expires_at`, `revoked_at`, `is_current`, `geo_fence[]`, `ip_fence[]`, `tunnel_scope[]`.
+
+### create_token (admin only)
+Create a new auth token. Full token string is returned once only -- store it securely.
+```bash
+curl -s -X POST $API -d "create_token=1&token=$TOKEN&label=my-agent&role=net-admin"
+```
+Optional: `label` (max 64 chars), `role` (`admin`/`net-admin`/`read-only`, default `admin`), `expires_at` (RFC3339).
+Returns: `new_token`.
+
+### revoke_token (admin only)
+Revoke a token immediately. It remains in `list_tokens` with a `revoked_at` timestamp. Cannot revoke your own active token.
+```bash
+curl -s -X POST $API -d "revoke_token=1&token=$TOKEN&target_token=TARGET_TOKEN"
+```
+Required: `target_token` (full token string).
+
+### update_token (admin only)
+Update a token's label, role, or expiration. Can reactivate expired tokens by extending expiry. Cannot downgrade your own active token's role.
+```bash
+curl -s -X POST $API -d "update_token=1&token=$TOKEN&target_token=TARGET_TOKEN&label=new-label&role=read-only&expires_at=2027-01-01T00:00:00Z"
+```
+Required: `target_token`. Optional: `label`, `role`, `expires_at` (RFC3339 or `never`).
+
+### add_geo_fence (admin only)
+Restrict a token to specific countries. When any geo fence entries exist, the token can only be used from those countries (GeoIP lookup). If GeoIP lookup fails, request is allowed.
+```bash
+curl -s -X POST $API -d "add_geo_fence=1&token=$TOKEN&target_token=TARGET_TOKEN&country=US"
+```
+Required: `target_token`, `country` (ISO 3166-1 alpha-2, e.g. `US`). Optional: `label`.
+
+### remove_geo_fence (admin only)
+Remove a country from a token's geo fence. Removing all entries makes the token unrestricted by country.
+```bash
+curl -s -X POST $API -d "remove_geo_fence=1&token=$TOKEN&target_token=TARGET_TOKEN&country=US"
+```
+Required: `target_token`, `country`.
+
+### add_ip_fence (admin only)
+Restrict a token to specific IPs or CIDRs. When any IP fence entries exist, the token can only be used from matching addresses.
+```bash
+curl -s -X POST $API -d "add_ip_fence=1&token=$TOKEN&target_token=TARGET_TOKEN&cidr=203.0.113.0/24"
+```
+Required: `target_token`, `cidr` (IPv4/IPv6 address or CIDR). Optional: `label`. Bare IPs normalized to /32 (IPv4) or /128 (IPv6).
+
+### remove_ip_fence (admin only)
+Remove a CIDR from a token's IP fence. Must match the stored value exactly. Removing all entries makes the token unrestricted by IP.
+```bash
+curl -s -X POST $API -d "remove_ip_fence=1&token=$TOKEN&target_token=TARGET_TOKEN&cidr=203.0.113.0/24"
+```
+Required: `target_token`, `cidr`.
+
+### add_token_tunnel (admin only)
+Restrict a token to a specific tunnel. When any tunnel scope entries exist, the token can only view and modify those tunnels.
+```bash
+curl -s -X POST $API -d "add_token_tunnel=1&token=$TOKEN&target_token=TARGET_TOKEN&tunnel_token=$TUNNEL"
+```
+Required: `target_token`, `tunnel_token` (must be owned by the account). Optional: `label`.
+
+### remove_token_tunnel (admin only)
+Remove a tunnel from a token's scope. Removing all entries restores full tunnel access.
+```bash
+curl -s -X POST $API -d "remove_token_tunnel=1&token=$TOKEN&target_token=TARGET_TOKEN&tunnel_token=$TUNNEL"
+```
+Required: `target_token`, `tunnel_token`.
+
 ---
 
 ## DNS Blocking

@@ -16,6 +16,7 @@ doxx.net -- what can I help with?
   Devices       List, rename, change icons, delete devices
   IP Addresses  Assign, release, rotate IPs; lease dedicated IPv4; manage connection profiles
   Account       Recovery settings, notifications, recovery codes, subscription status
+  Tokens        Create and manage auth tokens; set expiration, roles, geo/IP fences, tunnel scope
   Stats         Bandwidth usage, security alerts, threat categories, peak throughput
   Status        Tunnel and device connection dashboard
 
@@ -150,6 +151,7 @@ Note: `create_native_tunnel` auto-creates a profile; `create_tunnel`/`create_tun
 - `load_profile`: apply profile to tunnel. Params: `tunnel_token`, `profile_id`
 - `lock_profile`: lock profile (IP/settings). Params: `profile_id` or `tunnel_token`. Optional: `lock_type` (`ip`/`settings`)
 - `unlock_profile`: unlock profile. Params: `profile_id` or `tunnel_token`. Optional: `lock_type`
+- `apply_mode`: apply a connection mode template to a tunnel without creating a profile. Params: `tunnel_token`, `settings` (JSON). Optional: `template_key`, `dns` (JSON). Returns: `template_key`, `mode`
 
 ## Account
 
@@ -157,6 +159,22 @@ Note: `create_native_tunnel` auto-creates a profile; `create_tunnel`/`create_tun
 - `update_profile`: update. Params: `recovery_email`, `recovery_phone`, `notifications`
 - `create_account_recovery`: generate recovery codes. Returns: `codes[]`
 - `subscription_status`: check subscription tier, status, pro features
+- See also: token management is a separate capability -- use `list_tokens`, `create_token`, `revoke_token`, `update_token`, and fence/scope endpoints for API key management
+
+## Tokens
+
+Most token endpoints require **admin** role. `list_tokens` is available to any role.
+
+- `list_tokens`: list all tokens with role, expiry, revocation status, geo/IP fences, and tunnel scope. `is_current` flags the calling token
+- `create_token`: create a new token. Optional: `label`, `role` (`admin`/`net-admin`/`read-only`, default `admin`), `expires_at` (RFC3339). Returns: `new_token` (shown once only)
+- `revoke_token`: revoke a token. Params: `target_token` (full string). Cannot revoke your own active token
+- `update_token`: update label, role, or expiry. Params: `target_token`. Optional: `label`, `role`, `expires_at` (RFC3339 or `never`)
+- `add_geo_fence` / `remove_geo_fence`: restrict token by country. Params: `target_token`, `country` (ISO 3166-1 alpha-2). Removing all entries removes restriction
+- `add_ip_fence` / `remove_ip_fence`: restrict token by IP/CIDR. Params: `target_token`, `cidr`. Removing all entries removes restriction
+- `add_token_tunnel` / `remove_token_tunnel`: scope token to specific tunnels. Params: `target_token`, `tunnel_token`. Removing all entries restores full access
+
+**Token rotation:** create the new token first, then revoke the old one (never the reverse).
+**Least privilege for agents:** `net-admin` role + expiration + IP fence.
 
 ## Stats
 

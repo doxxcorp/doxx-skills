@@ -22,6 +22,7 @@ curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DO
 - `create_account_recovery`: generate new recovery codes. Returns: `codes[]`
 - `verify_account_recovery`: verify recovery code (for account recovery flow). Returns: `new_token`
 - `subscription_status`: check subscription. Returns: has_active_subscription, tier, subscription (original_transaction_id, product_id, tier, effective_tier, status, purchase_date, expires_date, is_trial, auto_renew), pro_features map
+- For token management (create/revoke tokens, set expiry, geo/IP fences, tunnel scoping): see the `manage-tokens` skill
 
 ## Guidelines
 
