@@ -165,13 +165,13 @@ Note: `create_native_tunnel` auto-creates a profile; `create_tunnel`/`create_tun
 
 Most token endpoints require **admin** role. `user_list_tokens` is available to any role.
 
-- `user_list_tokens`: list all tokens with role, expiry, revocation status, geo/IP fences, and tunnel scope. Returns full token string. `is_current` flags the calling token
+- `user_list_tokens`: list all tokens with role, expiry, revocation status, and geo/IP fences. Returns full token string. `is_current` flags the calling token
 - `create_token`: create a new token. Optional: `label`, `role` (`admin`/`net-admin`/`read-only`, default `admin`), `expires_at` (RFC3339). Returns: `new_token` (shown once only)
 - `revoke_token`: revoke a token. Params: `target_token` (full string). Cannot revoke your own active token or the last admin token on the account
 - `update_token`: update label, role, or expiry. Params: `target_token`. Optional: `label`, `role`, `expires_at` (RFC3339 or `never`)
 - `add_geo_fence` / `remove_geo_fence`: restrict token by country. Params: `target_token`, `country` (ISO 3166-1 alpha-2). Removing all entries removes restriction
 - `add_ip_fence` / `remove_ip_fence`: restrict token by IP/CIDR. Params: `target_token`, `cidr`. Removing all entries removes restriction
-- `add_token_tunnel` / `remove_token_tunnel`: scope token to specific tunnels. Params: `target_token`, `tunnel_token`. Removing all entries restores full access
+
 
 **Token rotation:** create the new token first, then revoke the old one (never the reverse).
 **Least privilege for agents:** `net-admin` role + expiration + IP fence.

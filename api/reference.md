@@ -320,7 +320,7 @@ List all tokens for the account. Available to any role.
 ```bash
 curl -s -X POST $API -d "user_list_tokens=1&token=$TOKEN"
 ```
-Returns: `tokens[]` with `token` (full token string -- use directly as `target_token` in other operations), `label`, `role`, `created_at`, `expires_at`, `revoked_at`, `is_current`, `geo_fence[]`, `ip_fence[]`, `tunnel_scope[]`.
+Returns: `tokens[]` with `token` (full token string -- use directly as `target_token` in other operations), `label`, `role`, `created_at`, `expires_at`, `revoked_at`, `is_current`, `geo_fence[]`, `ip_fence[]`.
 
 ### create_token (admin only)
 Create a new auth token. Full token string is returned once only -- store it securely.
@@ -371,20 +371,6 @@ Remove a CIDR from a token's IP fence. Must match the stored value exactly. Remo
 curl -s -X POST $API -d "remove_ip_fence=1&token=$TOKEN&target_token=TARGET_TOKEN&cidr=203.0.113.0/24"
 ```
 Required: `target_token`, `cidr`.
-
-### add_token_tunnel (admin only)
-Restrict a token to a specific tunnel. When any tunnel scope entries exist, the token can only view and modify those tunnels.
-```bash
-curl -s -X POST $API -d "add_token_tunnel=1&token=$TOKEN&target_token=TARGET_TOKEN&tunnel_token=$TUNNEL"
-```
-Required: `target_token`, `tunnel_token` (must be owned by the account). Optional: `label`.
-
-### remove_token_tunnel (admin only)
-Remove a tunnel from a token's scope. Removing all entries restores full tunnel access.
-```bash
-curl -s -X POST $API -d "remove_token_tunnel=1&token=$TOKEN&target_token=TARGET_TOKEN&tunnel_token=$TUNNEL"
-```
-Required: `target_token`, `tunnel_token`.
 
 ---
 
