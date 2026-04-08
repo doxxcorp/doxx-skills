@@ -62,7 +62,19 @@ When a token has IP fence entries, it can only be used from matching IPs/CIDRs.
 - `new_token` from `create_token` is shown only once -- remind users to store it securely before moving on
 - When a user asks to "rotate" their token: create a new admin token first, then revoke the old one in that order
 - `revoke_token` is reversible (use `unrevoke_token`); `delete_token` is permanent -- prefer revoke unless the user explicitly wants to purge the token entirely
-- After account recovery (recovery codes used), all tokens are revoked -- use `unrevoke_token` to selectively restore trusted tokens, or `delete_token` to clean up compromised ones
+
+## Account Recovery
+
+When a user redeems any recovery code (`verify_account_recovery`), the system performs a **nuclear revoke**: every token on the account is immediately revoked (assumes compromise). A single new admin token is generated and returned -- this is the only way back in.
+
+**Post-recovery workflow:**
+1. User receives the new admin token from the recovery code redemption
+2. Log into the portal at `a0x13.doxx.net` using the new token to investigate
+3. Call `user_list_tokens` to see all revoked tokens with their labels, roles, and `created_at` dates
+4. For each token: decide whether it was trusted (unrevoke) or potentially compromised (leave revoked or delete)
+5. Use `unrevoke_token` to restore trusted tokens one by one
+6. Use `delete_token` to permanently purge tokens that should never be used again
+7. Consider adding IP fencing to restored tokens before re-enabling them if the compromise vector is unknown
 - Suggest IP fencing for tokens used from known fixed IPs (servers, CI systems)
 - For geo fencing: note that GeoIP lookup failure allows the request by default
 - Always check API response `status` field -- HTTP 200 can still be an error

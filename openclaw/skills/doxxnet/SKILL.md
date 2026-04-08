@@ -164,7 +164,7 @@ Note: `create_native_tunnel` auto-creates a profile; `create_tunnel`/`create_tun
 
 - `get_profile`: get recovery email/phone, notification preferences, recovery code count
 - `update_profile`: update. Params: `recovery_email`, `recovery_phone`, `notifications`
-- `create_account_recovery`: generate recovery codes. Returns: `codes[]`
+- `create_account_recovery`: generate recovery codes. Returns: `codes[]`. **Warning:** redeeming any recovery code triggers a nuclear revoke of all tokens on the account. A new admin token is issued to allow re-entry and selective token restoration.
 - `subscription_status`: check subscription tier, status, pro features
 - See also: token management is a separate capability -- use `user_list_tokens`, `create_token`, `revoke_token`, `update_token`, and fence/scope endpoints for API key management
 
