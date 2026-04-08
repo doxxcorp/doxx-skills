@@ -327,13 +327,27 @@ Create a new auth token. Full token string is returned once only -- store it sec
 ```bash
 curl -s -X POST $API -d "create_token=1&token=$TOKEN&label=my-agent&role=net-admin"
 ```
-Optional: `label` (max 64 chars), `role` (`admin`/`net-admin`/`read-only`, default `admin`), `expires_at` (RFC3339).
+Optional: `label` (max 64 chars), `role` (`admin`/`net-admin`/`read-only`, default `read-only`), `expires_at` (RFC3339).
 Returns: `new_token`.
 
 ### revoke_token (admin only)
-Revoke a token immediately. It remains in `user_list_tokens` with a `revoked_at` timestamp. Cannot revoke your own active token or the last admin token on the account.
+Soft-revoke a token immediately. It remains in `user_list_tokens` with a `revoked_at` timestamp. Cannot revoke your own active token or the last admin token on the account.
 ```bash
 curl -s -X POST $API -d "revoke_token=1&token=$TOKEN&target_token=TARGET_TOKEN"
+```
+Required: `target_token` (full token string).
+
+### unrevoke_token (admin only)
+Re-enable a previously revoked token. Clears `revoked_at` and restores the token to fully active with its original role, fences, and settings intact. Only works on revoked tokens.
+```bash
+curl -s -X POST $API -d "unrevoke_token=1&token=$TOKEN&target_token=TARGET_TOKEN"
+```
+Required: `target_token` (full token string).
+
+### delete_token (admin only)
+Permanently hard-delete a token and all its associated fences. The token is completely removed and will no longer appear in `user_list_tokens`. Cannot delete your own active token or the last admin token on the account.
+```bash
+curl -s -X POST $API -d "delete_token=1&token=$TOKEN&target_token=TARGET_TOKEN"
 ```
 Required: `target_token` (full token string).
 

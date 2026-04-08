@@ -30,9 +30,11 @@ Most token management endpoints require **admin** role. `user_list_tokens` is av
 - `user_list_tokens`: list all tokens for the account. Returns: `tokens[]` with `token` (full token string -- use directly as `target_token` in other operations), `label`, `role`, `created_at`, `expires_at`, `revoked_at`, `is_current`, `geo_fence[]`, `ip_fence[]`
 
 ### Creating and updating (admin only)
-- `create_token`: create a new token. Optional params: `label` (max 64 chars), `role` (`admin`/`net-admin`/`read-only`, default `admin`), `expires_at` (RFC3339). Returns: `new_token` (shown once, store securely)
+- `create_token`: create a new token. Optional params: `label` (max 64 chars), `role` (`admin`/`net-admin`/`read-only`, default `read-only`), `expires_at` (RFC3339). Returns: `new_token` (shown once, store securely)
 - `update_token`: update label, role, or expiry. Params: `target_token` (required), optional: `label`, `role`, `expires_at` (RFC3339 or `never`). Can reactivate expired tokens.
-- `revoke_token`: revoke immediately. Params: `target_token` (required). Cannot revoke your own active token or the last admin token on the account. Revoked tokens appear in `user_list_tokens` with `revoked_at` set.
+- `revoke_token`: soft-revoke immediately. Params: `target_token` (required). Cannot revoke your own active token or the last admin token on the account. Revoked tokens remain in `user_list_tokens` with `revoked_at` set.
+- `unrevoke_token`: re-enable a revoked token. Params: `target_token` (required). Only works on revoked tokens. Restores original role, fences, and settings.
+- `delete_token`: permanently hard-delete a token and all its fences. Params: `target_token` (required). Cannot delete your own active token or the last admin token. Token will no longer appear in `user_list_tokens`.
 
 ### Geo fencing (admin only)
 When a token has geo fence entries, it can only be used from those countries (GeoIP lookup).
@@ -59,6 +61,8 @@ When a token has IP fence entries, it can only be used from matching IPs/CIDRs.
 - Strongly warn users when they revoke a token that is currently in use (they will need to update their configuration)
 - `new_token` from `create_token` is shown only once -- remind users to store it securely before moving on
 - When a user asks to "rotate" their token: create a new admin token first, then revoke the old one in that order
+- `revoke_token` is reversible (use `unrevoke_token`); `delete_token` is permanent -- prefer revoke unless the user explicitly wants to purge the token entirely
+- After account recovery (recovery codes used), all tokens are revoked -- use `unrevoke_token` to selectively restore trusted tokens, or `delete_token` to clean up compromised ones
 - Suggest IP fencing for tokens used from known fixed IPs (servers, CI systems)
 - For geo fencing: note that GeoIP lookup failure allows the request by default
 - Always check API response `status` field -- HTTP 200 can still be an error

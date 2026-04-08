@@ -181,8 +181,10 @@ Note: `create_native_tunnel` auto-creates a profile; `create_tunnel`/`create_tun
 Most token endpoints require **admin** role. `user_list_tokens` is available to any role.
 
 - `user_list_tokens`: list all tokens with role, expiry, revocation status, and geo/IP fences. Returns full token string. `is_current` flags the calling token
-- `create_token`: create a new token. Optional: `label`, `role` (`admin`/`net-admin`/`read-only`, default `admin`), `expires_at` (RFC3339). Returns: `new_token` (shown once only)
-- `revoke_token`: revoke a token. Params: `target_token` (full string). Cannot revoke your own active token or the last admin token on the account
+- `create_token`: create a new token. Optional: `label`, `role` (`admin`/`net-admin`/`read-only`, default `read-only`), `expires_at` (RFC3339). Returns: `new_token` (shown once only)
+- `revoke_token`: soft-revoke a token. Params: `target_token` (full string). Cannot revoke your own active token or the last admin token on the account
+- `unrevoke_token`: re-enable a revoked token. Params: `target_token`
+- `delete_token`: permanently delete a token and all its fences. Params: `target_token`. Cannot delete your own active token or the last admin token
 - `update_token`: update label, role, or expiry. Params: `target_token`. Optional: `label`, `role`, `expires_at` (RFC3339 or `never`)
 - `add_geo_fence` / `remove_geo_fence`: restrict token by country. Params: `target_token`, `country` (ISO 3166-1 alpha-2). Removing all entries removes restriction
 - `add_ip_fence` / `remove_ip_fence`: restrict token by IP/CIDR. Params: `target_token`, `cidr`. Removing all entries removes restriction
