@@ -39,8 +39,38 @@
       "expected_output": "Shows DNS blocking stats and active subscriptions",
       "expectations": [
         "Calls dns_blocklist_stats to show overall stats",
-        "Calls dns_get_tunnel_config to show per-tunnel config",
+        "Calls dns_get_tunnel_config or dns_get_all_tunnel_configs to show config",
         "Presents total blocked domains and active blocklists"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Show me a summary of DNS blocking across all my tunnels",
+      "expected_output": "Shows DNS config for all tunnels in one view",
+      "expectations": [
+        "Calls dns_get_all_tunnel_configs to get cross-tunnel DNS config",
+        "Presents per-tunnel blocking status, subscriptions, whitelists, and blacklists",
+        "Shows base protections and tunnel count"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Which of my tunnels have example.com whitelisted or blacklisted?",
+      "expected_output": "Searches custom rules across all tunnels for the domain",
+      "expectations": [
+        "Calls dns_get_user_custom_rules with domain=example.com",
+        "Shows which tunnels have the domain in whitelists or blacklists",
+        "Displays reason and blocked_by info when available"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Which blocklists are enabled on which tunnels?",
+      "expected_output": "Shows subscription breakdown across all tunnels",
+      "expectations": [
+        "Calls dns_get_user_subscriptions to get cross-tunnel subscriptions",
+        "Presents the per-list summary with enabled/disabled counts",
+        "Shows total tunnel count and subscription count"
       ]
     }
   ]

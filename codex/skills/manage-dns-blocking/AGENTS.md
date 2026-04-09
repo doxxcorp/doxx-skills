@@ -25,6 +25,9 @@ curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DO
 - `dns_add_blacklist`: blacklist a domain (force block it). Params: `tunnel_token`, `domain`. Optional: `apply_to_all`
 - `dns_remove_blacklist`: remove from blacklist. Params: `tunnel_token`, `domain`
 - `dns_blocklist_stats`: blocklist statistics (no auth needed)
+- `dns_get_all_tunnel_configs`: get DNS config across all tunnels in one call (no per-tunnel token needed)
+- `dns_get_user_custom_rules`: get all custom blacklist/whitelist entries across all tunnels. Optional: `domain` (substring filter)
+- `dns_get_user_subscriptions`: get all blocklist subscriptions across all tunnels with per-list summary
 - `public_dns_create_hash`: create Secure DNS hash. Params: `tunnel_token`
 - `public_dns_list_hashes`: list Secure DNS hashes
 - `public_dns_delete_hash`: delete a hash. Params: `host_hash`
@@ -46,3 +49,4 @@ After creating a hash with `public_dns_create_hash`, provide setup instructions:
 - When a user reports a site is broken, suggest whitelisting the specific domain
 - Use `apply_to_all` parameter when the user wants consistent blocking across all devices
 - If user has multiple tunnels, ask which to configure (or offer apply_to_all)
+- For cross-tunnel overview queries ("show all my DNS rules", "what blocklists am I using"), prefer the bulk endpoints (`dns_get_all_tunnel_configs`, `dns_get_user_custom_rules`, `dns_get_user_subscriptions`) over looping per-tunnel calls

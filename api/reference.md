@@ -437,6 +437,28 @@ curl -s -X POST $API -d "dns_blocklist_stats=1&token=$TOKEN"
 ```
 Returns: `total_domains`, `lists[]` with per-list stats.
 
+### dns_get_all_tunnel_configs
+Get DNS blocking config across all tunnels in a single request (eliminates N+1 calls).
+```bash
+curl -s -X POST $API -d "dns_get_all_tunnel_configs=1&token=$TOKEN"
+```
+Returns: `base_protections[]`, `tunnel_count`, `tunnels[]` (each with `tunnel_token`, `name`, `server`, `dns_blocking_enabled`, `snarf_dns`, `block_doh_dot`, `subscriptions[]`, `whitelists[]`, `blacklists[]`).
+
+### dns_get_user_custom_rules
+Get all custom blacklist and whitelist entries across all tunnels.
+```bash
+curl -s -X POST $API -d "dns_get_user_custom_rules=1&token=$TOKEN"
+```
+Optional: `domain` (substring filter, case-insensitive).
+Returns: `blacklists[]` (each with `tunnel_token`, `tunnel_name`, `domain`, `reason`, `created_at`), `whitelists[]` (each with `tunnel_token`, `tunnel_name`, `domain`, `reason`, `blocked_by`, `expires_at`, `created_at`), `blacklist_count`, `whitelist_count`.
+
+### dns_get_user_subscriptions
+Get all blocklist subscriptions across all tunnels with a per-list summary.
+```bash
+curl -s -X POST $API -d "dns_get_user_subscriptions=1&token=$TOKEN"
+```
+Returns: `subscriptions[]` (each with `tunnel_token`, `tunnel_name`, `blocklist_name`, `enabled`), `summary` (map keyed by blocklist name with `enabled_count`, `disabled_count`), `tunnel_count`, `subscription_count`.
+
 ---
 
 ## Firewall
