@@ -3,7 +3,7 @@ name: network-stats
 description: "View doxx.net network stats: bandwidth usage, security alerts, threat categories, peak throughput"
 argument-hint: "[bandwidth | alerts | summary] [time range]"
 user-invocable: true
-allowed-tools: Bash(curl *), Read, Write
+allowed-tools: Bash(curl *), Bash(cat *), Read, Write
 ---
 
 # doxx.net Network Stats
@@ -16,33 +16,35 @@ User request: $ARGUMENTS
 
 ## API convention
 
-Token file: `~/.config/doxxnet/token`
+**IMPORTANT: token security -- must never enter the AI conversation.**
 
-**IMPORTANT: avoiding permission prompts:**
-- To read the token: use the `Read` tool on `~/.config/doxxnet/token`. Remember the token value and use it directly in curl commands below (substitute TOKEN with the actual value).
-- To save a token: use the `Write` tool to `~/.config/doxxnet/token`
-- NEVER use Bash for file operations: only `Read` and `Write` tools. Bash is ONLY for `curl` commands.
+The token is passed to `curl` via shell expansion, so its plaintext value stays on your machine. Two sources, checked in this order:
 
-If missing or auth fails, ask the user for their token, validate with `auth=1&token=THEIR_TOKEN`, and save it with the `Write` tool.
+1. `$DOXXNET_TOKEN` env var (preferred, zero exposure): the user exports it before launching Claude Code. curl commands below reference it as `$DOXXNET_TOKEN`; the shell expands it at exec time, so the actual value is never emitted in a tool call.
+2. `$(cat ~/.config/doxxnet/token)` inline subshell fallback if the env var is unset (same shell-expansion property: the value never enters the assistant's context).
+
+Never use the `Read` tool on `~/.config/doxxnet/token`: doing so would load the plaintext into the AI conversation and ship it to Anthropic on every subsequent tool call. `Write` is fine to save a token the user just pasted (one-time exposure). Bash is used only for `curl` commands and inline `cat` fallback.
+
+If `$DOXXNET_TOKEN` is unset and no token file exists, ask the user to either `export DOXXNET_TOKEN=your-token` in their shell (zero exposure, restart the session) or paste the token here to save to `~/.config/doxxnet/token` (one-time exposure, then future sessions use the subshell fallback). Validate with `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=$DOXXNET_TOKEN"` (or substitute `$(cat ~/.config/doxxnet/token)` if using the file).
 
 **Config API**: POST to `https://config.doxx.net/v1/`:
 ```
-curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=TOKEN"
+curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
 ```
 
 **Stats API**: POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
 ```
-curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: TOKEN" -d "param=value"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: $DOXXNET_TOKEN" -d "param=value"
 ```
 
-Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat ...)` or any subshell.
+The `$DOXXNET_TOKEN` shown in curl examples is expanded by the shell at exec time. If the env var is unset, substitute `$(cat ~/.config/doxxnet/token)` inline within the curl args instead. Never inline the plaintext token value into a tool call.
 
 ## Stats API endpoints
 
 ### bandwidth
 Bandwidth usage over time. Auto-selects granularity based on time range.
 ```
-curl -s -X POST https://secure-wss.doxx.net/api/stats/bandwidth -H "X-Auth-Token: TOKEN" -d "start=ISO8601&end=ISO8601"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/bandwidth -H "X-Auth-Token: $DOXXNET_TOKEN" -d "start=ISO8601&end=ISO8601"
 ```
 Optional params: `tunnel_token` (filter to one tunnel), `start`, `end` (ISO 8601).
 
@@ -53,7 +55,7 @@ Returns: `data[]` with `tunnel_token`, `timestamp`, `peak_in` (Mbps), `peak_out`
 ### alerts
 Security alerts and DNS blocks.
 ```
-curl -s -X POST https://secure-wss.doxx.net/api/stats/alerts -H "X-Auth-Token: TOKEN" -d "last=1d"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/alerts -H "X-Auth-Token: $DOXXNET_TOKEN" -d "last=1d"
 ```
 Optional params: `tunnel_token`, `last` (session/1m/1h/1d/7d/30d), `start`/`end` (ISO 8601), `type` (filter by event type).
 
@@ -62,7 +64,7 @@ Returns: `totals` (counts by type), `block_count`, `category_counts` (ads, track
 ### summary
 Peak bandwidth and alert totals for a period.
 ```
-curl -s -X POST https://secure-wss.doxx.net/api/stats/summary -H "X-Auth-Token: TOKEN" -d "days=30"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/summary -H "X-Auth-Token: $DOXXNET_TOKEN" -d "days=30"
 ```
 Optional: `tunnel_token`, `days` (default: 30).
 

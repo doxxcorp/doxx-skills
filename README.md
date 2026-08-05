@@ -38,7 +38,15 @@ Use any skill as a slash command:
 /doxxnet:network-wizard
 ```
 
-On first use, the skill will ask for your auth token. It validates it and saves it locally to `~/.config/doxxnet/token`: no manual setup needed.
+**Set your token via environment variable (recommended, zero exposure):**
+
+```bash
+export DOXXNET_TOKEN=your-token
+```
+
+The skill passes the token to `curl` via shell expansion, so the plaintext value stays on your machine and is never included in messages sent to Anthropic.
+
+**Alternative:** on first use, paste your token when the skill asks. It saves to `~/.config/doxxnet/token`. Future sessions read via `$(cat ~/.config/doxxnet/token)` inside curl args (same shell-expansion property), but the initial paste is exposed once to the AI conversation.
 
 ### OpenClaw
 
@@ -154,8 +162,8 @@ Set up my tunnel in the WireGuard app on my phone
 doxx.net is anonymous by design. There are no usernames, passwords, or emails. Your auth token **is** your identity.
 
 1. You create an account at [a0x13.doxx.net](https://a0x13.doxx.net) (human-only, proof-of-work gated)
-2. You give your auth token to the agent
-3. The agent makes API calls on your behalf: your token stays on your machine
+2. You export your auth token as `$DOXXNET_TOKEN` before launching the agent (or, on Claude Code only, paste it once so the skill can persist it to `~/.config/doxxnet/token`)
+3. The agent makes `curl` calls that reference `$DOXXNET_TOKEN` (or `$(cat ~/.config/doxxnet/token)`): the shell expands the token at exec time, so the plaintext value stays on your machine and is never included in messages sent to Anthropic, OpenAI, or any third-party AI provider
 
 ## Known Limitations
 

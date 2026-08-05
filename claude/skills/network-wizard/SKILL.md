@@ -3,7 +3,7 @@ name: network-wizard
 description: "Set up a doxx.net private network: tunnels, mesh networking, domains, DNS blocking, and client installation"
 argument-hint: "[--quick] [number of devices] [server location]"
 user-invocable: true
-allowed-tools: Bash(curl *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo wg-quick *), Read, Write
+allowed-tools: Bash(curl *), Bash(cat *), Bash(openssl *), Bash(wg-quick *), Bash(dig *), Bash(sudo wg-quick *), Read, Write
 ---
 
 # doxx.net Network Wizard
@@ -20,24 +20,26 @@ You are an interactive wizard that helps users set up a complete doxx.net privat
 
 ## API convention
 
-Token file: `~/.config/doxxnet/token`
+**IMPORTANT: token security -- must never enter the AI conversation.**
 
-**IMPORTANT: avoiding permission prompts:**
-- To read the token: use the `Read` tool on `~/.config/doxxnet/token`. Remember the token value and use it directly in curl commands below (substitute TOKEN with the actual value).
-- To save a token: use the `Write` tool to `~/.config/doxxnet/token`
-- NEVER use Bash for file operations: only `Read` and `Write` tools. Bash is ONLY for `curl` commands.
+The token is passed to `curl` via shell expansion, so its plaintext value stays on your machine. Two sources, checked in this order:
+
+1. `$DOXXNET_TOKEN` env var (preferred, zero exposure): the user exports it before launching Claude Code. curl commands below reference it as `$DOXXNET_TOKEN`; the shell expands it at exec time, so the actual value is never emitted in a tool call.
+2. `$(cat ~/.config/doxxnet/token)` inline subshell fallback if the env var is unset (same shell-expansion property: the value never enters the assistant's context).
+
+Never use the `Read` tool on `~/.config/doxxnet/token`: doing so would load the plaintext into the AI conversation and ship it to Anthropic on every subsequent tool call. `Write` is fine to save a token the user just pasted (one-time exposure). Bash is used only for `curl` commands and inline `cat` fallback.
 
 **Config API**: POST to `https://config.doxx.net/v1/` with URL-encoded form data:
 ```
-curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=TOKEN"
+curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
 ```
 
 **Stats API**: POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
 ```
-curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: TOKEN" -d "param=value"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: $DOXXNET_TOKEN" -d "param=value"
 ```
 
-Replace TOKEN with the actual token value read from the file. Do NOT use `$(cat ...)` or any subshell.
+The `$DOXXNET_TOKEN` shown in curl examples is expanded by the shell at exec time. If the env var is unset, substitute `$(cat ~/.config/doxxnet/token)` inline within the curl args instead. Never inline the plaintext token value into a tool call.
 
 **Special responses:** `sign_certificate` returns raw PEM (not JSON). `generate_qr` returns binary PNG: use `curl -s ... -o file.png`.
 
@@ -65,11 +67,11 @@ If the user says "full", "everything", "with domain", "ad blocking", or is a pow
 
 ## Phase 1: Authentication
 
-Use the `Read` tool on `~/.config/doxxnet/token` to check if a token exists. If it does, validate: `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=TOKEN"` (substitute the actual token value)
+Use the `Read` tool on `~/.config/doxxnet/token` to check if a token exists. If it does, validate: `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=$DOXXNET_TOKEN"` (substitute the actual token value)
 
 If no token or validation fails, ask: "Do you have a doxx.net auth token?"
 
-**If yes:** validate with `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=THEIR_TOKEN"`. On success, save it with the `Write` tool to `~/.config/doxxnet/token`.
+**If yes:** validate with `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=$DOXXNET_TOKEN"`. On success, save it with the `Write` tool to `~/.config/doxxnet/token`.
 **If no:** tell them to create one at https://a0x13.doxx.net (human-only, POW required). Offer to wait.
 
 Warn: "This token is your identity. There are no passwords. Keep it safe."
