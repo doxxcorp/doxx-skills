@@ -17,16 +17,23 @@ User request: $ARGUMENTS
 
 ## API convention
 
-Token is provided via `$DOXXNET_TOKEN` environment variable.
+**Auth token -- never enters the AI conversation.**
+
+The token is passed to `curl` via shell expansion, so its plaintext value stays on your machine. Two sources, checked in this order:
+
+1. `$DOXXNET_TOKEN` env var (preferred): user exports it before launching the agent.
+2. `~/.config/doxxnet/token` file: used automatically if the env var is unset.
+
+curl commands below use `${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}`, so both work transparently. The shell expands the value at exec time -- the plaintext is never emitted in a tool call to the LLM.
 
 **Config API**: POST to `https://config.doxx.net/v1/`:
 ```
-curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
+curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}"
 ```
 
 **Stats API**: POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
 ```
-curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: $DOXXNET_TOKEN" -d "param=value"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: ${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}" -d "param=value"
 ```
 
 ## Stats API endpoints
@@ -34,7 +41,7 @@ curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token:
 ### bandwidth
 Bandwidth usage over time. Auto-selects granularity based on time range.
 ```
-curl -s -X POST https://secure-wss.doxx.net/api/stats/bandwidth -H "X-Auth-Token: $DOXXNET_TOKEN" -d "start=ISO8601&end=ISO8601"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/bandwidth -H "X-Auth-Token: ${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}" -d "start=ISO8601&end=ISO8601"
 ```
 Optional params: `tunnel_token` (filter to one tunnel), `start`, `end` (ISO 8601).
 
@@ -45,7 +52,7 @@ Returns: `data[]` with `tunnel_token`, `timestamp`, `peak_in` (Mbps), `peak_out`
 ### alerts
 Security alerts and DNS blocks.
 ```
-curl -s -X POST https://secure-wss.doxx.net/api/stats/alerts -H "X-Auth-Token: $DOXXNET_TOKEN" -d "last=1d"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/alerts -H "X-Auth-Token: ${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}" -d "last=1d"
 ```
 Optional params: `tunnel_token`, `last` (session/1m/1h/1d/7d/30d), `start`/`end` (ISO 8601), `type` (filter by event type).
 
@@ -54,7 +61,7 @@ Returns: `totals` (counts by type), `block_count`, `category_counts` (ads, track
 ### summary
 Peak bandwidth and alert totals for a period.
 ```
-curl -s -X POST https://secure-wss.doxx.net/api/stats/summary -H "X-Auth-Token: $DOXXNET_TOKEN" -d "days=30"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/summary -H "X-Auth-Token: ${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}" -d "days=30"
 ```
 Optional: `tunnel_token`, `days` (default: 30).
 

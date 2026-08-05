@@ -17,11 +17,18 @@ User request: $ARGUMENTS
 
 ## API convention
 
-Token is provided via `$DOXXNET_TOKEN` environment variable.
+**Auth token -- never enters the AI conversation.**
+
+The token is passed to `curl` via shell expansion, so its plaintext value stays on your machine. Two sources, checked in this order:
+
+1. `$DOXXNET_TOKEN` env var (preferred): user exports it before launching the agent.
+2. `~/.config/doxxnet/token` file: used automatically if the env var is unset.
+
+curl commands below use `${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}`, so both work transparently. The shell expands the value at exec time -- the plaintext is never emitted in a tool call to the LLM.
 
 **Config API**: POST to `https://config.doxx.net/v1/`:
 ```
-curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
+curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}"
 ```
 
 ## IP Address Endpoints

@@ -60,11 +60,13 @@ Or from a local clone:
 openclaw skill install ./openclaw/skills/doxxnet
 ```
 
-Set your token via environment variable:
+Set your token via environment variable (preferred):
 
 ```bash
 export DOXXNET_TOKEN=your-token
 ```
+
+Or save it to `~/.config/doxxnet/token`: skills read the env var first and fall back to the file automatically. Either way, the plaintext token never enters the AI conversation.
 
 See [openclaw/README.md](openclaw/README.md) for full setup.
 
@@ -77,6 +79,8 @@ export DOXXNET_TOKEN=your-token
 cd codex/skills/doxxnet
 codex
 ```
+
+Or save your token to `~/.config/doxxnet/token` and skip the env var: skills read the env var first and fall back to the file automatically. Either way, the plaintext token never enters the AI conversation.
 
 Or pass a request directly with `codex exec`:
 
@@ -111,11 +115,11 @@ See the Getting Started section above for installation and usage.
 
 ### OpenClaw Skills (`openclaw/`)
 
-Native [OpenClaw](https://openclaw.org) skills. Uses `$DOXXNET_TOKEN` environment variable. See [openclaw/README.md](openclaw/README.md).
+Native [OpenClaw](https://openclaw.org) skills. Uses `$DOXXNET_TOKEN` env var or `~/.config/doxxnet/token` file (env var takes precedence). See [openclaw/README.md](openclaw/README.md).
 
 ### Codex Agent Skills (`codex/`)
 
-Native [OpenAI Codex CLI](https://github.com/openai/codex) skills using `AGENTS.md` (auto-loaded on startup). Uses `$DOXXNET_TOKEN` environment variable. See [codex/README.md](codex/README.md).
+Native [OpenAI Codex CLI](https://github.com/openai/codex) skills using `AGENTS.md` (auto-loaded on startup). Uses `$DOXXNET_TOKEN` env var or `~/.config/doxxnet/token` file (env var takes precedence). See [codex/README.md](codex/README.md).
 
 ### API Reference (`api/`)
 
@@ -162,8 +166,8 @@ Set up my tunnel in the WireGuard app on my phone
 doxx.net is anonymous by design. There are no usernames, passwords, or emails. Your auth token **is** your identity.
 
 1. You create an account at [a0x13.doxx.net](https://a0x13.doxx.net) (human-only, proof-of-work gated)
-2. You export your auth token as `$DOXXNET_TOKEN` before launching the agent (or, on Claude Code only, paste it once so the skill can persist it to `~/.config/doxxnet/token`)
-3. The agent makes `curl` calls that reference `$DOXXNET_TOKEN` (or `$(cat ~/.config/doxxnet/token)`): the shell expands the token at exec time, so the plaintext value stays on your machine and is never included in messages sent to Anthropic, OpenAI, or any third-party AI provider
+2. You either export your auth token as `$DOXXNET_TOKEN` before launching the agent, or save it once to `~/.config/doxxnet/token` (all three runtimes read either source)
+3. The agent makes `curl` calls that use `${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}`: the shell expands the token at exec time, so the plaintext value stays on your machine and is never included in messages sent to Anthropic, OpenAI, or any third-party AI provider
 
 ## Known Limitations
 

@@ -16,11 +16,19 @@ openclaw skill install ./openclaw/skills/doxxnet
 
 ## Setup
 
-Set your doxx.net auth token as an environment variable:
+Set your doxx.net auth token as an environment variable (preferred):
 
 ```bash
 export DOXXNET_TOKEN=your-token
 ```
+
+Or save it to `~/.config/doxxnet/token`:
+
+```bash
+mkdir -p ~/.config/doxxnet && printf '%s' 'your-token' > ~/.config/doxxnet/token
+```
+
+Skills use `${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}` in curl commands, so either source works. The shell expands the value at exec time, so the plaintext token stays on your machine and is never included in messages sent to the LLM.
 
 Get a token at [a0x13.doxx.net](https://a0x13.doxx.net) (human-only, proof-of-work gated).
 

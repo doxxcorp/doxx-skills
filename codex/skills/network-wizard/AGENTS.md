@@ -6,7 +6,7 @@ You are an interactive wizard that helps users set up a complete doxx.net privat
 
 ## Setup
 
-Requires `DOXXNET_TOKEN` environment variable. If not set, tell the user to run `export DOXXNET_TOKEN=your-token`.
+Requires either the `DOXXNET_TOKEN` environment variable (preferred) or a token file at `~/.config/doxxnet/token`. If neither is set, tell the user to run `export DOXXNET_TOKEN=your-token`.
 
 ## Key facts
 
@@ -16,16 +16,23 @@ Requires `DOXXNET_TOKEN` environment variable. If not set, tell the user to run 
 
 ## API convention
 
-Token is provided via `$DOXXNET_TOKEN` environment variable.
+**Auth token -- never enters the AI conversation.**
+
+The token is passed to `curl` via shell expansion, so its plaintext value stays on your machine. Two sources, checked in this order:
+
+1. `$DOXXNET_TOKEN` env var (preferred): user exports it before launching the agent.
+2. `~/.config/doxxnet/token` file: used automatically if the env var is unset.
+
+curl commands below use `${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}`, so both work transparently. The shell expands the value at exec time -- the plaintext is never emitted in a tool call to the LLM.
 
 **Config API**: POST to `https://config.doxx.net/v1/` with URL-encoded form data:
 ```
-curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
+curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}"
 ```
 
 **Stats API**: POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
 ```
-curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: $DOXXNET_TOKEN" -d "param=value"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: ${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}" -d "param=value"
 ```
 
 **Special responses:** `sign_certificate` returns raw PEM (not JSON). `generate_qr` returns binary PNG: use `curl -s ... -o file.png`.
@@ -54,7 +61,7 @@ If the user says "full", "everything", "with domain", "ad blocking", or is a pow
 
 ## Phase 1: Authentication
 
-Validate `$DOXXNET_TOKEN`: `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=$DOXXNET_TOKEN"`
+Validate `$DOXXNET_TOKEN`: `curl -s -X POST https://config.doxx.net/v1/ -d "auth=1&token=${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}"`
 
 If `$DOXXNET_TOKEN` is not set or validation fails, tell the user to run `export DOXXNET_TOKEN=your-token` and try again.
 
@@ -75,8 +82,8 @@ Present grouped by continent. Ask which server is closest, or suggest based on c
 Ask: "How many devices will be on this network?"
 
 For each device, ask for a name and type, then create:
-- Desktop/server: `curl -s -X POST ... -d "create_tunnel=1&server=HOST&name=NAME&token=$DOXXNET_TOKEN"`
-- Mobile: `curl -s -X POST ... -d "create_tunnel_mobile=1&server=HOST&name=NAME&device_type=mobile&token=$DOXXNET_TOKEN"`
+- Desktop/server: `curl -s -X POST ... -d "create_tunnel=1&server=HOST&name=NAME&token=${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}"`
+- Mobile: `curl -s -X POST ... -d "create_tunnel_mobile=1&server=HOST&name=NAME&device_type=mobile&token=${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}"`
 
 List all tunnels to confirm: `list_tunnels=1`
 

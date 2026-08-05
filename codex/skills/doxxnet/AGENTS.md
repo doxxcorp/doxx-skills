@@ -27,20 +27,27 @@ doxx.net -- what can I help with?
 
 ## Setup
 
-Requires `DOXXNET_TOKEN` environment variable. If not set, tell the user to run `export DOXXNET_TOKEN=your-token`.
+Requires either the `DOXXNET_TOKEN` environment variable (preferred) or a token file at `~/.config/doxxnet/token`. If neither is set, tell the user to run `export DOXXNET_TOKEN=your-token`.
 
 ## API convention
 
-Token is provided via `$DOXXNET_TOKEN` environment variable.
+**Auth token -- never enters the AI conversation.**
+
+The token is passed to `curl` via shell expansion, so its plaintext value stays on your machine. Two sources, checked in this order:
+
+1. `$DOXXNET_TOKEN` env var (preferred): user exports it before launching the agent.
+2. `~/.config/doxxnet/token` file: used automatically if the env var is unset.
+
+curl commands below use `${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}`, so both work transparently. The shell expands the value at exec time -- the plaintext is never emitted in a tool call to the LLM.
 
 **Config API**: POST to `https://config.doxx.net/v1/`:
 ```
-curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=$DOXXNET_TOKEN"
+curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}"
 ```
 
 **Stats API**: POST to `https://secure-wss.doxx.net/api/stats/` with `X-Auth-Token` header:
 ```
-curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: $DOXXNET_TOKEN" -d "param=value"
+curl -s -X POST https://secure-wss.doxx.net/api/stats/ENDPOINT -H "X-Auth-Token: ${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}" -d "param=value"
 ```
 
 **Special responses:** `sign_certificate` returns raw PEM (not JSON). `generate_qr` returns binary PNG: use `curl -s ... -o file.png`.
@@ -184,19 +191,19 @@ Most token endpoints require **admin** role. `user_list_tokens` is available to 
 
 - `bandwidth`: usage over time. Params: `start`, `end` (ISO 8601), optional: `tunnel_token`
   ```
-  curl -s -X POST https://secure-wss.doxx.net/api/stats/bandwidth -H "X-Auth-Token: $DOXXNET_TOKEN" -d "start=ISO8601&end=ISO8601"
+  curl -s -X POST https://secure-wss.doxx.net/api/stats/bandwidth -H "X-Auth-Token: ${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}" -d "start=ISO8601&end=ISO8601"
   ```
   Returns: `data[]` with `peak_in`/`peak_out` (Mbps), `aggregate[]`
 
 - `alerts`: security alerts and DNS blocks. Params: `last` (session/1m/1h/1d/7d/30d), optional: `tunnel_token`, `type`
   ```
-  curl -s -X POST https://secure-wss.doxx.net/api/stats/alerts -H "X-Auth-Token: $DOXXNET_TOKEN" -d "last=1d"
+  curl -s -X POST https://secure-wss.doxx.net/api/stats/alerts -H "X-Auth-Token: ${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}" -d "last=1d"
   ```
   Returns: `totals`, `block_count`, `category_counts` (ads, tracking, malware), `data[]`
 
 - `summary`: peak bandwidth + alert totals. Params: `days` (default: 30), optional: `tunnel_token`
   ```
-  curl -s -X POST https://secure-wss.doxx.net/api/stats/summary -H "X-Auth-Token: $DOXXNET_TOKEN" -d "days=30"
+  curl -s -X POST https://secure-wss.doxx.net/api/stats/summary -H "X-Auth-Token: ${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}" -d "days=30"
   ```
 
 - `global`: global threat counter (no auth, GET only)

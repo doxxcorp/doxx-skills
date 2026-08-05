@@ -5,13 +5,21 @@ doxx.net skills for [OpenAI Codex CLI](https://github.com/openai/codex). Each sk
 ## Requirements
 
 - A doxx.net account: create one at [a0x13.doxx.net](https://a0x13.doxx.net)
-- Your doxx.net auth token set as an environment variable:
+- Your doxx.net auth token, provided in one of two ways (env var takes precedence):
 
 ```bash
+# Option 1 (preferred): environment variable
 export DOXXNET_TOKEN=your-token
 ```
 
-Add this to your shell profile (`~/.zshrc`, `~/.bashrc`) to persist across sessions.
+```bash
+# Option 2: saved token file
+mkdir -p ~/.config/doxxnet && printf '%s' 'your-token' > ~/.config/doxxnet/token
+```
+
+Skills use `${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}` in curl commands, so either source works. The shell expands the value at exec time, so the plaintext token stays on your machine and is never included in messages sent to the LLM.
+
+For the env-var option, add the `export` line to your shell profile (`~/.zshrc`, `~/.bashrc`) to persist across sessions.
 
 ## Usage
 
