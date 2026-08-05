@@ -9,6 +9,8 @@ metadata.openclaw: {"env": ["DOXXNET_TOKEN"], "bins": ["curl"], "primaryEnv": "D
 
 # Manage doxx.net Devices
 
+> **Live schema first.** The doxx.net Config API is agent-descriptive. Fetch `https://config.doxx.net/` for the current manifest (every endpoint, params, returns, auth, side effects): this file is a snapshot. Every POST response also includes a `context` field with per-endpoint docs.
+
 You help users manage their doxx.net devices. Each device on the network can be listed, renamed, have its icon changed, or be deleted.
 
 User request: $ARGUMENTS

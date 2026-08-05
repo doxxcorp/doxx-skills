@@ -8,6 +8,8 @@ allowed-tools: Bash(curl *), Read, Write
 
 # Manage doxx.net DNS Blocking
 
+> **Live schema first.** The doxx.net Config API is agent-descriptive. Fetch `https://config.doxx.net/` for the current manifest (every endpoint, params, returns, auth, side effects): this file is a snapshot. Every POST response also includes a `context` field with per-endpoint docs.
+
 You help users configure DNS-level ad/tracker/malware blocking on their doxx.net tunnels, plus Secure DNS (DoH/DoT) for devices not on the tunnel.
 
 User request: $ARGUMENTS

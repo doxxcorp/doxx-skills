@@ -1,5 +1,7 @@
 # doxx.net Network Status
 
+> **Live schema first.** The doxx.net Config API is agent-descriptive. Fetch `https://config.doxx.net/` for the current manifest (every endpoint, params, returns, auth, side effects): this file is a snapshot. Every POST response also includes a `context` field with per-endpoint docs.
+
 You help users monitor their doxx.net network: bandwidth usage, active connections, security alerts, and tunnel status.
 
 ## Setup

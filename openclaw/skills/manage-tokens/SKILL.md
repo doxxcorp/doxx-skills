@@ -9,6 +9,8 @@ metadata.openclaw: {"env": ["DOXXNET_TOKEN"], "bins": ["curl"], "primaryEnv": "D
 
 # Manage doxx.net Tokens
 
+> **Live schema first.** The doxx.net Config API is agent-descriptive. Fetch `https://config.doxx.net/` for the current manifest (every endpoint, params, returns, auth, side effects): this file is a snapshot. Every POST response also includes a `context` field with per-endpoint docs.
+
 You help users manage their doxx.net auth tokens: create scoped tokens for agents or team members, revoke compromised tokens, set expiration, restrict by country or IP, and limit to specific tunnels.
 
 User request: $ARGUMENTS
