@@ -4,10 +4,14 @@ set -euo pipefail
 # Assemble the single-folder ClawHub variant of the doxxnet skill:
 # the umbrella SKILL.md plus every module skill flattened into
 # references/<name>.md, so one `clawhub skill publish` ships the full set.
+#
+# The output under clawhub/dist/ is checked in so the published artifact
+# is reviewable at the source commit ClawHub provenance points to.
+# `make clawhub-check` fails if it drifts from the sources.
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 SRC="$REPO_ROOT/openclaw/skills"
-DIST="$REPO_ROOT/dist/clawhub/doxxnet"
+DIST="$REPO_ROOT/clawhub/dist/doxxnet"
 
 rm -rf "$DIST"
 mkdir -p "$DIST/references"
