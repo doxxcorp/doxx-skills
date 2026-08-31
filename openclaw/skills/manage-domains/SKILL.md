@@ -4,7 +4,12 @@ description: "Manage doxx.net domains: register, DNS records, TLS certificates, 
 version: 1.0.0
 homepage: https://github.com/doxxcorp/doxx-skills
 user-invocable: false
-metadata.openclaw: {"env": ["DOXXNET_TOKEN"], "bins": ["curl", "openssl", "dig"], "primaryEnv": "DOXXNET_TOKEN"}
+metadata:
+  openclaw:
+    requires:
+      env: [DOXXNET_TOKEN]
+      bins: [curl, openssl, dig]
+    primaryEnv: DOXXNET_TOKEN
 ---
 
 # Manage doxx.net Domains

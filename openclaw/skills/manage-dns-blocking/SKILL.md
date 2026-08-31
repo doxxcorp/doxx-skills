@@ -4,7 +4,12 @@ description: "Manage doxx.net DNS blocking: enable blocklists, whitelist/blackli
 version: 1.0.0
 homepage: https://github.com/doxxcorp/doxx-skills
 user-invocable: false
-metadata.openclaw: {"env": ["DOXXNET_TOKEN"], "bins": ["curl"], "primaryEnv": "DOXXNET_TOKEN"}
+metadata:
+  openclaw:
+    requires:
+      env: [DOXXNET_TOKEN]
+      bins: [curl]
+    primaryEnv: DOXXNET_TOKEN
 ---
 
 # Manage doxx.net DNS Blocking

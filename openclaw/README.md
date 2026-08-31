@@ -5,13 +5,13 @@ AI agent skills for managing [doxx.net](https://doxx.net) private networks via [
 ## Install
 
 ```bash
-clawhub install doxxnet
+openclaw skills install @doxxcorp/doxxnet
 ```
 
 Or from a local clone:
 
 ```bash
-openclaw skill install ./openclaw/skills/doxxnet
+openclaw skills install ./openclaw/skills/doxxnet
 ```
 
 ## Setup

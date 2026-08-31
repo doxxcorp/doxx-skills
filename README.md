@@ -51,13 +51,13 @@ The skill passes the token to `curl` via shell expansion, so the plaintext value
 ### OpenClaw
 
 ```bash
-clawhub install doxxnet
+openclaw skills install @doxxcorp/doxxnet
 ```
 
 Or from a local clone:
 
 ```bash
-openclaw skill install ./openclaw/skills/doxxnet
+openclaw skills install ./openclaw/skills/doxxnet
 ```
 
 Set your token via environment variable (preferred):

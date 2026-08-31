@@ -271,7 +271,6 @@ if [[ -d "$OPENCLAW_DIR" ]]; then
 
     fm_name=$(echo "$frontmatter" | grep '^name:' | sed 's/^name: *//' || true)
     fm_desc=$(echo "$frontmatter" | grep '^description:' | sed 's/^description: *//' || true)
-    fm_meta=$(echo "$frontmatter" | grep '^metadata\.openclaw:' | sed 's/^metadata\.openclaw: *//' || true)
 
     if [[ -n "$fm_name" ]]; then
       pass "openclaw/$skill_name: has name ($fm_name)"
@@ -297,15 +296,25 @@ if [[ -d "$OPENCLAW_DIR" ]]; then
       fail "openclaw/$skill_name: name '$fm_name' doesn't match directory"
     fi
 
-    # Check metadata.openclaw is present and valid JSON
-    if [[ -n "$fm_meta" ]]; then
-      if python3 -c "import json; json.loads('$fm_meta')" 2>/dev/null; then
-        pass "openclaw/$skill_name: metadata.openclaw valid JSON"
-      else
-        fail "openclaw/$skill_name: metadata.openclaw invalid JSON"
-      fi
+    # Check nested metadata.openclaw block (OpenClaw 2.0 skill schema):
+    # metadata: -> openclaw: -> requires: {env, bins}, primaryEnv. See
+    # docs.openclaw.ai/clawhub/skill-format. The legacy dotted top-level
+    # key "metadata.openclaw:" is not the path the OpenClaw flattener reads.
+    if echo "$frontmatter" | python3 -c '
+import sys, re
+fm = sys.stdin.read()
+def has(p): return re.search(p, fm, re.M)
+ok = (has(r"^metadata:\s*$")
+      and has(r"^\s+openclaw:\s*$")
+      and has(r"^\s+requires:\s*$")
+      and has(r"^\s+env:\s*\[[^]]*DOXXNET_TOKEN[^]]*\]\s*$")
+      and has(r"^\s+bins:\s*\[[^]]*\]\s*$")
+      and has(r"^\s+primaryEnv:\s*DOXXNET_TOKEN\s*$"))
+sys.exit(0 if ok else 1)
+'; then
+      pass "openclaw/$skill_name: metadata.openclaw nested block ok"
     else
-      fail "openclaw/$skill_name: missing metadata.openclaw"
+      fail "openclaw/$skill_name: metadata.openclaw block missing or malformed (need metadata.openclaw.requires.env/bins + primaryEnv)"
     fi
 
     # API consistency for OpenClaw skills

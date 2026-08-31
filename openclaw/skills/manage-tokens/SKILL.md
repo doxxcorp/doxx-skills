@@ -4,7 +4,12 @@ description: "Manage doxx.net auth tokens: create, revoke, update roles, set geo
 version: 1.0.0
 homepage: https://github.com/doxxcorp/doxx-skills
 user-invocable: true
-metadata.openclaw: {"env": ["DOXXNET_TOKEN"], "bins": ["curl"], "primaryEnv": "DOXXNET_TOKEN"}
+metadata:
+  openclaw:
+    requires:
+      env: [DOXXNET_TOKEN]
+      bins: [curl]
+    primaryEnv: DOXXNET_TOKEN
 ---
 
 # Manage doxx.net Tokens

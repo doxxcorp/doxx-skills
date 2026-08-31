@@ -4,7 +4,12 @@ description: "Set up a doxx.net private network: tunnels, mesh networking, domai
 version: 1.0.0
 homepage: https://github.com/doxxcorp/doxx-skills
 user-invocable: true
-metadata.openclaw: {"env": ["DOXXNET_TOKEN"], "bins": ["curl", "openssl", "dig", "wg-quick"], "primaryEnv": "DOXXNET_TOKEN"}
+metadata:
+  openclaw:
+    requires:
+      env: [DOXXNET_TOKEN]
+      bins: [curl, openssl, dig, wg-quick]
+    primaryEnv: DOXXNET_TOKEN
 ---
 
 # doxx.net Network Wizard

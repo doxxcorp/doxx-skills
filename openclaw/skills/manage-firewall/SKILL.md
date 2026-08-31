@@ -4,7 +4,12 @@ description: "Manage doxx.net firewall rules: open ports, link tunnels for mesh 
 version: 1.0.0
 homepage: https://github.com/doxxcorp/doxx-skills
 user-invocable: false
-metadata.openclaw: {"env": ["DOXXNET_TOKEN"], "bins": ["curl"], "primaryEnv": "DOXXNET_TOKEN"}
+metadata:
+  openclaw:
+    requires:
+      env: [DOXXNET_TOKEN]
+      bins: [curl]
+    primaryEnv: DOXXNET_TOKEN
 ---
 
 # Manage doxx.net Firewall
