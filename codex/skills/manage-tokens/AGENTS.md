@@ -32,7 +32,7 @@ Most token management endpoints require **admin** role. `user_list_tokens` is av
 - `user_list_tokens`: list all tokens for the account. Returns: `tokens[]` with `token` (full token string -- use directly as `target_token` in other operations), `label`, `role`, `created_at`, `expires_at`, `revoked_at`, `is_current`, `geo_fence[]`, `ip_fence[]`
 
 ### Creating and updating (admin only)
-- `create_token`: create a new token. Optional params: `label` (max 64 chars), `role` (`admin`/`net-admin`/`read-only`, default `read-only`), `expires_at` (RFC3339). Returns: `new_token` (shown once, store securely)
+- `create_token`: create a new token. Optional params: `label` (max 64 chars), `role` (`admin`/`net-admin`/`read-only`, default `admin`), `expires_at` (RFC3339). Returns: `new_token` (shown once, store securely). For least privilege, pass `role` explicitly rather than relying on the default.
 - `update_token`: update label, role, or expiry. Params: `target_token` (required), optional: `label`, `role`, `expires_at` (RFC3339 or `never`). Can reactivate expired tokens.
 - `revoke_token`: soft-revoke immediately. Params: `target_token` (required). Cannot revoke your own active token or the last admin token on the account. Revoked tokens remain in `user_list_tokens` with `revoked_at` set.
 - `unrevoke_token`: re-enable a revoked token. Params: `target_token` (required). Only works on revoked tokens. Restores original role, fences, and settings.
@@ -48,6 +48,11 @@ When a token has IP fence entries, it can only be used from matching IPs/CIDRs.
 - `add_ip_fence`: params: `target_token`, `cidr` (IPv4/IPv6 address or CIDR, e.g. `203.0.113.0/24`). Optional: `label`. Bare IPs normalized to /32 or /128.
 - `remove_ip_fence`: params: `target_token`, `cidr` (must match stored value exactly). Removing all entries removes the restriction.
 
+### Tunnel scoping (admin only)
+When a token has any tunnel-scope entries, it can only view and modify those tunnels. With no entries, the token has access to every tunnel on the account.
+- `add_token_tunnel`: restrict a token to a specific tunnel. Params: `target_token`, `tunnel_token` (must be owned by the account). Optional: `label`. Reference tunnels by name to the user; the `tunnel_token` is itself a credential -- get it from `list_tunnels` (manage-tunnels), never echo it back.
+- `remove_token_tunnel`: params: `target_token`, `tunnel_token`. Removing all entries returns the token to full access across every tunnel.
+
 ## Roles
 
 | Role | Can do |
@@ -61,7 +66,7 @@ When a token has IP fence entries, it can only be used from matching IPs/CIDRs.
 - Always call `user_list_tokens` first to show the current token landscape before making changes
 - When creating tokens for AI agents or automation: suggest `net-admin` role + expiration + IP fence for least privilege
 - Strongly warn users when they revoke a token that is currently in use (they will need to update their configuration)
-- `new_token` from `create_token` is shown only once -- remind users to store it securely before moving on
+- The `new_token` value from `create_token` is shown only once -- remind users to store it securely before moving on
 - When a user asks to "rotate" their token: create a new admin token first, then revoke the old one in that order
 - `revoke_token` is reversible (use `unrevoke_token`); `delete_token` is permanent -- prefer revoke unless the user explicitly wants to purge the token entirely
 

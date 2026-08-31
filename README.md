@@ -104,7 +104,7 @@ Two commands cover everything, available across all three platforms:
 
 | Command | What it does |
 |---------|-------------|
-| **doxxnet** | Manage anything: tunnels, firewall, domains, DNS blocking, IP addresses, devices, account, stats: just describe what you want |
+| **doxxnet** | Manage anything: tunnels, firewall, domains, DNS blocking, IP addresses, devices, account, tokens, agents, stats: just describe what you want |
 | **network-wizard** | Guided setup: walks through auth, server selection, tunnel creation, mesh networking, client install, and optional domain/DNS/blocking config |
 
 Skills call the doxx.net API directly via `curl`: no intermediate server, no background processes.

@@ -1,0 +1,49 @@
+{
+  "skill_name": "manage-tokens",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "List all my auth tokens",
+      "expected_output": "Lists every token with role, expiry, and revocation status",
+      "expectations": [
+        "Calls user_list_tokens with the user's auth token",
+        "Shows each token's label, role, created_at, expires_at, and revoked_at",
+        "Flags the current token (is_current) and never echoes full token strings back into the conversation unnecessarily",
+        "Checks the API response status field"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create a net-admin token for my CI that expires in 30 days",
+      "expected_output": "Creates a scoped, expiring token and surfaces it once",
+      "expectations": [
+        "Calls create_token with role=net-admin and an expires_at ~30 days out (RFC3339)",
+        "Does not rely on the default role; passes role explicitly for least privilege",
+        "Displays new_token once and strongly warns it is shown only this one time",
+        "Suggests adding an IP fence for further least privilege"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Restrict my CI token to just the prod tunnel",
+      "expected_output": "Scopes the token to a single tunnel via add_token_tunnel",
+      "expectations": [
+        "Calls list_tunnels (manage-tunnels) to resolve the prod tunnel's tunnel_token, referencing it by name to the user",
+        "Calls add_token_tunnel with target_token and the prod tunnel_token",
+        "Explains that with a tunnel scope entry the token can only view/modify that tunnel",
+        "Does not echo the raw tunnel_token back to the user"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Rotate my admin token",
+      "expected_output": "Creates a new admin token first, then revokes the old one",
+      "expectations": [
+        "Calls create_token to mint the new admin token BEFORE revoking anything",
+        "Displays the new_token once with a save-it-now warning",
+        "Calls revoke_token on the old token only after the new one exists",
+        "Warns that any config using the old token must be updated"
+      ]
+    }
+  ]
+}

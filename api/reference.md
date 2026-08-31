@@ -1,5 +1,7 @@
 # doxx.net API Reference (Agent-Optimized)
 
+**Config API version: 1.1.0.** This file is a snapshot; the live API self-documents. Fetch `https://config.doxx.net/v1/` (POST) for the current manifest, and every POST response carries a `context` field with per-endpoint docs.
+
 All Config API calls use `POST https://config.doxx.net/v1/` with `application/x-www-form-urlencoded`. Endpoint is selected by `endpoint_name=1` parameter.
 
 **Failover endpoints:** `config-us-east.doxx.net`, `config-us-west.doxx.net`, `config-eu-central.doxx.net` (same `/v1/` path).
@@ -42,13 +44,13 @@ curl -s -X POST $API -d "accept_tos=1&token=$TOKEN"
 ```bash
 curl -s -X POST $API -d "get_profile=1&token=$TOKEN"
 ```
-Returns: `profile` object with `recovery_email`, `recovery_phone`, `created_at`, `updated_at` + `recovery_codes_count`.
+Returns: `email` (opt-in recovery email, may be empty), `phone` (opt-in recovery phone, may be empty), whether notifications are enabled, and whether recovery codes exist + how many remain. Recovery contact is opt-in only; doxx.net does not require or prefer it.
 
 ### update_profile
 ```bash
-curl -s -X POST $API -d "update_profile=1&token=$TOKEN&email=EMAIL&name=NAME"
+curl -s -X POST $API -d "update_profile=1&token=$TOKEN&email=EMAIL&phone=+15551234567&notifications_enabled=1"
 ```
-Optional params: `email`, `name`.
+Optional params: `email` (valid format, or empty to clear), `phone` (international format like `+1234567890`, or empty to clear), `notifications_enabled` (`0` or `1`). All fields are opt-in and can be cleared by sending an empty value.
 
 ### create_account_recovery
 Generate recovery codes (save these:they're the only way to recover a lost token).
@@ -68,27 +70,9 @@ Returns: `new_token`, `user_id`.
 ```bash
 curl -s -X POST $API -d "delete_account=1&token=$TOKEN"
 ```
+Cascades everything the account holds: tunnels, domains, DNS records, firewall rules, proxy configs, devices, saved profiles, IP allocations, and any owned bots. Irreversible; terminates all active tunnel connections immediately.
 
-### merge_account
-Merge all tunnels/settings from `source_token` into `token`.
-```bash
-curl -s -X POST $API -d "merge_account=1&token=$TOKEN&source_token=SOURCE_TOKEN"
-```
-Returns: `new_token`, `merged_tunnels`, `merged_whitelist`, `merged_blacklist`.
-
-### subscription_status
-Check subscription tier, status, and pro features.
-```bash
-curl -s -X POST $API -d "subscription_status=1&token=$TOKEN"
-```
-Returns: `has_active_subscription`, `tier`, `subscription` (`original_transaction_id`, `product_id`, `tier`, `effective_tier`, `status`, `purchase_date`, `expires_date`, `is_trial`, `auto_renew`), `pro_features` map.
-
-### recover_account
-Recover an account using a recovery code. Alias for `verify_account_recovery`.
-```bash
-curl -s -X POST $API -d "recover_account=1&recovery_code=CODE"
-```
-Returns: `new_token`, `user_id`.
+> **Subscription status is no longer a Config API endpoint.** `subscription_status` and `merge_account` were removed in 1.1.0. Subscription tier and seat management now live in the a0x13 portal (`https://a0x13.doxx.net/ops/account/subscription`).
 
 ---
 
@@ -327,7 +311,7 @@ Create a new auth token. Full token string is returned once only -- store it sec
 ```bash
 curl -s -X POST $API -d "create_token=1&token=$TOKEN&label=my-agent&role=net-admin"
 ```
-Optional: `label` (max 64 chars), `role` (`admin`/`net-admin`/`read-only`, default `read-only`), `expires_at` (RFC3339).
+Optional: `label` (max 64 chars), `role` (`admin`/`net-admin`/`read-only`, default `admin`), `expires_at` (RFC3339).
 Returns: `new_token`.
 
 ### revoke_token (admin only)
@@ -385,6 +369,75 @@ Remove a CIDR from a token's IP fence. Must match the stored value exactly. Remo
 curl -s -X POST $API -d "remove_ip_fence=1&token=$TOKEN&target_token=TARGET_TOKEN&cidr=203.0.113.0/24"
 ```
 Required: `target_token`, `cidr`.
+
+### add_token_tunnel (admin only)
+Restrict a token to a specific tunnel. When a token has any tunnel-scope entries, it can only view and modify those tunnels. The tunnel must be owned by the authenticated account.
+```bash
+curl -s -X POST $API -d "add_token_tunnel=1&token=$TOKEN&target_token=TARGET_TOKEN&tunnel_token=$TUNNEL"
+```
+Required: `target_token`, `tunnel_token` (must be owned by the account). Optional: `label`.
+
+### remove_token_tunnel (admin only)
+Remove a tunnel from a token's scope. Removing all entries returns the token to full access across every tunnel on the account.
+```bash
+curl -s -X POST $API -d "remove_token_tunnel=1&token=$TOKEN&target_token=TARGET_TOKEN&tunnel_token=$TUNNEL"
+```
+Required: `target_token`, `tunnel_token`.
+
+---
+
+## Agents
+
+Agent principals are the doxx.net gateway backend: an AGENT is an owned sub-friend of your account (a chat identity), not a separate user, token, or billing entity. Your devices see it as a friend; you see every conversation it has. The agent binds to one of your devices via `create_token role=device` and is hosted by the doxxGateway binary (`https://github.com/doxxcorp/gateway`) on Linux, or the in-app gateway on macOS. Requires an active P2P plan (Pro or Pro+) and a profile name set on the account. See the `chat_bot_gateway_for_ai_agents` recipe in the live manifest's `use_cases`.
+
+### create_agent (net-admin)
+Create an agent principal. New agents start OWNER-ONLY (`owner_only=1`): they reach you and nobody else until you unlock friend links. After unlock, every link is double opt-in (the person must be your active friend AND explicitly accept the agent via an introduction). No token is minted here; the agent is not an account.
+```bash
+curl -s -X POST $API -d "create_agent=1&token=$TOKEN&agent_name=Fable"
+```
+Required: `agent_name` (the friend name your devices show). Optional: `a2a_enabled` (`1` to allow agent-to-agent pairing; off by default, and must be set on both agents), `kind` (`agent` [default, dedicated-machine gateway] or `device_agent` [in-app gateway sharing one of your existing device seats]).
+Returns: `agent_id`, `agent_name`, `kind`, `a2a_enabled`.
+
+### list_agents
+List agent principals your account owns, with binding state.
+```bash
+curl -s -X POST $API -d "list_agents=1&token=$TOKEN"
+```
+Returns: `agents[]` with `agent_id`, `agent_name`, `kind`, `a2a_enabled`, `owner_only`, `bound`, `bound_device_hash`, `bound_device_name`, `status`, `created_at`.
+
+### delete_agent (admin)
+Delete an agent you own: revokes all its pairs (yours, introduced friends, agent-to-agent), clears its device binding, and revokes its device credential. The device row and tunnel still belong to you (remove them with `delete_tunnel` if the machine is going away). The agent's chat-identity certificate lives on the host machine and dies with it.
+```bash
+curl -s -X POST $API -d "delete_agent=1&token=$TOKEN&agent_id=AGENT_ID"
+```
+Required: `agent_id` (from `list_agents` or `create_agent`).
+Returns: `deleted_agent_id`, `notes`.
+
+---
+
+## Bots (deprecated)
+
+Bot accounts are replaced by agent principals (see Agents above). Existing bots keep working until removed; no new bots can be created.
+
+### create_bot -- DEPRECATED (410)
+Returns HTTP 410 `create_bot_deprecated` with migration instructions. Use `create_agent` + doxxGateway setup instead.
+```bash
+curl -s -X POST $API -d "create_bot=1&token=$TOKEN"
+```
+
+### list_bots
+List the bots your account owns, with seat and liveness state.
+```bash
+curl -s -X POST $API -d "list_bots=1&token=$TOKEN"
+```
+Returns: `bots[]` with `bot_user_id`, `bot_name`, `tunnel_count`, `seated` (tunnel provisioned), `online` (tunnel connected), `created_at`.
+
+### delete_bot (admin)
+Delete a legacy bot and everything it holds: user row, token, profile, seat grant, pairs, and tunnels. The seat returns to your plan. Irreversible; the bot's chat identity is gone with it.
+```bash
+curl -s -X POST $API -d "delete_bot=1&token=$TOKEN&bot_user_id=BOT_USER_ID"
+```
+Required: `bot_user_id` (from `list_bots`).
 
 ---
 

@@ -1,0 +1,50 @@
+{
+  "skill_name": "manage-agents",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "List my doxx.net agents",
+      "expected_output": "Lists all agent principals with their binding state",
+      "expectations": [
+        "Calls list_agents with the user's auth token",
+        "Displays each agent's name, kind, a2a_enabled, owner_only, and binding state (bound device name or unbound)",
+        "Does not confuse agents with devices or bots",
+        "Checks the API response status field"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create a new agent called Fable",
+      "expected_output": "Creates an agent principal named Fable and explains the next steps",
+      "expectations": [
+        "Calls list_agents first to show current state",
+        "Calls create_agent with agent_name=Fable (kind defaults to agent, a2a off by default)",
+        "Explains that the agent starts owner-only and is not yet bound to a device",
+        "Points the user at the doxxGateway repo (github.com/doxxcorp/gateway) to host and bind the agent",
+        "Notes the P2P plan + profile name prerequisites if create_agent errors"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Delete the agent named Fable",
+      "expected_output": "Finds Fable's agent_id, confirms, and deletes it",
+      "expectations": [
+        "Calls list_agents to resolve Fable's agent_id",
+        "Warns that deletion revokes all the agent's pairs and its device credential (irreversible chat identity)",
+        "Asks for confirmation before proceeding",
+        "Calls delete_agent with the correct agent_id",
+        "Notes the device/tunnel remain and can be removed separately with delete_tunnel"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Create a bot for my server",
+      "expected_output": "Explains bots are deprecated and offers to create an agent instead",
+      "expectations": [
+        "Explains that bot accounts are deprecated (create_bot returns 410) and replaced by agent principals",
+        "Offers to create an agent with create_agent instead",
+        "Does not attempt create_bot except to demonstrate the deprecation, if at all"
+      ]
+    }
+  ]
+}

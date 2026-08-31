@@ -80,9 +80,9 @@
     {
       "id": 6,
       "prompt": "What subscription am I on and generate recovery codes",
-      "expected_output": "Shows subscription status and generates recovery codes",
+      "expected_output": "Directs subscription to the a0x13 portal and generates recovery codes",
       "expectations": [
-        "Calls subscription_status to show tier and features",
+        "Does not call subscription_status (removed from the Config API in 1.1.0); points the user to the a0x13 portal for tier and seats",
         "Calls create_account_recovery to generate new codes",
         "Displays recovery codes with security warning",
         "Reminds user to save codes securely"

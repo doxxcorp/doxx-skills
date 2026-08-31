@@ -58,6 +58,9 @@ curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=${D
 **Open SSH on a server tunnel:**
 - `firewall_rule_add=1&tunnel_token=TT&protocol=TCP&src_ip=0.0.0.0/0&src_port=ALL&dst_ip=TUNNEL_IP&dst_port=22`
 
+**SSH into a NAT'd / headless box over the mesh (least privilege):**
+- Add a single TCP:22 rule between just the two tunnel IPs (client -> server) instead of enabling link-all. This is the per-pair pattern behind agent-to-agent reach and the `ssh_to_server_behind_nat` recipe in the live manifest's `use_cases`.
+
 ## Guidelines
 
 - Always list current rules before making changes

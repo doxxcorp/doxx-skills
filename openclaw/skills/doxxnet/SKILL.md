@@ -33,8 +33,9 @@ doxx.net -- what can I help with?
   DNS Blocking  Enable blocklists, whitelist/blacklist domains, configure Secure DNS
   Devices       List, rename, change icons, delete devices
   IP Addresses  Assign, release, rotate IPs; lease dedicated IPv4; manage connection profiles
-  Account       Recovery settings, notifications, recovery codes, subscription status
+  Account       Recovery settings, notifications, recovery codes, account deletion
   Tokens        Create and manage auth tokens; set expiration, roles, geo/IP fences, tunnel scope
+  Agents        Create/list/delete AI-agent chat principals for the doxxGateway
   Stats         Bandwidth usage, security alerts, threat categories, peak throughput
   Status        Tunnel and device connection dashboard
 
@@ -176,10 +177,11 @@ Note: `create_native_tunnel` auto-creates a profile; `create_tunnel`/`create_tun
 
 ## Account
 
-- `get_profile`: get recovery email/phone, notification preferences, recovery code count
-- `update_profile`: update. Params: `recovery_email`, `recovery_phone`, `notifications`
+- `get_profile`: get opt-in recovery email/phone, notification preference, recovery code count
+- `update_profile`: update recovery contact + notifications. Params (all optional): `email`, `phone` (international format), `notifications_enabled` (`0`/`1`). Empty value clears a field
 - `create_account_recovery`: generate recovery codes. Returns: `codes[]`. **Warning:** redeeming any recovery code triggers a nuclear revoke of all tokens on the account. A new admin token is issued to allow re-entry and selective token restoration.
-- `subscription_status`: check subscription tier, status, pro features
+- `delete_account`: permanently delete the account and everything it holds (irreversible; terminates all tunnels immediately)
+- **Subscription moved off the Config API in 1.1.0** (`subscription_status` and `merge_account` removed). Tier and seats are managed in the a0x13 portal: `https://a0x13.doxx.net/ops/account/subscription`
 - See also: token management is a separate capability -- use `user_list_tokens`, `create_token`, `revoke_token`, `update_token`, and fence/scope endpoints for API key management
 
 ## Tokens
@@ -187,17 +189,28 @@ Note: `create_native_tunnel` auto-creates a profile; `create_tunnel`/`create_tun
 Most token endpoints require **admin** role. `user_list_tokens` is available to any role.
 
 - `user_list_tokens`: list all tokens with role, expiry, revocation status, and geo/IP fences. Returns full token string. `is_current` flags the calling token
-- `create_token`: create a new token. Optional: `label`, `role` (`admin`/`net-admin`/`read-only`, default `read-only`), `expires_at` (RFC3339). Returns: `new_token` (shown once only)
+- `create_token`: create a new token. Optional: `label`, `role` (`admin`/`net-admin`/`read-only`, default `admin`), `expires_at` (RFC3339). Returns: `new_token` (shown once only)
 - `revoke_token`: soft-revoke a token. Params: `target_token` (full string). Cannot revoke your own active token or the last admin token on the account
 - `unrevoke_token`: re-enable a revoked token. Params: `target_token`
 - `delete_token`: permanently delete a token and all its fences. Params: `target_token`. Cannot delete your own active token or the last admin token
 - `update_token`: update label, role, or expiry. Params: `target_token`. Optional: `label`, `role`, `expires_at` (RFC3339 or `never`)
 - `add_geo_fence` / `remove_geo_fence`: restrict token by country. Params: `target_token`, `country` (ISO 3166-1 alpha-2). Removing all entries removes restriction
 - `add_ip_fence` / `remove_ip_fence`: restrict token by IP/CIDR. Params: `target_token`, `cidr`. Removing all entries removes restriction
+- `add_token_tunnel` / `remove_token_tunnel`: restrict a token to a specific tunnel. Params: `target_token`, `tunnel_token` (must be owned by the account). With any entries, the token can only view/modify those tunnels; removing all entries restores full access
 
 
 **Token rotation:** create the new token first, then revoke the old one (never the reverse).
 **Least privilege for agents:** `net-admin` role + expiration + IP fence.
+
+## Agents
+
+AI-agent chat principals for the doxxGateway (`https://github.com/doxxcorp/gateway`). An agent is an owned sub-friend of the account (a chat identity), not a separate user/token/billing entity; it binds to a device that hosts the gateway. Requires an active P2P plan and a profile name on the account. New agents start owner-only (reach you and nobody else) until unlocked; after that, contacts are double opt-in. Full lifecycle + host guidance: the `manage-agents` skill.
+
+- `create_agent`: create an agent principal (net-admin). Params: `agent_name` (required). Optional: `a2a_enabled` (`1` for agent-to-agent pairing, off by default), `kind` (`agent` [default] or `device_agent`). Returns: `agent_id`, `agent_name`, `kind`, `a2a_enabled`. No token is minted here
+- `list_agents`: list agents the account owns with binding state. Returns: `agents[]` with `agent_id`, `agent_name`, `kind`, `a2a_enabled`, `owner_only`, `bound`, `bound_device_hash`, `bound_device_name`, `status`, `created_at`
+- `delete_agent`: delete an agent (admin). Params: `agent_id`. Revokes its pairs and device credential; the device/tunnel remain (remove with `delete_tunnel`)
+
+**Legacy bots (deprecated):** `create_bot` returns HTTP 410; use `create_agent` instead. `list_bots` and `delete_bot` (params: `bot_user_id`) remain only to inspect and clean up existing bots.
 
 ## Stats
 

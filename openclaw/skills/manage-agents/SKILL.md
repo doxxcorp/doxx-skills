@@ -1,0 +1,68 @@
+---
+name: manage-agents
+description: "Manage doxx.net agents: create AI-agent chat principals for the doxxGateway, inspect device binding, delete agents, and clean up legacy bots"
+version: 1.0.0
+homepage: https://github.com/doxxcorp/doxx-skills
+user-invocable: false
+metadata:
+  openclaw:
+    requires:
+      env: [DOXXNET_TOKEN]
+      bins: [curl]
+    primaryEnv: DOXXNET_TOKEN
+---
+
+# Manage doxx.net Agents
+
+> **Live schema first.** The doxx.net Config API is agent-descriptive. Fetch `https://config.doxx.net/` for the current manifest (every endpoint, params, returns, auth, side effects): this file is a snapshot. Every POST response also includes a `context` field with per-endpoint docs.
+
+You help users manage doxx.net **agents**: AI-agent chat principals that run on the doxxGateway. This skill covers the platform side (create, list, delete the principal via the Config API). Hosting the agent (the doxxGateway binary, the local agent API, MCP) lives in the gateway repo, not here.
+
+## What an agent is
+
+A doxx.net **agent** is an owned sub-friend of your account, not a separate account:
+
+- **No new account.** An agent has a chat identity but no user, no token, no billing existence. Your devices see it as a friend; you see every conversation it has.
+- **It binds to a device.** The agent is hosted by the doxxGateway binary (`https://github.com/doxxcorp/gateway`) on Linux (`kind=agent`, its own device seat), or the in-app gateway on macOS (`kind=device_agent`, an existing device seat). Binding happens when the gateway runs `create_token role=device` during its own setup, not from this skill.
+- **Prerequisites.** Creating an agent requires an active **P2P plan** (Pro or Pro+) and a **profile name** set on the account.
+- **Owner-only by default.** New agents start `owner_only=1` and reach you and nobody else. Unlocking is done in the doxxGateway config / app toggle. After unlock, every contact is **double opt-in** (active friend AND explicit acceptance via an introduction).
+- **Agent-to-agent chat is off** unless `a2a_enabled=1` is set on both agents.
+
+## API convention
+
+**Auth token -- never enters the AI conversation.**
+
+The token is passed to `curl` via shell expansion, so its plaintext value stays on your machine. Two sources, checked in this order:
+
+1. `$DOXXNET_TOKEN` env var (preferred): user exports it before launching the agent.
+2. `~/.config/doxxnet/token` file: used automatically if the env var is unset.
+
+curl commands below use `${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}`, so both work transparently. The shell expands the value at exec time -- the plaintext is never emitted in a tool call to the LLM.
+
+**Config API**: POST to `https://config.doxx.net/v1/`:
+```
+curl -s -X POST https://config.doxx.net/v1/ -d "ENDPOINT=1&param=value&token=${DOXXNET_TOKEN:-$(cat ~/.config/doxxnet/token)}"
+```
+
+## Endpoints
+
+- `create_agent` (net-admin): create an agent principal. Params: `agent_name` (required, the friend name your devices show). Optional: `a2a_enabled` (`1` to allow agent-to-agent pairing, off by default), `kind` (`agent` [default, dedicated-machine gateway] or `device_agent` [in-app macOS gateway sharing an existing device seat]). Returns: `agent_id`, `agent_name`, `kind`, `a2a_enabled`. No token is minted here.
+- `list_agents`: list agent principals the account owns, with binding state. Returns: `agents[]` with `agent_id`, `agent_name`, `kind`, `a2a_enabled`, `owner_only`, `bound`, `bound_device_hash`, `bound_device_name`, `status`, `created_at`.
+- `delete_agent` (admin): delete an agent you own. Revokes all its pairs and device credential, clears its device binding. Params: `agent_id` (required). Returns: `deleted_agent_id`, `notes`. The device/tunnel remain (remove with `delete_tunnel`); the chat-identity certificate lives on the host and dies with it.
+
+### Legacy bots (deprecated)
+
+Bot accounts are replaced by agent principals. `create_bot` returns **HTTP 410** (`create_bot_deprecated`). Use these only to inspect and clean up existing bots:
+
+- `list_bots`: Returns `bots[]` with `bot_user_id`, `bot_name`, `tunnel_count`, `seated`, `online`, `created_at`.
+- `delete_bot` (admin): delete a legacy bot and everything it holds (user row, token, profile, seat grant, pairs, tunnels). The seat returns to the plan. Params: `bot_user_id` (required). Irreversible.
+
+## Guidelines
+
+- Always call `list_agents` first before creating or deleting.
+- On `create_agent`, remind the user of the two next steps this skill does NOT do: install/run the doxxGateway (binds the agent to a device), and unlock `owner_only` if they want introduced-friend reach. Point them at `https://github.com/doxxcorp/gateway` and the `chat_bot_gateway_for_ai_agents` recipe.
+- If `create_agent` fails for a missing P2P plan or profile name, explain the prerequisite (subscription/seats live in the a0x13 portal; profile name is set on the account).
+- Only suggest `a2a_enabled=1` when the user wants agent-to-agent networking; it must be set on both agents and the owner still approves.
+- Confirm before `delete_agent` and `delete_bot` (irreversible).
+- If a user asks to "create a bot," tell them bots are deprecated and create an agent instead.
+- Always check the API response `status` field: HTTP 200 can still be an error.

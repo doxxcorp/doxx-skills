@@ -4,11 +4,11 @@
     {
       "id": 1,
       "prompt": "Show me my account settings",
-      "expected_output": "Shows account profile and subscription status",
+      "expected_output": "Shows account profile (recovery contact + notifications)",
       "expectations": [
         "Calls get_profile to show recovery email, phone, and notification settings",
-        "Calls subscription_status to show current tier and features",
-        "Presents both profile and subscription info in a clear format"
+        "Presents the profile info in a clear format",
+        "Does not call a subscription endpoint; if subscription comes up, points the user to the a0x13 portal"
       ]
     },
     {
@@ -17,7 +17,7 @@
       "expected_output": "Updates the recovery email after showing current settings",
       "expectations": [
         "Calls get_profile to show current recovery settings",
-        "Calls update_profile with recovery_email=me@example.com",
+        "Calls update_profile with email=me@example.com",
         "Confirms the update was successful"
       ]
     },
@@ -35,11 +35,11 @@
     {
       "id": 4,
       "prompt": "What subscription plan am I on?",
-      "expected_output": "Shows subscription tier and pro features",
+      "expected_output": "Explains subscription is managed in the a0x13 portal, not the Config API",
       "expectations": [
-        "Calls subscription_status with the user's auth token",
-        "Shows tier, status, expiry date, and auto-renew status",
-        "Explains what the current tier includes using pro_features map"
+        "Does not call subscription_status (removed from the Config API in 1.1.0)",
+        "Directs the user to the a0x13 portal (https://a0x13.doxx.net/ops/account/subscription) to view tier and seats",
+        "Does not fabricate a tier or plan"
       ]
     }
   ]
