@@ -1,0 +1,5 @@
+name: manage-agents
+description: "Manage doxx.net agents: create, update and delete AI-agent chat principals (including webhook agents) for the doxxGateway, inspect device binding, clean up legacy bots"
+argument-hint: "[action] [agent name]"
+user-invocable: true
+allowed-tools: Bash(curl *), Bash(printf *), Write

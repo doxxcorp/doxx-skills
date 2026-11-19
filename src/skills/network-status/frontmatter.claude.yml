@@ -1,0 +1,5 @@
+name: network-status
+description: "Check doxx.net network status: bandwidth, connections, security alerts, tunnel and device status, this machine's public address"
+argument-hint: "[what to check]"
+user-invocable: true
+allowed-tools: Bash(curl *), Bash(bash */network-status/scripts/status-summary.sh*), Bash(printf *), Bash(dig *), Write

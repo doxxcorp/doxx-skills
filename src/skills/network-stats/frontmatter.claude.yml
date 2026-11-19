@@ -1,0 +1,5 @@
+name: network-stats
+description: "View doxx.net network stats: bandwidth usage, security alerts, threat categories, peak throughput"
+argument-hint: "[bandwidth | alerts | summary] [time range]"
+user-invocable: true
+allowed-tools: Bash(curl *), Bash(printf *), Write

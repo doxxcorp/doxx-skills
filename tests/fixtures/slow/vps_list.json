@@ -1,0 +1,18 @@
+{
+  "status": "success",
+  "count": 1,
+  "servers": [
+    {
+      "vps_id": "v123",
+      "name": "web1",
+      "tunnel_token": "SECRET-TT-VPS",
+      "state": "pending",
+      "detail": "",
+      "progress": 0,
+      "region": "mia1",
+      "public_ipv4": "203.0.113.50",
+      "ssh_command": "ssh root@203.0.113.50"
+    }
+  ],
+  "bandwidth_pool": {}
+}

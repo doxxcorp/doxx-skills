@@ -1,0 +1,5 @@
+{
+  "status": "error",
+  "message": "Invalid or expired token",
+  "context": "..."
+}

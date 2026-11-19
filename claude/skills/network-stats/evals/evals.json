@@ -4,57 +4,75 @@
     {
       "id": 0,
       "prompt": "Give me a full overview of my network stats",
-      "expected_output": "Dashboard-style summary covering all stats endpoints",
+      "expected_output": "Dashboard of global, bandwidth, alerts and summary with tunnel names",
       "expectations": [
-        "Calls /api/stats/global for total threats blocked",
-        "Calls /api/stats/bandwidth for recent bandwidth usage",
-        "Calls /api/stats/alerts for block counts and category breakdown",
-        "Calls /api/stats/summary for peak bandwidth per tunnel",
-        "Presents results in a concise table or structured dashboard format"
+        "Calls /api/stats/global, /api/stats/bandwidth, /api/stats/alerts and /api/stats/summary",
+        "Calls the Stats API with params in the query string and the token in the X-Auth-Token header through stdin, never in the URL",
+        "Maps tunnel_token keys to tunnel names via list_tunnels and never prints a tunnel_token",
+        "Presents results in a concise table or dashboard"
       ]
     },
     {
       "id": 1,
       "prompt": "Show my bandwidth usage for the last hour",
-      "expected_output": "Per-tunnel and aggregate bandwidth stats for the past hour",
+      "expected_output": "Peak Mbps per tunnel and in total",
       "expectations": [
-        "Calls /api/stats/bandwidth with appropriate start/end or default 1-hour range",
-        "Authenticates with token parameter",
-        "Presents peak_in and peak_out in Mbps",
-        "Shows per-tunnel breakdown and aggregate totals"
+        "Calls /api/stats/bandwidth with no start (the default is the last hour) or with start/end as RFC3339 UTC in the query string",
+        "Does not send an hours or last param to bandwidth",
+        "Presents peak_in and peak_out in Mbps per tunnel name and in total, and does not present them as transferred GB",
+        "Can report the granularity of the answer"
       ]
     },
     {
       "id": 2,
       "prompt": "What's being blocked on my network?",
-      "expected_output": "DNS block summary with category breakdown",
+      "expected_output": "Block categories and top domains",
       "expectations": [
-        "Calls /api/stats/alerts with last=1d or similar recent range",
-        "Shows block_count and category_counts (ads, tracking, malware)",
-        "Highlights the most blocked categories",
-        "Mentions total blocks across all tunnels"
+        "Calls /api/stats/alerts?last=1d (query string)",
+        "Shows block_count and category_counts (for example ads, tracking, malware)",
+        "Lists the top blocked domains with tunnel names, not tunnel tokens"
       ]
     },
     {
       "id": 3,
       "prompt": "Give me a monthly summary of my network",
-      "expected_output": "30-day peak bandwidth and alert totals per tunnel",
+      "expected_output": "30-day peaks and alert totals",
       "expectations": [
-        "Calls /api/stats/summary with days=30",
-        "Shows peak_in_mbps and peak_out_mbps per tunnel",
-        "Shows alert_totals broken down by type",
-        "Calls list_tunnels to get tunnel names for labeling"
+        "Calls /api/stats/summary?days=30",
+        "Shows bandwidth.total_peak_in/out (the highest single-tunnel peak) and by_tunnel keyed by tunnel name",
+        "Shows the alerts totals by type",
+        "Uses list_tunnels to map tunnel tokens to names and never prints the tokens"
       ]
     },
     {
       "id": 4,
       "prompt": "Are there any security threats? Show me the last week",
-      "expected_output": "Security alerts filtered to the past 7 days",
+      "expected_output": "Security events for 7 days",
       "expectations": [
-        "Calls /api/stats/alerts with last=7d",
-        "Focuses on security_event, dangerous_port, port_scan, doh_bypass types",
-        "Groups and summarizes by alert type",
-        "Highlights any concerning patterns or high counts"
+        "Calls /api/stats/alerts?last=7d, optionally with type=security_event",
+        "Groups security events by their value (dangerous_port, port_scan, dns_bypass, doh_bypass)",
+        "Highlights concerning patterns or high counts"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "How many things were blocked on my iPhone since I connected?",
+      "expected_output": "Session alerts for one tunnel",
+      "expectations": [
+        "Calls /api/stats/alerts with last=session AND the iPhone tunnel's tunnel_token (resolved by name in the shell)",
+        "Knows that last=session without tunnel_token returns 400",
+        "Explains that the session is the app's Live Activity session and zero counts mean no session",
+        "Does not print the tunnel_token"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Show me alerts for the last 3 hours",
+      "expected_output": "Uses start instead of an invalid last value",
+      "expectations": [
+        "Uses start (RFC3339 UTC, three hours ago) instead of a last value, because last accepts only 1m, 1h, 1d/24h, 7d, 30d, session",
+        "Writes the time with Z, not +00:00, in the query string",
+        "Shows plain-text API errors (such as a 400) to the user as given"
       ]
     }
   ]

@@ -1,0 +1,70 @@
+{
+  "skill_name": "manage-tunnels",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Show me all my tunnels",
+      "expected_output": "Lists all tunnels with names, IPs, servers, and connection status",
+      "expectations": [
+        "Calls list_tunnels with the user's auth token",
+        "Displays tunnel name, assigned IP, server, and connection status",
+        "Does not print tunnel_token or private_key values",
+        "Presents output in a readable format"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Add a new device called Work Laptop on the London server",
+      "expected_output": "Creates a generic WireGuard tunnel named Work Laptop on the London server",
+      "expectations": [
+        "Calls servers endpoint to find the London server hostname",
+        "Calls create_tunnel with name=Work Laptop, type=wireguard and the correct server",
+        "Shows the new tunnel's name, server and assigned IP (from list_tunnels), never its tunnel_token",
+        "Offers to get the WireGuard config for the new tunnel"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Move my Home Server tunnel to the EU",
+      "expected_output": "Updates the tunnel's server to an EU location",
+      "expectations": [
+        "Lists tunnels to find the Home Server tunnel token",
+        "Calls servers endpoint to show EU server options",
+        "Calls update_tunnel with only the new server",
+        "Warns that the WireGuard config will change and needs reinstalling"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Delete the tunnel called Test Device",
+      "expected_output": "Deletes the specified tunnel after confirmation",
+      "expectations": [
+        "Lists tunnels to find Test Device's tunnel token",
+        "Asks for confirmation before deleting",
+        "Calls delete_tunnel with the correct tunnel token"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Turn off the firewall on my NAS tunnel",
+      "expected_output": "Warns about the effect and plan gate, then patches only the firewall flag",
+      "expectations": [
+        "Lists tunnels to find the NAS tunnel",
+        "Warns that turning the firewall off deletes that tunnel's firewall rules and asks for confirmation",
+        "Calls update_tunnel with tunnel_token and firewall=0 only (no apply_mode or load_profile)",
+        "If the call returns feature_required (firewall_edit), explains that Firewall Control is a Pro feature and shows the upgrade_url instead of retrying"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I'm on the free plan. Can I still connect my laptop?",
+      "expected_output": "Explains that Free connects with mesh-only routing and creates a tunnel if asked",
+      "expectations": [
+        "Explains that Free accounts can connect, with mesh-only routing (devices reach each other, no internet egress)",
+        "Does not claim that a subscription is required to create a tunnel",
+        "Mentions that only paused, revoked or suspended accounts are refused (feature_required with feature connect)",
+        "Does not quote seat counts or prices from memory"
+      ]
+    }
+  ]
+}

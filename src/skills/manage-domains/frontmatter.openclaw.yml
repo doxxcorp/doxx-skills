@@ -1,0 +1,11 @@
+name: manage-domains
+description: "Manage doxx.net domains: register, DNS records, TLS certificates, import external domains"
+version: {{version}}
+homepage: https://github.com/doxxcorp/doxx-skills
+user-invocable: false
+metadata:
+  openclaw:
+    requires:
+      env: [DOXX_TOKEN]
+      bins: [curl, jq, openssl, dig]
+    primaryEnv: DOXX_TOKEN

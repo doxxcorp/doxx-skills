@@ -1,0 +1,11 @@
+name: network-wizard
+description: "Set up a doxx.net private network: tunnels, mesh networking, domains, DNS blocking, and client installation"
+version: {{version}}
+homepage: https://github.com/doxxcorp/doxx-skills
+user-invocable: true
+metadata:
+  openclaw:
+    requires:
+      env: [DOXX_TOKEN]
+      bins: [curl, jq, openssl, dig]
+    primaryEnv: DOXX_TOKEN

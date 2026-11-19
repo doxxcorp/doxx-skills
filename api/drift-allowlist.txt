@@ -1,0 +1,3 @@
+# Endpoints documented in api/reference.md that the live Config API manifest
+# does not list, on purpose. `make api-drift` ignores these. One name per line;
+# `#` starts a comment. Keep a reason next to each one.

@@ -1,0 +1,5 @@
+name: network-wizard
+description: "Set up a doxx.net private network: tunnels, mesh networking, domains, DNS blocking, and client installation"
+argument-hint: "[--quick] [number of devices] [server location]"
+user-invocable: true
+allowed-tools: Bash(curl *), Bash(printf *), Bash(jq *), Bash(chmod 600 *), Bash(umask 077), Bash(qrencode -o */doxx-wg.*/doxx-qr.png*), Bash(open */doxx-wg.*/doxx-qr.png), Bash(xdg-open */doxx-wg.*/doxx-qr.png), Bash(sudo install -m 600 */doxx-wg.*/doxx.conf /etc/wireguard/doxx.conf), Bash(rm -f */doxx-wg.*/doxx.conf */doxx-wg.*/doxx-qr.png), Bash(rmdir */doxx-wg.*), Bash(openssl *), Bash(dig *), Bash(sudo wg-quick up doxx), Bash(sudo wg-quick down doxx), Write

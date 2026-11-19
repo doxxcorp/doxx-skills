@@ -1,0 +1,48 @@
+{
+  "tunnel_tokens": [
+    "SECRET-TT-LAPTOP",
+    "SECRET-TT-HOME",
+    "SECRET-TT-OLD"
+  ],
+  "requested": {
+    "start": "2026-11-17T08:00:00Z",
+    "end": "2026-11-17T09:00:00Z"
+  },
+  "actual": {
+    "start": 1794902400,
+    "end": 1794906000
+  },
+  "granularity": "1m",
+  "data": [
+    {
+      "tunnel_token": "SECRET-TT-LAPTOP",
+      "timestamp": 1794902400,
+      "peak_in": 12.345,
+      "peak_out": 3.2,
+      "samples": 60
+    },
+    {
+      "tunnel_token": "SECRET-TT-LAPTOP",
+      "timestamp": 1794902460,
+      "peak_in": 8.0,
+      "peak_out": 4.75,
+      "samples": 60
+    },
+    {
+      "tunnel_token": "SECRET-TT-HOME",
+      "timestamp": 1794902400,
+      "peak_in": 1.5,
+      "peak_out": 0.25,
+      "samples": 60
+    }
+  ],
+  "aggregate": [
+    {
+      "tunnel_token": "aggregate",
+      "timestamp": 1794902400,
+      "peak_in": 13.845,
+      "peak_out": 3.45,
+      "samples": 120
+    }
+  ]
+}

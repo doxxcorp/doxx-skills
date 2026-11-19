@@ -1,0 +1,5 @@
+name: manage-account
+description: "Manage doxx.net account: recovery email and phone, notification preferences, and account deletion; recovery codes through the portal"
+argument-hint: "[action] [setting]"
+user-invocable: true
+allowed-tools: Bash(curl *), Bash(printf *), Write

@@ -1,0 +1,5 @@
+name: manage-tokens
+description: "Manage doxx.net auth tokens: create, revoke, update roles, device tokens bound to a tunnel or agent, geo/IP fences, and tunnel scoping"
+argument-hint: "[action] [target]"
+user-invocable: true
+allowed-tools: Bash(curl *), Bash(printf *), Write

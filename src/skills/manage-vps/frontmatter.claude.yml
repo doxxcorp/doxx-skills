@@ -1,0 +1,5 @@
+name: manage-vps
+description: "Manage doxx.net cloud servers (VPS): catalog and live prices, create, power, mesh access, DNS and reverse DNS, root password, SSH keys, delete"
+argument-hint: "[action] [server name]"
+user-invocable: true
+allowed-tools: Bash(curl *), Bash(bash */manage-vps/scripts/vps-wait.sh*), Bash(printf *), Bash(jq *), Bash(ssh-keygen -lf *), Bash(rm -f */doxx-vps.*/root-password), Bash(rmdir */doxx-vps.*), Write

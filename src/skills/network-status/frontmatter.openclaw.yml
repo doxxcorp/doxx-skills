@@ -1,0 +1,11 @@
+name: network-status
+description: "Check doxx.net network status: bandwidth, connections, security alerts, tunnel and device status, this machine's public address"
+version: {{version}}
+homepage: https://github.com/doxxcorp/doxx-skills
+user-invocable: false
+metadata:
+  openclaw:
+    requires:
+      env: [DOXX_TOKEN]
+      bins: [curl, jq, dig]
+    primaryEnv: DOXX_TOKEN

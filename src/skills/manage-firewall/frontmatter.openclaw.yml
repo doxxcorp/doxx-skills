@@ -1,0 +1,11 @@
+name: manage-firewall
+description: "Manage doxx.net firewall rules: open ports, port forwards, link tunnels for mesh networking, manage access rules"
+version: {{version}}
+homepage: https://github.com/doxxcorp/doxx-skills
+user-invocable: false
+metadata:
+  openclaw:
+    requires:
+      env: [DOXX_TOKEN]
+      bins: [curl, jq]
+    primaryEnv: DOXX_TOKEN

@@ -1,0 +1,11 @@
+name: manage-account
+description: "Manage doxx.net account: recovery email and phone, notification preferences, and account deletion; recovery codes through the portal"
+version: {{version}}
+homepage: https://github.com/doxxcorp/doxx-skills
+user-invocable: false
+metadata:
+  openclaw:
+    requires:
+      env: [DOXX_TOKEN]
+      bins: [curl, jq]
+    primaryEnv: DOXX_TOKEN

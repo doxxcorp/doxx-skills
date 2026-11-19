@@ -1,0 +1,66 @@
+{
+  "skill_name": "network-status",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Show me my network status",
+      "expected_output": "Tunnels, devices and recent stats",
+      "expectations": [
+        "Calls list_tunnels and shows only name, server, address and connection state (no tunnel_token or private_key)",
+        "Calls /api/stats/bandwidth and /api/stats/alerts with params in the query string",
+        "Maps stats tunnel tokens to tunnel names",
+        "Presents a clear summary of network health"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "How much bandwidth am I using?",
+      "expected_output": "Peak bandwidth per tunnel",
+      "expectations": [
+        "Calls /api/stats/bandwidth (no hours param; start/end or the default last hour)",
+        "Presents peak throughput in Mbps, per tunnel name"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Are there any security alerts?",
+      "expected_output": "Recent alerts grouped by category",
+      "expectations": [
+        "Calls /api/stats/alerts with last=1d (or no time params, which means 24 hours)",
+        "Groups alerts by category and highlights anything unusual"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Is my VPN connected?",
+      "expected_output": "Connection state per tunnel",
+      "expectations": [
+        "Calls list_tunnels and checks is_connected / connection_status",
+        "Clearly shows which tunnels are connected and which are not",
+        "Suggests dig @10.10.10.10 to verify DNS through the tunnel",
+        "Does not use the word VPN in its reply"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "What's my public IP and who is my ISP?",
+      "expected_output": "One network_info call",
+      "expectations": [
+        "Calls network_info once and shows ip, family, asn and org",
+        "Explains that doxx.net answers it without third parties and keeps no record",
+        "Notes that if this machine's traffic goes through a doxx.net tunnel, the org is doxx.net, not the home ISP",
+        "Does not poll network_info in a loop (30 calls a minute limit)"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Is my old laptop still registered on my account?",
+      "expected_output": "device_status for that device",
+      "expectations": [
+        "Finds the laptop's device_hash with device_list_unified",
+        "Calls device_status with device_id_hash and reports registered, seated and tunnels",
+        "Makes no changes (device_status is read-only)"
+      ]
+    }
+  ]
+}
