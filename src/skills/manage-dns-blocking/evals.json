@@ -1,0 +1,110 @@
+{
+  "skill_name": "manage-dns-blocking",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Enable ad and tracker blocking on all my devices",
+      "expected_output": "Enables ads and tracking blocklists on all tunnels",
+      "expectations": [
+        "Calls dns_get_options to show available blocklists",
+        "Calls dns_set_subscription for ads with enabled=1 and apply_to_all=1",
+        "Calls dns_set_subscription for tracking with enabled=1 and apply_to_all=1",
+        "Confirms the subscriptions were applied"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "A website is broken, I think it's being blocked. Whitelist example.com",
+      "expected_output": "Adds example.com to the whitelist",
+      "expectations": [
+        "Calls dns_add_whitelist with domain=example.com",
+        "Confirms the domain was whitelisted",
+        "Optionally offers apply_to_all",
+        "If the call returns feature_required (custom_rules), explains Custom Rules is a Pro feature, shows upgrade_url, and offers a timed dns_blocking_pause instead"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Set up DNS blocking on my phone without using VPN",
+      "expected_output": "Creates a Secure DNS hash and provides setup instructions",
+      "expectations": [
+        "Calls public_dns_create_hash to generate DoH/DoT URLs",
+        "Provides the DoH URL and DoT hostname",
+        "Gives platform-specific setup instructions (iOS or Android)",
+        "Explains this works without the tunnel"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "What's being blocked on my network?",
+      "expected_output": "Shows DNS blocking stats and active subscriptions",
+      "expectations": [
+        "Calls dns_blocklist_stats (with the token) to show per-list domain counts and total_domains",
+        "Calls dns_get_tunnel_config or dns_get_all_tunnel_configs to show config",
+        "Presents total blocked domains and active blocklists"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Show me a summary of DNS blocking across all my tunnels",
+      "expected_output": "Shows DNS config for all tunnels in one view",
+      "expectations": [
+        "Calls dns_get_all_tunnel_configs to get cross-tunnel DNS config",
+        "Presents per-tunnel blocking status, subscriptions, whitelists, and blacklists",
+        "Shows base protections and tunnel count"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Which of my tunnels have example.com whitelisted or blacklisted?",
+      "expected_output": "Searches custom rules across all tunnels for the domain",
+      "expectations": [
+        "Calls dns_get_user_custom_rules with domain=example.com",
+        "Shows which tunnels have the domain in whitelists or blacklists",
+        "Displays reason and blocked_by info when available"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Which blocklists are enabled on which tunnels?",
+      "expected_output": "Shows subscription breakdown across all tunnels",
+      "expectations": [
+        "Calls dns_get_user_subscriptions to get cross-tunnel subscriptions",
+        "Presents the per-list summary with enabled/disabled counts",
+        "Shows total tunnel count and subscription count"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Pause ad blocking on my phone for 10 minutes, a checkout page is broken",
+      "expected_output": "Pauses Smart Blocking on the phone's tunnel for 600 seconds",
+      "expectations": [
+        "Calls list_tunnels to find the phone's tunnel_token",
+        "Calls dns_blocking_pause with tunnel_token and seconds=600",
+        "Reports when the pause ends (block_bad_dns_pause_until or seconds_remaining) without printing the tunnel_token",
+        "Explains that blocking resumes on its own and that base safety lists still apply during the pause",
+        "Does not change block_bad_dns with update_tunnel"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Turn blocking back on now, I'm done",
+      "expected_output": "Ends the active pause early",
+      "expectations": [
+        "Calls dns_blocking_pause with seconds=0 on the paused tunnel",
+        "Confirms seconds_remaining is 0 and Smart Blocking is active again"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "On my laptop tunnel, turn on the AdGuard and URLhaus lists and turn off the StevenBlack social list, in one go",
+      "expected_output": "One batch dns_set_subscription call with a changes object",
+      "expectations": [
+        "Calls dns_set_subscription with changes as a JSON object mapping blocklist name to true/false (for example {\"adguard\":true,\"urlhaus\":true,\"stevenblack_social\":false}, names from dns_get_options), not an array",
+        "Sends changes with --data-urlencode",
+        "Resolves the laptop tunnel_token by name in the shell and does not print it",
+        "Reads the tunnel's DNS config back afterwards to confirm the change"
+      ]
+    }
+  ]
+}

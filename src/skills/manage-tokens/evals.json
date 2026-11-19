@@ -1,0 +1,92 @@
+{
+  "skill_name": "manage-tokens",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "List all my auth tokens",
+      "expected_output": "Token list with labels, roles and dates, no token values",
+      "expectations": [
+        "Calls user_list_tokens and filters the answer with jq so no token value or tunnel_token reaches the conversation",
+        "Shows each token's label, role, created_at, expires_at and revoked_at, and flags is_current",
+        "Notes that a non-admin token sees only itself, and that gateway (device) credentials are never in this list (they are counted in list_agents credentials)",
+        "Checks the API response status field"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create a net-admin token for my CI that expires in 30 days",
+      "expected_output": "Creates a net-admin token and saves it to a private file",
+      "expectations": [
+        "Calls create_token with role=net-admin passed explicitly and an expires_at about 30 days out (RFC3339)",
+        "Says that omitting role would create a read-only token",
+        "Writes new_token to a 0600 file in a private temp directory and tells the user the path; never prints the value",
+        "Says the value is shown only once, and suggests an IP fence for the CI's fixed address"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Restrict my CI token to just the prod tunnel",
+      "expected_output": "Token scoped to one tunnel",
+      "expectations": [
+        "Resolves the prod tunnel's tunnel_token from list_tunnels inside the shell, referring to it by name",
+        "Resolves the CI token's value by label/created_at inside the shell, without printing it",
+        "Calls add_token_tunnel with target_token and tunnel_token",
+        "Explains that the token can then see and change only that tunnel"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Rotate my admin token",
+      "expected_output": "New token first, then the old one revoked",
+      "expectations": [
+        "Calls create_token (role=admin, with an expiry) BEFORE revoking anything",
+        "Saves the new token to a private file, never into the conversation",
+        "Calls revoke_token on the old token only after the new one is in place",
+        "Warns that anything using the old token stops working at once"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "What can my current token do?",
+      "expected_output": "Reads the role from the auth check",
+      "expectations": [
+        "Runs the token check (auth=1) and reads the role field",
+        "Explains what that role can and cannot do (admin, net-admin, read-only, device)",
+        "Does not print the token"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I just used a recovery code. What happened to my tokens and what should I do?",
+      "expected_output": "Explains the revoke-all behaviour and the restore steps",
+      "expectations": [
+        "Explains that redeeming a recovery code revoked every token on the account, agent gateway credentials included, and issued one new admin token",
+        "Calls only endpoints in the public manifest",
+        "Lists the revoked tokens without their values and helps decide per token: unrevoke_token or leave revoked / delete_token",
+        "Suggests an IP fence before re-enabling tokens when the compromise is unclear, and re-running gateway setup for agents (device credentials do not appear in user_list_tokens, so they cannot be unrevoked from there)"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Make a device token for my gateway box's tunnel and bind it to my agent",
+      "expected_output": "Mints a role=device credential bound to the tunnel and agent",
+      "expectations": [
+        "Calls create_token with role=device, the box's tunnel_token (resolved by name in the shell) and agent_id",
+        "Notes a net-admin token is enough for role=device",
+        "Does not print new_token or bound_tunnel; saves the credential to a private file",
+        "Mentions that doxxGateway setup normally mints this credential itself"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Revoke the device credential of my old gateway box",
+      "expected_output": "Uses the agent endpoints, not the token list",
+      "expectations": [
+        "Says that device credentials never appear in user_list_tokens, so the created_at recipe cannot pick one",
+        "Calls list_agents to find the agent and its credentials count, referring to it by name",
+        "Offers update_agent with a new or empty host_device_hash (re-host or unhost), or delete_agent, both of which revoke the old host's credentials",
+        "Confirms with the user before the change"
+      ]
+    }
+  ]
+}

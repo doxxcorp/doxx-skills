@@ -1,0 +1,5 @@
+name: manage-devices
+description: "Manage doxx.net devices: list, rename, change icons, check device status, log this machine out, and delete devices"
+argument-hint: "[action] [device name]"
+user-invocable: true
+allowed-tools: Bash(curl *), Bash(printf *), Write

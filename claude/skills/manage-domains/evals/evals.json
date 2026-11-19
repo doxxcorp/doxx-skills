@@ -17,10 +17,11 @@
       "prompt": "Generate a TLS certificate for mysite.crypto",
       "expected_output": "Generates key, CSR, and signs certificate with doxx.net CA",
       "expectations": [
-        "Generates a private key locally with openssl",
-        "Creates a CSR with the correct CN",
-        "Calls sign_certificate with the CSR",
-        "Verifies the certificate with openssl x509",
+        "Generates a private key locally with openssl (umask 077) and never prints it",
+        "Creates a CSR with the correct CN and no IP SANs",
+        "Calls sign_certificate with the CSR, saving the PEM to a file",
+        "Checks the file starts with BEGIN CERTIFICATE (otherwise shows the JSON error message)",
+        "Verifies the certificate with openssl x509 and mentions it covers the wildcard and is valid for 825 days",
         "Mentions that clients need the doxx.net root CA installed"
       ]
     },
@@ -29,10 +30,11 @@
       "prompt": "Import my external domain example.com to doxx.net",
       "expected_output": "Walks through TXT verification and domain import",
       "expectations": [
-        "Calls get_domain_validation to get the verification code",
+        "Calls get_domain_validation to get the account's verification code",
         "Instructs user to set _doxx-verify.example.com TXT record",
         "Calls import_domain after user confirms TXT record is set",
-        "Tells user to update nameservers to a.root-dx.net, a.root-dx.com, a.root-dx.org"
+        "Tells user to update nameservers to a.root-dx.net, a.root-dx.com, a.root-dx.org",
+        "If import_domain returns domain_limit, explains the domain add-on and shows upgrade_url"
       ]
     },
     {
@@ -42,6 +44,28 @@
       "expectations": [
         "Calls create_dns_record with type=CNAME, name=blog.mysite.doxx, content=mysite.doxx",
         "Verifies the record was created"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Register lab.doxx for me, I already have one domain",
+      "expected_output": "Attempts registration and handles the domain add-on limit",
+      "expectations": [
+        "Checks live entitlements (limits.domains) or calls list_domains first",
+        "Calls create_domain with domain=lab.doxx",
+        "If the answer is 403 domain_limit, explains that each domain past the included ones is an add-on, shows used/max and upgrade_url verbatim, and does not retry in a loop",
+        "Does not buy the add-on for the user"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Get me a TLS certificate for 10.1.2.3 and nas.home.doxx",
+      "expected_output": "Explains IP SANs are refused and signs a name-only certificate",
+      "expectations": [
+        "Explains that the doxx.net CA cannot certify IP addresses (sign_certificate returns 400 for IP SANs)",
+        "Creates the CSR with the hostname only, under a doxx.net domain the user owns",
+        "Calls sign_certificate for that name",
+        "Suggests a public CA such as Let's Encrypt if the user needs https on a raw public IP"
       ]
     }
   ]

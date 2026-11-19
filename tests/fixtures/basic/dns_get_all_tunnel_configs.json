@@ -1,0 +1,58 @@
+{
+  "status": "success",
+  "context": "dns ...",
+  "base_protections": [
+    "malware"
+  ],
+  "tunnel_count": 3,
+  "tunnels": [
+    {
+      "tunnel_token": "SECRET-TT-LAPTOP",
+      "name": "laptop",
+      "server": "mia1.doxx.net",
+      "dns_blocking_enabled": true,
+      "snarf_dns": true,
+      "block_doh_dot": false,
+      "subscriptions": [
+        {
+          "blocklist_name": "ads",
+          "enabled": true
+        }
+      ],
+      "whitelists": [],
+      "blacklists": []
+    },
+    {
+      "tunnel_token": "SECRET-TT-HOME",
+      "name": "homeserver",
+      "server": "mia1.doxx.net",
+      "dns_blocking_enabled": true,
+      "snarf_dns": true,
+      "block_doh_dot": false,
+      "subscriptions": [
+        {
+          "blocklist_name": "ads",
+          "enabled": true
+        }
+      ],
+      "whitelists": [],
+      "blacklists": []
+    },
+    {
+      "tunnel_token": "SECRET-TT-OLD",
+      "name": "oldbox",
+      "server": "mia1.doxx.net",
+      "dns_blocking_enabled": true,
+      "snarf_dns": true,
+      "block_doh_dot": false,
+      "subscriptions": [
+        {
+          "blocklist_name": "ads",
+          "enabled": true
+        }
+      ],
+      "whitelists": [],
+      "blacklists": []
+    }
+  ]
+}

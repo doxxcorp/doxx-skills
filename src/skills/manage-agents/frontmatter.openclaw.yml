@@ -1,0 +1,11 @@
+name: manage-agents
+description: "Manage doxx.net agents: create, update and delete AI-agent chat principals (including webhook agents) for the doxxGateway, inspect device binding, clean up legacy bots"
+version: {{version}}
+homepage: https://github.com/doxxcorp/doxx-skills
+user-invocable: false
+metadata:
+  openclaw:
+    requires:
+      env: [DOXX_TOKEN]
+      bins: [curl, jq]
+    primaryEnv: DOXX_TOKEN

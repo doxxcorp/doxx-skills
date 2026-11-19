@@ -1,0 +1,25 @@
+{
+  "status": "success",
+  "link_all_enabled": false,
+  "count": 2,
+  "rules": [
+    {
+      "tunnel_token": "SECRET-TT-A",
+      "protocol": "TCP",
+      "src_ip": "0.0.0.0/0",
+      "src_port": "ALL",
+      "dst_ip": "10.2.0.9",
+      "dst_port": "80",
+      "enabled": true
+    },
+    {
+      "tunnel_token": "SECRET-TT-B",
+      "protocol": "TCP",
+      "src_ip": "0.0.0.0/0",
+      "src_port": "ALL",
+      "dst_ip": "10.2.0.9",
+      "dst_port": "443",
+      "enabled": true
+    }
+  ]
+}

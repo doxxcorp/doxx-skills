@@ -6,7 +6,7 @@
       "prompt": "/doxxnet help",
       "expected_output": "Prints the capability menu and asks what the user wants to do",
       "expectations": [
-        "Displays all 9 capability areas with short descriptions",
+        "Displays all capability areas with short descriptions, including Cloud Servers",
         "Mentions /network-wizard for guided setup",
         "Does not make any API calls",
         "Asks the user what they want to do"
@@ -17,9 +17,10 @@
       "prompt": "Show me my tunnels and current bandwidth usage",
       "expected_output": "Tunnel list plus bandwidth stats",
       "expectations": [
-        "Calls list_tunnels to get tunnel info",
-        "Calls /api/stats/bandwidth for recent bandwidth",
-        "Presents both tunnel status and bandwidth in a combined view"
+        "Calls list_tunnels and shows only names, servers, addresses and connection state (no tunnel_token or private_key)",
+        "Calls /api/stats/bandwidth for recent bandwidth (default last hour)",
+        "Passes Stats API params in the query string with the token in the X-Auth-Token header (stdin), never in the URL",
+        "Presents tunnel status and bandwidth together, keyed by tunnel name"
       ]
     },
     {
@@ -29,7 +30,7 @@
       "expectations": [
         "Calls dns_get_options to list available blocklists",
         "Calls dns_set_subscription with apply_to_all to enable blocking",
-        "Calls /api/stats/alerts with last=1d to show current blocks",
+        "Calls /api/stats/alerts?last=1d to show current blocks",
         "Shows category_counts and block_count"
       ]
     },
@@ -48,10 +49,10 @@
       "prompt": "Give me a full overview of my network",
       "expected_output": "Comprehensive network dashboard",
       "expectations": [
-        "Calls list_tunnels for device status",
-        "Calls /api/stats/bandwidth for recent bandwidth",
-        "Calls /api/stats/alerts for security and blocking summary",
-        "Calls /api/stats/summary for peak stats",
+        "Calls list_tunnels for device status (fields only)",
+        "Calls /api/stats/bandwidth, /api/stats/alerts and /api/stats/summary",
+        "Passes Stats API params in the query string with the token in the X-Auth-Token header (stdin), never in the URL",
+        "Maps stats tunnel tokens to tunnel names and never prints them",
         "Presents a unified dashboard-style summary"
       ]
     },
@@ -63,29 +64,28 @@
         "Calls device_list_unified with the user's auth token",
         "Shows each device with name, model, OS, and online status",
         "Highlights which devices are currently online",
-        "Shows subscription device count"
+        "Shows seats used of total"
       ]
     },
     {
       "id": 5,
       "prompt": "Show me my IP addresses and rotate my public one",
-      "expected_output": "Lists IPs and rotates the public address",
+      "expected_output": "Explains a dedicated IPv4 cannot be rotated; offers alternatives",
       "expectations": [
         "Calls list_addresses to show all assigned IPs",
-        "Identifies the static_public address",
-        "Warns that rotation releases the old IP",
-        "Calls rotate_address with the correct address and type"
+        "Explains that a dedicated public IPv4 cannot be rotated (rotate_address takes static_private or static_ipv6 only)",
+        "Offers the options that exist instead (rotate a private or IPv6 address, or release and lease a new dedicated IPv4), with confirmation"
       ]
     },
     {
       "id": 6,
       "prompt": "What subscription am I on and generate recovery codes",
-      "expected_output": "Directs subscription to the a0x13 portal and generates recovery codes",
+      "expected_output": "Reads the plan from live entitlements and sends the user to the portal for recovery codes",
       "expectations": [
-        "Does not call subscription_status (removed from the Config API in 1.1.0); points the user to the a0x13 portal for tier and seats",
-        "Calls create_account_recovery to generate new codes",
-        "Displays recovery codes with security warning",
-        "Reminds user to save codes securely"
+        "Reads the plan and seats from POST https://payments.doxx.net/v1/access/status, not from a Config API endpoint",
+        "Calls only endpoints in the public manifest and sends the user to the portal for recovery codes",
+        "Sends the user to the portal profile page (https://app.doxx.net/ops/account/profile) to create recovery codes",
+        "Explains the codes are the backup for a lost token and that redeeming one revokes every token"
       ]
     },
     {
@@ -104,11 +104,11 @@
       "prompt": "Set up a new tunnel in New York and install WireGuard on my Mac",
       "expected_output": "Creates a tunnel on a New York server, writes the WireGuard config to /etc/wireguard/doxx.conf, and activates it",
       "expectations": [
-        "Calls servers endpoint and selects a New York server",
-        "Calls create_tunnel with the New York server",
-        "Calls wireguard endpoint to get the config",
-        "Writes config to /etc/wireguard/doxx.conf using the Write tool",
-        "Runs sudo wg-quick up doxx to activate the tunnel"
+        "Calls servers and picks a New York server",
+        "Calls create_tunnel with that server and type=wireguard",
+        "Fetches the config with wireguard into a private temp directory without printing the private key",
+        "Installs it with sudo install -m 600 to /etc/wireguard/doxx.conf and runs sudo wg-quick up doxx",
+        "Cleans up the temp directory afterwards"
       ]
     },
     {
@@ -116,12 +116,11 @@
       "prompt": "Lease a dedicated IPv4 address for my iPhone tunnel",
       "expected_output": "Leases a dedicated public IPv4 and applies it to the iPhone tunnel without asking the user about profiles",
       "expectations": [
-        "Calls list_tunnels to identify the iPhone tunnel",
-        "Checks the tunnel's profile_id to see if a profile already exists",
-        "Creates a saved profile silently if none exists",
-        "Calls lease_public_ipv4 with the profile details",
-        "Calls load_profile to apply the profile to the tunnel",
-        "Presents the leased IP address to the user without mentioning profiles"
+        "Checks the entitlements for a free dedicated IP slot first",
+        "Calls list_tunnels to identify the iPhone tunnel and its active_profile_id",
+        "Calls lease_public_ipv4 with profile_id, or with profile_name and server when the tunnel has no profile",
+        "Confirms before load_profile, because it replaces the tunnel's settings",
+        "Presents the leased ip_address and any requires_reconnect notice without exposing profile mechanics"
       ]
     },
     {
@@ -129,10 +128,10 @@
       "prompt": "Show me my bandwidth usage for the last 7 days and any security alerts",
       "expected_output": "Returns bandwidth stats for the 7-day window plus a security alert summary",
       "expectations": [
-        "Calls /api/stats/bandwidth with a 7-day date range",
-        "Calls /api/stats/alerts with last=7d",
-        "Presents bandwidth peak and aggregate data",
-        "Groups alerts by category (ads, tracking, malware)"
+        "Calls /api/stats/bandwidth with start 7 days ago (RFC3339 UTC) in the query string, or /api/stats/summary?days=7",
+        "Calls /api/stats/alerts?last=7d",
+        "Presents peak bandwidth in Mbps per tunnel name",
+        "Groups alerts by category (ads, tracking, malware, security)"
       ]
     },
     {
@@ -140,11 +139,11 @@
       "prompt": "Register a .vpn domain and create an A record pointing to my tunnel IP",
       "expected_output": "Registers a .vpn domain and creates a DNS A record pointing to the tunnel's assigned IP",
       "expectations": [
-        "Asks for or infers a domain name with .vpn TLD",
+        "Checks list_tlds that .vpn exists",
         "Calls create_domain to register the domain",
         "Calls list_tunnels to get the tunnel's assigned IP",
         "Calls create_dns_record with type=A and the tunnel IP as content",
-        "Confirms the domain and record are created"
+        "Handles domain_limit by sending the user to the portal instead of retrying"
       ]
     },
     {
@@ -160,12 +159,12 @@
     },
     {
       "id": 13,
-      "prompt": "Rotate my static IP address and update any DNS records that reference it",
+      "prompt": "Rotate my private IP address and update any DNS records that reference it",
       "expected_output": "Rotates the static IP and updates all DNS A records that pointed to the old IP",
       "expectations": [
-        "Calls list_addresses to identify the static_public address",
-        "Warns the user that the old IP will be released",
-        "Calls rotate_address to get the new IP",
+        "Calls list_addresses to identify the static_private address",
+        "Warns the user that the old IP is released for good, and gets confirmation",
+        "Calls rotate_address and reads new_address",
         "Calls list_domains and list_dns for each domain to find A records pointing to the old IP",
         "Calls update_dns_record for each affected record with the new IP"
       ]
@@ -177,9 +176,47 @@
       "expectations": [
         "Calls list_tunnels to identify the relevant tunnel",
         "Verifies the tunnel is a generic WireGuard tunnel (not a native doxx.net app tunnel)",
-        "Calls wireguard endpoint to get the config",
-        "Calls generate_qr with the config data and saves to a .png file",
+        "Builds doxx.conf from the wireguard response in a private temp directory without printing the key",
+        "Offers a local QR code (qrencode) or the .conf file: makes the QR code locally and never sends the config to a server to render it",
         "Instructs the user to scan it in the WireGuard app"
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "Rename my agent Fable to Atlas and move it to my Linux server",
+      "expected_output": "Routes to update_agent with confirmation",
+      "expectations": [
+        "Calls list_agents and device_list_unified to resolve agent_id and the server's device_hash",
+        "Warns that re-hosting revokes the current host's credentials at once and that the new name is shown to every pair",
+        "Calls update_agent with agent_id, agent_name and host_device_hash after confirmation"
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "What's my current public IP and ISP?",
+      "expected_output": "One network_info call",
+      "expectations": [
+        "Calls network_info once and shows ip, asn and org",
+        "Does not use a third-party IP lookup service"
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "Set up a cloud server for me",
+      "expected_output": "Routes to manage-vps",
+      "expectations": [
+        "Routes cloud server work to the manage-vps skill",
+        "Does not quote server prices from memory (reads vps_catalog live)",
+        "Checks the entitlements: a cloud server needs the VPS add-on, which any plan can buy (Free included); does not say Pro is required"
+      ]
+    },
+    {
+      "id": 18,
+      "prompt": "Create a token for my automation script",
+      "expected_output": "Explicit role, private file",
+      "expectations": [
+        "Calls create_token with an explicit role (net-admin) and expires_at, knowing the default is read-only",
+        "Saves new_token to a 0600 file and never prints it"
       ]
     }
   ]

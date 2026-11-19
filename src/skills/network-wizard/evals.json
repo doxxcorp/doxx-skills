@@ -1,0 +1,99 @@
+{
+  "skill_name": "network-wizard",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Set up a doxx.net private network with 3 devices on a Miami server",
+      "expected_output": "Wizard walks through auth, creates 3 tunnels on Miami server, offers mesh networking, DNS blocking, and client setup",
+      "expectations": [
+        "Runs the token check before making API calls, and reads the role",
+        "Checks the entitlements (plan, free device seats) before creating tunnels",
+        "Calls the servers endpoint to list available servers",
+        "Creates WireGuard tunnels with create_tunnel and type=wireguard on the Miami server (or explains the doxx.net app creates its own tunnel)",
+        "Asks about mesh networking (firewall_link_all_toggle)",
+        "Offers DNS blocking configuration",
+        "Delivers the WireGuard config without printing the private key (local QR or file)",
+        "Prints a summary of the completed network without tunnel tokens"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I want to set up a VPN but I don't have a doxx.net account yet",
+      "expected_output": "Explains account creation process and offers to wait",
+      "expectations": [
+        "Explains that the account is created by a human at https://app.doxx.net",
+        "Mentions proof-of-work is required (human-only)",
+        "Explains choosing Essentials or Pro in the portal and creating a dedicated Network Admin token with a 7 to 30 day expiry",
+        "Explains storing the token in ~/.config/doxx/token or DOXX_TOKEN, not in the chat",
+        "Suggests setting up recovery codes in the portal",
+        "Does NOT attempt to create an account via API",
+        "Does not use the word VPN in its reply"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I already have some tunnels set up, can you help me add a domain and DNS blocking?",
+      "expected_output": "Checks existing state and resumes from the relevant phase",
+      "expectations": [
+        "Calls list_tunnels to check existing state before creating anything",
+        "Skips tunnel creation phases since tunnels already exist",
+        "Proceeds to domain registration (Phase 5) and DNS blocking (Phase 6)",
+        "Demonstrates idempotent behavior: does not duplicate existing resources"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Help me set up my iPhone on the VPN",
+      "expected_output": "Generates QR code for iOS WireGuard app setup",
+      "expectations": [
+        "Asks whether the iPhone uses the doxx.net app (sign in, no config needed) or the generic WireGuard app",
+        "For the WireGuard app: fetches the config via the wireguard endpoint into a private temp directory",
+        "Offers a local QR code (qrencode) or the .conf file: makes the QR code locally and never sends the config to a server to render it",
+        "Provides step-by-step WireGuard iOS app instructions"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "/network-wizard --quick 2 us-east",
+      "expected_output": "Creates 2 tunnels on a US East server with mesh enabled and WireGuard configs generated, skipping domain, DNS blocking, and secure DNS phases",
+      "expectations": [
+        "Detects --quick flag and skips mode selection question",
+        "Uses a US East server without asking for server preference",
+        "Creates 2 tunnels (create_tunnel with type=wireguard) without asking for device count",
+        "Enables mesh networking via firewall_link_all_toggle",
+        "Fetches WireGuard config for each tunnel without printing private keys",
+        "Does not ask about custom domain, DNS blocking, or secure DNS",
+        "Prints a summary card"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "/network-wizard",
+      "expected_output": "Asks the user to choose between quick and full setup before proceeding",
+      "expectations": [
+        "Presents quick vs full setup options with time estimates",
+        "Does not begin Phase 1 before getting a mode answer from the user",
+        "Describes what each mode includes and excludes"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "/network-wizard --quick 5 devices",
+      "expected_output": "Checks seats before creating tunnels",
+      "expectations": [
+        "Checks the live entitlements for free device seats before creating tunnels",
+        "If fewer than 5 seats are free, tells the user and does not buy or add seats",
+        "Stops adding devices on a seat_limit error and shows its message"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I set up my token, can you check it works and then we continue?",
+      "expected_output": "Token check with role",
+      "expectations": [
+        "Runs the token check without reading or printing the token",
+        "Reads the role: net-admin or admin continues; read-only cannot create anything and the user is asked for a Network Admin token"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "tunnel_tokens": [
+    "SECRET-TT-LAPTOP",
+    "SECRET-TT-HOME",
+    "SECRET-TT-OLD"
+  ],
+  "start": "2026-11-17T08:00:00Z",
+  "end": "2026-11-17T09:00:00Z",
+  "granularity": "1m",
+  "totals": {
+    "dns_block": 40,
+    "security_event": 2
+  },
+  "block_count": 42,
+  "category_counts": {
+    "ads": 30,
+    "tracking": 10,
+    "security": 2
+  },
+  "data": [
+    {
+      "tunnel_token": "SECRET-TT-LAPTOP",
+      "prefix": "10.1.0.2",
+      "type": "dns_block",
+      "action": "block",
+      "value": "ads.example.com",
+      "category": "ads",
+      "count": 30,
+      "last_seen": 1794905000
+    },
+    {
+      "tunnel_token": "SECRET-TT-LAPTOP",
+      "prefix": "10.1.0.2",
+      "type": "dns_block",
+      "action": "block",
+      "value": "t.example.net",
+      "category": "tracking",
+      "count": 10,
+      "last_seen": 1794905100
+    },
+    {
+      "tunnel_token": "SECRET-TT-HOME",
+      "prefix": "10.1.0.3",
+      "type": "security_event",
+      "value": "dangerous_port",
+      "category": "security",
+      "count": 2,
+      "last_seen": 1794905200
+    }
+  ]
+}

@@ -4,10 +4,10 @@
     {
       "id": 1,
       "prompt": "List my doxx.net agents",
-      "expected_output": "Lists all agent principals with their binding state",
+      "expected_output": "Agent directory with host state, no tunnel tokens",
       "expectations": [
-        "Calls list_agents with the user's auth token",
-        "Displays each agent's name, kind, a2a_enabled, owner_only, and binding state (bound device name or unbound)",
+        "Calls list_agents and removes host_tunnel_token before showing anything",
+        "Displays each agent's name, kind, owner_only, a2a_enabled, host_name/host_os and host_online, credentials and pair_count",
         "Does not confuse agents with devices or bots",
         "Checks the API response status field"
       ]
@@ -15,35 +15,72 @@
     {
       "id": 2,
       "prompt": "Create a new agent called Fable",
-      "expected_output": "Creates an agent principal named Fable and explains the next steps",
+      "expected_output": "Checks entitlements, creates the agent, explains hosting",
       "expectations": [
-        "Calls list_agents first to show current state",
-        "Calls create_agent with agent_name=Fable (kind defaults to agent, a2a off by default)",
-        "Explains that the agent starts owner-only and is not yet bound to a device",
-        "Points the user at the doxxGateway repo (github.com/doxxcorp/gateway) to host and bind the agent",
-        "Notes the P2P plan + profile name prerequisites if create_agent errors"
+        "Checks the entitlements for the agents feature and free agent seats (limits.agents) before creating",
+        "Calls create_agent with agent_name=Fable (kind defaults to agent, a2a off)",
+        "Explains that the agent starts owner-only and has no host yet; points to the doxxGateway (github.com/doxxcorp/gateway) or the Mac app's Agent Gateway",
+        "Does not claim agents need a P2P plan or Pro; Essentials includes agents"
       ]
     },
     {
       "id": 3,
       "prompt": "Delete the agent named Fable",
-      "expected_output": "Finds Fable's agent_id, confirms, and deletes it",
+      "expected_output": "Confirmed deletion",
       "expectations": [
         "Calls list_agents to resolve Fable's agent_id",
-        "Warns that deletion revokes all the agent's pairs and its device credential (irreversible chat identity)",
-        "Asks for confirmation before proceeding",
-        "Calls delete_agent with the correct agent_id",
-        "Notes the device/tunnel remain and can be removed separately with delete_tunnel"
+        "Warns that deletion revokes all its pairs and its device credential (the chat identity is gone)",
+        "Asks for confirmation before calling delete_agent",
+        "Notes the device and tunnel remain and can be removed separately with delete_tunnel"
       ]
     },
     {
       "id": 4,
       "prompt": "Create a bot for my server",
-      "expected_output": "Explains bots are deprecated and offers to create an agent instead",
+      "expected_output": "Explains bots are deprecated and offers an agent",
       "expectations": [
-        "Explains that bot accounts are deprecated (create_bot returns 410) and replaced by agent principals",
+        "Explains that bots are deprecated (create_bot returns 410) and replaced by agents",
         "Offers to create an agent with create_agent instead",
-        "Does not attempt create_bot except to demonstrate the deprecation, if at all"
+        "Does not call create_bot"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Move my agent Fable to my Mac mini and let my friends talk to it",
+      "expected_output": "Re-hosts the agent and unlocks owner-only after confirmation",
+      "expectations": [
+        "Calls list_agents for Fable's agent_id and device_list_unified for the Mac mini's device_hash",
+        "Explains before acting that re-hosting revokes the current host's credentials at once and the agent is silent until the Mac mini claims it",
+        "Explains that owner_only=0 lets introduced friends reach the agent, each still needing to accept (double opt-in)",
+        "Gets confirmation, then calls update_agent with agent_id, host_device_hash and owner_only=0, and reports the changed fields"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Change Fable's status message to 'on vacation'",
+      "expected_output": "Explains the status line is not set through the API",
+      "expectations": [
+        "Does not send motd to update_agent (the API refuses it with 410)",
+        "Explains that the status line travels over the mesh from the owner's device to the agent's host and is set in the app"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Create another agent called Scout",
+      "expected_output": "Handles agent_limit cleanly",
+      "expectations": [
+        "On an agent_limit error, shows message and upgrade_url verbatim and that used equals max",
+        "Offers to remove an existing agent instead; does not buy agent seats or retry in a loop"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "How do I make my agent send me a chat message from a script?",
+      "expected_output": "Separates the chat layer from network management",
+      "expectations": [
+        "Explains that chatting is the gateway's local agent API, not the Config API",
+        "Mentions the gateway's MCP server (doxxGateway mcp) and tools such as chat_send and wait_for_message",
+        "Does not invent a Config API endpoint for sending chat"
       ]
     }
   ]
