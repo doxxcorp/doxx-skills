@@ -380,6 +380,60 @@ check "two-line token file: only the first line is the token (exit 0)" '[ "$RC" 
 check "two-line token file: the injected URL got no request" evil_untouched
 check "Config token sent in the form body" "jq -se 'map(select(.api == \"config\")) | all(.token_ok)' '$LOG' >/dev/null"
 
+echo "api-drift-report.sh (tracking issue, with a fake gh)"
+RB="$WORK/report"
+mkdir -p "$RB/bin" "$RB/state"
+cat > "$RB/bin/gh" <<'EOF_GH'
+#!/usr/bin/env bash
+# Fake gh for api-drift-report.sh: one optional open issue, #7, kept in $GH_STATE.
+set -euo pipefail
+printf '%s %s\n' "$1" "$2" >> "$GH_STATE/calls"
+sub="$1 $2"; shift 2
+title="" bodyfile=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --title) title="$2"; shift 2 ;;
+    --body-file) bodyfile="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+case "$sub" in
+  "issue list")
+    if [ -f "$GH_STATE/title" ]; then jq -n --arg t "$(cat "$GH_STATE/title")" '[{number: 7, title: $t}]'; else echo '[]'; fi ;;
+  "issue view") jq -Rs '{body: .}' < "$GH_STATE/body" ;;
+  "issue create") printf '%s' "$title" > "$GH_STATE/title"; cp "$bodyfile" "$GH_STATE/body" ;;
+  "issue edit") cp "$bodyfile" "$GH_STATE/body" ;;
+  "issue close") rm -f "$GH_STATE/title" ;;
+  "issue comment") : ;;
+  *) echo "fake gh: unexpected $sub" >&2; exit 1 ;;
+esac
+EOF_GH
+chmod +x "$RB/bin/gh"
+printf 'manifest: x (version 1, 3 endpoints)\n\nMissing in reference (...):\n  new_one\n\ndrift found\n' > "$RB/drift1.txt"
+printf 'manifest: x (version 1, 4 endpoints)\n\nMissing in reference (...):\n  new_one\n  new_two\n\ndrift found\n' > "$RB/drift2.txt"
+printf 'manifest: x\nno drift\n' > "$RB/clean.txt"
+report() {
+  : > "$RB/state/calls"
+  RC=0
+  OUT="$(env PATH="$RB/bin:$PATH" GH_STATE="$RB/state" GITHUB_REPOSITORY=o/r GITHUB_RUN_ID=42 \
+    bash "$REPO_ROOT/scripts/api-drift-report.sh" "$1" "$2" 2>&1)" || RC=$?
+}
+mutations() { grep -cE '^issue (create|edit|close|comment)' "$RB/state/calls" || true; }
+report 0 "$RB/clean.txt"
+check "no drift, no issue: no change" '[ "$RC" -eq 0 ] && [ "$(mutations)" = 0 ]'
+report 1 "$RB/drift1.txt"
+check "drift: opens the tracking issue" '[ "$RC" -eq 0 ] && grep -qx "issue create" "$RB/state/calls" && grep -q "^  new_one$" "$RB/state/body" && grep -q "api-drift-fingerprint: [0-9a-f]\{64\}" "$RB/state/body"'
+report 1 "$RB/drift1.txt"
+check "same drift next day: body refreshed, no comment" '[ "$RC" -eq 0 ] && grep -qx "issue edit" "$RB/state/calls" && ! grep -qx "issue comment" "$RB/state/calls" && ! grep -qx "issue create" "$RB/state/calls"'
+report 1 "$RB/drift2.txt"
+check "changed drift: body updated and one comment" '[ "$RC" -eq 0 ] && grep -qx "issue comment" "$RB/state/calls" && grep -q "^  new_two$" "$RB/state/body"'
+report 2 "$RB/clean.txt"
+check "manifest unreachable: issue left alone" '[ "$RC" -eq 0 ] && [ "$(mutations)" = 0 ] && [ -f "$RB/state/title" ]'
+report 0 "$RB/clean.txt"
+check "drift gone: closes the issue" '[ "$RC" -eq 0 ] && grep -qx "issue close" "$RB/state/calls" && [ ! -f "$RB/state/title" ]'
+report 5 "$RB/clean.txt"
+check "unexpected exit code: fails" '[ "$RC" -ne 0 ]'
+
 echo
 if [ "$FAILS" -eq 0 ]; then
   echo "tests: $PASSES passed"

@@ -71,6 +71,14 @@ saved manifest: `make api-drift MANIFEST=path/to/manifest.json`.
 It needs the network, so it is not part of `make validate`. Run it before a release and
 whenever the API changes.
 
+`.github/workflows/api-drift.yml` also runs it every day, on demand (`workflow_dispatch`),
+and on pull requests that touch the check or `api/reference.md`. On scheduled and manual
+runs `scripts/api-drift-report.sh` keeps one tracking issue titled "api-drift:
+api/reference.md is behind the live Config API manifest": it opens the issue on drift,
+comments only when the drift output changes, and closes it when the drift is gone. A
+manifest that cannot be fetched (exit 2) fails the run but leaves the issue alone. The
+check compares endpoint names only, so params and returns still need a manual review.
+
 ## Adding a New Skill
 
 1. Create a directory under `src/skills/your-skill-name/` with a `body.md`.

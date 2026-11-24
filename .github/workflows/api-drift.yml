@@ -1,0 +1,60 @@
+name: api-drift
+
+# Compares the endpoint list of the live Config API manifest
+# (https://config.doxx.net/, public, no token) with the `### <endpoint>`
+# headings in api/reference.md. Scheduled and manual runs keep one tracking
+# issue in sync (scripts/api-drift-report.sh); pull requests that touch the
+# check itself or the reference run it without touching issues.
+
+on:
+  schedule:
+    - cron: "23 6 * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/api-drift.yml
+      - scripts/api-drift.sh
+      - scripts/api-drift-report.sh
+      - api/reference.md
+      - api/drift-allowlist.txt
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-drift-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  drift:
+    name: make api-drift
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare the reference with the live manifest
+        id: drift
+        run: |
+          set +e
+          ./scripts/api-drift.sh > drift.txt 2>&1
+          rc=$?
+          set -e
+          cat drift.txt
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Update the tracking issue
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/api-drift-report.sh "${{ steps.drift.outputs.rc }}" drift.txt
+
+      - name: Result
+        run: |
+          case "${{ steps.drift.outputs.rc }}" in
+            0) echo "no drift" ;;
+            1) echo "::error title=api-drift::api/reference.md is behind the live manifest (see the output above)"; exit 1 ;;
+            *) echo "::error title=api-drift::could not fetch or read the manifest; this is not drift"; exit 2 ;;
+          esac
