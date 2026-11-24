@@ -17,10 +17,12 @@
       "prompt": "Get me a dedicated public IP on the London server",
       "expected_output": "Leases a dedicated public IPv4 on the London server",
       "expectations": [
+        "Checks live entitlements (access/status) or list_ip_reservations for a free dedicated IP slot",
         "Calls servers endpoint to find the London server hostname",
         "Calls lease_public_ipv4 with the correct server and profile params",
         "Explains that the dedicated IP persists across reconnections",
-        "Shows the newly assigned IP address"
+        "Shows the newly assigned IP from ip_address and says a reconnect is needed when requires_reconnect is true",
+        "If refused with feature_required (dedicated_ip) or a full-slots 409, explains the add-on and shows upgrade_url instead of retrying"
       ]
     },
     {
@@ -29,9 +31,10 @@
       "expected_output": "Rotates the user's public IP to a new address",
       "expectations": [
         "Calls list_addresses to find the current public IP",
-        "Warns user that the old IP will be released and a new one assigned",
+        "Notes that a public IPv4 cannot be rotated (rotate_address takes static_private or static_ipv6 only) and offers the supported option",
+        "Warns user that the old IP will be released for good and a new one assigned, and that anything pointing at it must be updated",
         "Asks for confirmation before rotating",
-        "Calls rotate_address with the correct address and type"
+        "Calls rotate_address only for a static_private or static_ipv6 address the user confirms, never for a static_public one"
       ]
     },
     {
@@ -40,9 +43,11 @@
       "expected_output": "Creates a Gaming profile and applies it to the desktop tunnel",
       "expectations": [
         "Calls servers to list available servers for the user to choose",
-        "Calls create_saved_profile with profile_name=Gaming",
+        "Calls create_saved_profile with profile_name=Gaming and the chosen server",
         "Calls list_tunnels to find the desktop tunnel's tunnel_token",
-        "Calls load_profile with the tunnel_token and new profile_id"
+        "Warns that load_profile replaces all of the tunnel's settings with the profile's snapshot",
+        "Calls load_profile with the tunnel_token and new profile_id",
+        "If create_saved_profile returns feature_required (saved_profiles), explains Saved Connections is a Pro feature"
       ]
     },
     {
@@ -51,9 +56,78 @@
       "expected_output": "Lists profiles and deletes the unused profile after confirmation",
       "expectations": [
         "Calls list_saved_profiles to list all profiles",
-        "Identifies profiles where in_use is false",
+        "Identifies profiles where in_use is false, and notes that a disconnected tunnel may still be bound to one",
+        "Does not print in_use_tunnel_token values",
         "Asks user to confirm which profile to delete",
-        "Calls delete_saved_profile with the correct profile_id"
+        "Calls delete_saved_profile with the correct profile_id",
+        "Relays reconnect_message if the response has needs_reconnect"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Move my static private address 10.4.2.9 onto my Office profile",
+      "expected_output": "Assigns the address to the profile and reports any reconnect or site mismatch",
+      "expectations": [
+        "Calls list_addresses and list_saved_profiles to find the address and the Office profile_id",
+        "Calls assign_address with address=10.4.2.9, type=static_private and profile_id of Office",
+        "If the response is a 409 site_mismatch, explains that the address and profile are at different locations and offers update_location=1 instead of retrying blindly",
+        "If needs_reconnect is true, shows reconnect_message and names reconnect_device"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Save my laptop tunnel's current settings as a profile called Travel",
+      "expected_output": "Snapshots the tunnel into a new profile and reports whether the tunnel is now bound to it",
+      "expectations": [
+        "Calls list_tunnels to find the laptop tunnel_token",
+        "Calls save_profile with tunnel_token and profile_name=Travel",
+        "Reports the new profile_id and explains the bound flag (whether the laptop tunnel now uses the profile)",
+        "If refused with feature_required (saved_profiles), explains Saved Connections is a Pro feature and shows upgrade_url"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Apply the Tinfoil Hat mode to my desktop tunnel",
+      "expected_output": "Warns about the REPLACE effects and gets confirmation before apply_mode",
+      "expectations": [
+        "Calls list_tunnels (and list_addresses) to show the desktop tunnel's current settings and addresses",
+        "Warns that apply_mode resets every setting it does not name and detaches the saved profile",
+        "Warns that a dedicated public IPv4 (a paid add-on address) bound through the profile is released",
+        "Asks for explicit confirmation before calling apply_mode",
+        "Handles feature_required (modes or a Pro setting) by showing upgrade_url instead of retrying"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Update my Travel profile with the current settings of my laptop tunnel",
+      "expected_output": "Saves a new profile with save_profile instead of re-snapshotting; never sends re_snapshot",
+      "expectations": [
+        "Does not send re_snapshot=1 to update_saved_profile (it deletes the profile)",
+        "Offers save_profile from the laptop tunnel to a new profile, and asks before deleting the old Travel profile",
+        "Calls only endpoints in the manifest"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Take the dedicated IP off my Gaming profile, I don't need it there any more",
+      "expected_output": "Explains the difference between unlinking and giving the address up, then acts",
+      "expectations": [
+        "Explains that release_ip_reservation only unlinks the IPv4 from the profile: it stays on the account and still uses a dedicated IP slot",
+        "Explains that release_address with type=static_public gives the address up for good, and that this cannot be undone",
+        "Asks which of the two the user wants and confirms before calling it",
+        "Calls release_ip_reservation with ip_address, or release_address with address and type=static_public, as the user chose"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Load my Office profile onto my laptop tunnel",
+      "expected_output": "Tries load_profile after confirmation; on 409 profile_in_use shows the message, names the tunnel that holds the profile, and offers the two safe ways out",
+      "expectations": [
+        "Warns that load_profile replaces all of the laptop tunnel's settings and asks for confirmation before calling it",
+        "On a 409 profile_in_use, shows the message and names the tunnel that holds the profile (resolved from in_use_tunnel_token through list_tunnels inside the shell) and its device (in_use_by)",
+        "Does not print in_use_tunnel_token or any other tunnel_token",
+        "Does not follow release_action and does not disconnect or release anything on its own",
+        "Tells the user to disconnect the named tunnel and retry, or to pick another profile"
       ]
     }
   ]

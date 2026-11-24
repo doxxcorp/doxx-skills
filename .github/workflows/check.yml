@@ -1,0 +1,43 @@
+name: check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: make check and make test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # jq, curl and python3 are preinstalled on both runners. validate.sh
+      # fails in CI (CI=true) when shellcheck, jq, curl or python3 is missing.
+      - name: Install shellcheck (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Install shellcheck (macOS)
+        if: runner.os == 'macOS'
+        run: brew install shellcheck
+
+      - name: Tool versions
+        run: |
+          bash --version | head -1
+          shellcheck --version | sed -n 2p
+          jq --version
+          python3 --version
+
+      - name: make check
+        run: make check
+
+      - name: make test
+        run: make test

@@ -1,0 +1,12 @@
+{
+  "status": "success",
+  "link_all_enabled": true,
+  "firewall_enabled": false,
+  "ipv6_enabled": false,
+  "user_tunnel_ips": [
+    "10.2.0.2",
+    "10.2.0.3"
+  ],
+  "rules": null,
+  "count": 0
+}

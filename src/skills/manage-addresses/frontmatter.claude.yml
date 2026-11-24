@@ -1,0 +1,5 @@
+name: manage-addresses
+description: "Manage doxx.net IP addresses and saved profiles: assign, release, rotate IPs, lease dedicated IPv4, create and manage connection profiles"
+argument-hint: "[action] [address or profile]"
+user-invocable: true
+allowed-tools: Bash(curl *), Bash(printf *), Write

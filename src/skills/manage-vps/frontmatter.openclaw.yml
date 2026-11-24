@@ -1,0 +1,11 @@
+name: manage-vps
+description: "Manage doxx.net cloud servers (VPS): catalog and live prices, create, power, mesh access, DNS and reverse DNS, root password, SSH keys, delete"
+version: {{version}}
+homepage: https://github.com/doxxcorp/doxx-skills
+user-invocable: false
+metadata:
+  openclaw:
+    requires:
+      env: [DOXX_TOKEN]
+      bins: [curl, jq]
+    primaryEnv: DOXX_TOKEN

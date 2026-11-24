@@ -1,0 +1,11 @@
+name: doxxnet
+description: "Manage your doxx.net private network: tunnels, devices, firewall, domains, DNS blocking, IP addresses, profiles, cloud servers, agents, tokens, account, bandwidth stats, and security alerts"
+version: {{version}}
+homepage: https://github.com/doxxcorp/doxx-skills
+user-invocable: true
+metadata:
+  openclaw:
+    requires:
+      env: [DOXX_TOKEN]
+      bins: [curl, jq, openssl, dig]
+    primaryEnv: DOXX_TOKEN

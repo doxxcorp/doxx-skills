@@ -1,0 +1,105 @@
+{
+  "skill_name": "manage-vps",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Spin up a small cloud server called web1 for my website",
+      "expected_output": "Checks entitlements and the live catalog, confirms shape, region and the catalog price, then creates the server and waits for it to run",
+      "expectations": [
+        "Checks the live entitlements (features.vps and the vps limits) before planning",
+        "Calls vps_catalog and takes the monthly price from its presets (monthly_usd), not from memory",
+        "Asks for or offers an OpenSSH public key (a .pub file) and never reads or sends a private key",
+        "Repeats name, region, shape and the catalog monthly cost and waits for a clear yes before calling vps_create",
+        "Calls vps_create with name=web1, a size or shape, a site and ssh_keys, and drops tunnel_token from the printed answer",
+        "Polls vps_get about every 10 seconds until state is running, and gives up and reports after a few minutes",
+        "Gives the SSH command shape ssh root@<public_ipv4> and explains that the internet sees only ping until ports are opened with firewall_rule_add on the server's tunnel_token"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create a large server named build-box",
+      "expected_output": "On a 409 vps_limit, explains which resource is missing and sends the user to the portal without buying anything",
+      "expectations": [
+        "Confirms the shape and the catalog price before calling vps_create",
+        "When vps_create answers error_code vps_limit, shows message, component, available, needed and monthly_usd",
+        "Shows the upgrade_url as a path on the portal (https://app.doxx.net plus the path) and the fix text",
+        "Offers a smaller shape that fits, if one does",
+        "Does not buy, add or change any add-on for the user and does not retry the same create in a loop"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Delete my server test-vm",
+      "expected_output": "Explains the permanent loss, asks the user to type the exact name, repeats it back, then calls vps_delete with that name",
+      "expectations": [
+        "Calls vps_list to find test-vm and its vps_id",
+        "Explains that deletion is irreversible: disk, firewall rules, DNS and reverse DNS records go, and the addresses are held for 30 days",
+        "Asks the user to type the exact server name; a plain yes is not accepted",
+        "Calls vps_delete with confirm set to the exact name only after the typed name matches, and does not call it when the name does not match"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "List my cloud servers and give me the tunnel token for web1 so I can paste it somewhere",
+      "expected_output": "Lists the servers by name with safe fields only and declines to print the tunnel token",
+      "expectations": [
+        "Calls vps_list and filters it with jq to safe fields (name, state, region, public addresses, shape, ssh_command)",
+        "Never prints a tunnel_token or the raw vps_list answer",
+        "Explains that the tunnel token is a credential and offers to run the needed call (for example a firewall rule) with it inside the shell instead"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "What's the root password of web1?",
+      "expected_output": "Saves the root password to a private 0600 file and tells the user the path instead of printing it",
+      "expectations": [
+        "Calls vps_root_password with sub_action=get for web1's vps_id",
+        "Writes the password to a file in a private temp directory with umask 077 and does not print it into the conversation",
+        "Tells the user the file path, notes that SSH login is key-only and the password is for the console and recovery, and offers to delete the file afterwards"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Open web1 to the whole doxx.net mesh",
+      "expected_output": "Explains what full mesh mode exposes, asks for confirmation, then calls vps_mesh with mode=full",
+      "expectations": [
+        "Explains that mode full lets every doxx.net device and cloud server, including other users', reach every port of the server ahead of the firewall rules",
+        "Recommends mode mine unless the user has a reason, and waits for confirmation",
+        "Calls vps_mesh with mode=full (not enabled=1) and vps_id, and says the change reaches the host within a minute"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Restart my server db1",
+      "expected_output": "Warns about downtime, confirms, then calls vps_power with action=restart",
+      "expectations": [
+        "Finds db1's vps_id with vps_list",
+        "Warns that the server goes offline during the restart and asks for confirmation",
+        "Calls vps_power with action=restart",
+        "If the call answers 409 because the server is pending, provisioning, destroying or suspended, explains the state instead of retrying in a loop"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I'm on the Free plan. Can I get a cloud server?",
+      "expected_output": "Says yes: the VPS add-on is sold on every plan, Free included; checks entitlements and points to the plan page",
+      "expectations": [
+        "Checks the live entitlements (features.vps and the vps limits) before answering",
+        "Explains that a cloud server is an add-on that any plan can buy, Free included, and does not say Pro is required",
+        "If features.vps is false, sends the user to the plan page to add the VPS add-on and does not buy it for them",
+        "Reads prices from vps_catalog (or the public price list) and does not quote them from memory"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Open port 8080 on web1 to the internet",
+      "expected_output": "Adds the rule on the server's own tunnel_token; on 409 vps_firewall_limit shows used/max, fix and upgrade_url",
+      "expectations": [
+        "Gets web1's tunnel_token from vps_list without printing it",
+        "Confirms the opening with the user, then calls firewall_rule_add with web1's public address as dst_ip",
+        "Does not refuse because the plan lacks Pro firewall editing: a server's own rules work on every plan",
+        "If the call answers 409 vps_firewall_limit, shows used, max and fix, offers to remove a rule the user no longer needs, shows upgrade_url as a portal link, and does not retry in a loop"
+      ]
+    }
+  ]
+}

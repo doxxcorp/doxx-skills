@@ -1,0 +1,14 @@
+{
+  "status": "success",
+  "vps": {
+    "vps_id": "v123",
+    "name": "web1",
+    "tunnel_token": "SECRET-TT-VPS",
+    "state": "provisioning",
+    "detail": "writing disk",
+    "progress": 0,
+    "region": "mia1",
+    "public_ipv4": "203.0.113.50",
+    "ssh_command": "ssh root@203.0.113.50"
+  }
+}

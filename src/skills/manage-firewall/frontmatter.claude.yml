@@ -1,0 +1,5 @@
+name: manage-firewall
+description: "Manage doxx.net firewall rules: open ports, port forwards, link tunnels for mesh networking, manage access rules"
+argument-hint: "[action] [details]"
+user-invocable: true
+allowed-tools: Bash(curl *), Bash(bash */manage-firewall/scripts/firewall-audit.sh*), Bash(printf *), Write

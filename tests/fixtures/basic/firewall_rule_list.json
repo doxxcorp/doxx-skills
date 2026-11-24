@@ -1,0 +1,53 @@
+{
+  "status": "success",
+  "context": "firewall_rule_list: ...",
+  "link_all_enabled": false,
+  "count": 5,
+  "rules": [
+    {
+      "tunnel_token": "SECRET-TT-HOME",
+      "protocol": "TCP",
+      "src_ip": "0.0.0.0/0",
+      "src_port": "ALL",
+      "dst_ip": "203.0.113.10",
+      "dst_port": "443",
+      "enabled": true
+    },
+    {
+      "tunnel_token": "SECRET-TT-HOME",
+      "protocol": "ALL",
+      "src_ip": "::/0",
+      "src_port": "ALL",
+      "dst_ip": "2001:db8::10",
+      "dst_port": "ALL",
+      "enabled": true
+    },
+    {
+      "tunnel_token": "SECRET-TT-HOME",
+      "protocol": "TCP",
+      "src_ip": "198.51.100.7/32",
+      "src_port": "ALL",
+      "dst_ip": "10.1.0.3",
+      "dst_port": "22",
+      "enabled": true
+    },
+    {
+      "tunnel_token": "SECRET-TT-HOME",
+      "protocol": "TCP",
+      "src_ip": "10.1.0.2",
+      "src_port": "ALL",
+      "dst_ip": "10.1.0.3",
+      "dst_port": "22",
+      "enabled": false
+    },
+    {
+      "tunnel_token": "SECRET-TT-GONE",
+      "protocol": "UDP",
+      "src_ip": "192.168.1.0/24",
+      "src_port": "ALL",
+      "dst_ip": "10.1.0.9",
+      "dst_port": "51820",
+      "enabled": true
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "skill_name": "manage-devices",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Show me all my devices",
+      "expected_output": "Lists all devices with status and subscription info",
+      "expectations": [
+        "Calls device_list_unified with the user's auth token",
+        "Displays device name, model, OS, online status, tunnel count, and seat status (has_seat)",
+        "Shows seat usage from subscription.device_count and max_devices",
+        "Shows cloud servers (device_type vps) and per-device services when present",
+        "Groups guest accounts separately if present"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Rename my MacBook to Work Laptop",
+      "expected_output": "Finds the MacBook device and renames it to Work Laptop",
+      "expectations": [
+        "Calls device_list_unified to find the MacBook's device_hash",
+        "Checks can_rename flag before proceeding",
+        "Calls device_rename with the correct device_hash and device_name=Work Laptop",
+        "Confirms the rename was successful"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Change the icon on my iPhone",
+      "expected_output": "Finds the iPhone and updates its icon",
+      "expectations": [
+        "Calls device_list_unified to find the iPhone's device_hash",
+        "Asks the user what icon they want or suggests options",
+        "Calls device_rename with device_hash and device_icon parameter",
+        "Confirms the icon change was successful"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Delete my old iPad from the network",
+      "expected_output": "Finds the iPad, confirms deletion, and removes it",
+      "expectations": [
+        "Calls device_list_unified to find the iPad's device_hash",
+        "Checks can_delete flag before proceeding",
+        "Warns user that deletion is permanent and removes the device's tunnels, seat and saved profiles, and unhosts any agents on it",
+        "Asks for confirmation before proceeding",
+        "Calls device_delete with the correct target_device_hash",
+        "Reports the result counts (tunnels_removed, seat_removed, ips_freed)",
+        "If the call returns insufficient_role, asks the user for an admin-role token or points them to the portal, and does not call device_logout as a workaround"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Delete my cloud server from the device list",
+      "expected_output": "Explains that a cloud server cannot be deleted through the device endpoints",
+      "expectations": [
+        "Calls device_list_unified and identifies the device with device_type vps (device_hash vps_<id>)",
+        "Does not call device_delete or device_logout on it",
+        "Explains that the server is removed only by deleting the cloud server itself (vps_delete with its name typed to confirm), and that this is permanent"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Is my old Pixel still registered on my account? Its device hash is 3f9a...",
+      "expected_output": "Checks registration read-only and reports the result",
+      "expectations": [
+        "Calls device_status with device_id_hash set to the given hash",
+        "Reports registered, seated and the tunnel count",
+        "Makes no change to the account (does not call device_delete or device_logout)"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "device_delete says my token is not admin. Just use device_logout on the old iPad instead.",
+      "expected_output": "Refuses the workaround and offers the supported paths",
+      "expectations": [
+        "Does not call device_logout with the iPad's device hash",
+        "Explains that device_logout is only for signing out the machine the agent itself runs on",
+        "Asks the user for an admin-role token to retry device_delete, or points them to the portal at https://app.doxx.net"
+      ]
+    }
+  ]
+}

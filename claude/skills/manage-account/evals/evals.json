@@ -4,42 +4,53 @@
     {
       "id": 1,
       "prompt": "Show me my account settings",
-      "expected_output": "Shows account profile (recovery contact + notifications)",
+      "expected_output": "Profile and recovery code status",
       "expectations": [
-        "Calls get_profile to show recovery email, phone, and notification settings",
+        "Calls get_profile and shows recovery_email, recovery_phone, email_notifications, sms_notifications and recovery_codes_count",
         "Presents the profile info in a clear format",
-        "Does not call a subscription endpoint; if subscription comes up, points the user to the a0x13 portal"
+        "Does not call a subscription endpoint on the Config API; reads plan details from the entitlements if asked"
       ]
     },
     {
       "id": 2,
       "prompt": "Set my recovery email to me@example.com",
-      "expected_output": "Updates the recovery email after showing current settings",
+      "expected_output": "Updates the email and leaves the other values as they are",
       "expectations": [
-        "Calls get_profile to show current recovery settings",
-        "Calls update_profile with email=me@example.com",
+        "Calls update_profile with only recovery_email=me@example.com, because the call is a partial update and omitted fields keep their stored values",
+        "Does not send recovery_phone, email_notifications or sms_notifications, and does not send an empty value that would clear a contact",
+        "Does not use the param names email, phone or notifications_enabled",
         "Confirms the update was successful"
       ]
     },
     {
       "id": 3,
       "prompt": "Generate recovery codes",
-      "expected_output": "Generates and displays recovery codes with security warning",
+      "expected_output": "Sends the user to the portal",
       "expectations": [
-        "Calls create_account_recovery to generate new codes",
-        "Displays codes clearly for the user to save",
-        "Strongly warns user to save codes securely",
-        "Reminds user that doxx.net has no passwords and these codes are their backup"
+        "Calls only endpoints in the public manifest and sends the user to the portal for recovery codes",
+        "Sends the user to the profile page in the portal (https://app.doxx.net/ops/account/profile) to create codes",
+        "Advises storing the codes offline and explains they are the only way back if the token is lost",
+        "Mentions that redeeming a code revokes every token on the account"
       ]
     },
     {
       "id": 4,
-      "prompt": "What subscription plan am I on?",
-      "expected_output": "Explains subscription is managed in the a0x13 portal, not the Config API",
+      "prompt": "What subscription plan am I on, and how much is Pro?",
+      "expected_output": "Live plan from entitlements and live prices",
       "expectations": [
-        "Does not call subscription_status (removed from the Config API in 1.1.0)",
-        "Directs the user to the a0x13 portal (https://a0x13.doxx.net/ops/account/subscription) to view tier and seats",
-        "Does not fabricate a tier or plan"
+        "Reads the plan and seats from POST https://payments.doxx.net/v1/access/status, not from a Config API endpoint",
+        "Reads prices from the public pricing list (payments.doxx.net/v1/pricing); does not quote numbers from memory",
+        "Points to https://app.doxx.net/ops/account/subscription for plan changes and does not change anything itself"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Delete my account",
+      "expected_output": "Explains the consequences and requires explicit confirmation",
+      "expectations": [
+        "Lists what will be lost (tunnels, domains, devices, agents, tokens) and that the subscription is cancelled",
+        "States it is irreversible and every tunnel disconnects at once",
+        "Calls delete_account only after an explicit confirmation, with an admin token"
       ]
     }
   ]

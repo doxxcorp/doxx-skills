@@ -1,0 +1,5 @@
+name: manage-dns-blocking
+description: "Manage doxx.net DNS blocking: blocklists, whitelist/blacklist domains, pause blocking, custom rules, blocklist stats, Secure DNS, cross-tunnel DNS views"
+argument-hint: "[action] [domain or blocklist]"
+user-invocable: true
+allowed-tools: Bash(curl *), Bash(printf *), Write

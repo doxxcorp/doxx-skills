@@ -1,0 +1,2 @@
+tt=$(printf %s "${DOXX_TOKEN:-$(grep -m1 -s . ~/.config/doxx/token || printf %s "${DOXXNET_TOKEN:-$(grep -m1 -s . ~/.config/doxxnet/token)}")}" | curl -s -X POST https://config.doxx.net/v1/ -d "list_tunnels=1" --data-urlencode "token@-" | jq -r --arg name "NAME" '[.tunnels[]? | select(.name == $name)] | if length == 1 then .[0].tunnel_token else empty end')
+[ -n "$tt" ] || { echo "no single tunnel named NAME"; exit 1; }

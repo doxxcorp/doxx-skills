@@ -1,0 +1,11 @@
+name: manage-devices
+description: "Manage doxx.net devices: list, rename, change icons, check device status, log this machine out, and delete devices"
+version: {{version}}
+homepage: https://github.com/doxxcorp/doxx-skills
+user-invocable: false
+metadata:
+  openclaw:
+    requires:
+      env: [DOXX_TOKEN]
+      bins: [curl]
+    primaryEnv: DOXX_TOKEN
