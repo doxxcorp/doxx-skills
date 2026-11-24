@@ -2,7 +2,7 @@
 
 ## 1.2.0
 
-Renovation against the current Config API (live manifest 1.1.0 as of 2026-11-17) and Stats API.
+Renovation against the current Config API (live manifest 1.1.0 as of 2026-11-24) and Stats API.
 
 **Build and tooling**
 
@@ -27,6 +27,7 @@ Renovation against the current Config API (live manifest 1.1.0 as of 2026-11-17)
 - Code Mode scripts with a shared `lib/doxx.sh`: `status-summary.sh` (network-status), `firewall-audit.sh` (manage-firewall), `snapshot.sh` (doxxnet), `vps-wait.sh` (manage-vps). Offline tests with a fake API (`make test`) assert that no token or private key leaks.
 - New endpoints across skills: `device_status`, `device_logout` (this machine only), `device_service_state` (read only, through `device_list_unified`), `dns_blocking_pause`, `update_agent` and webhook agents, `role=device` tokens bound to a tunnel or agent, `network_info`, `mesh_public_pools`, new `update_tunnel`, `assign_address` and `lease_public_ipv4` params, `purpose=port_forward`, `domain_limit`.
 - Removed internal endpoints: the skills call only endpoints in the public manifest. Recovery codes are managed in the portal; WireGuard QR codes are made locally with `qrencode`.
+- Saved profiles: `load_profile`'s 409 `profile_in_use` is in the error table (show the message, name the tunnel that holds the profile, never print `in_use_tunnel_token`, never act on `release_action`), and `list_saved_profiles` documents `in_use_by_address`. The reference also covers the public `clients` group (`current_build`, `macos_releases`), which the skills do not use.
 - Plans: Free, Essentials (API slug `basic`) and Pro; Pro+ is legacy. No seat counts, limits or prices in the skills: they read the live entitlements and the public price list, and explain gate errors (`feature_required`, limits, `upgrade_url`). Portal links point to app.doxx.net.
 - Frontmatter descriptions list the new capabilities.
 - Claude Code plugin: `plugin.json` lists all 14 skills under `skills` (it listed only `doxxnet` and `network-wizard` under `commands`), so the specialist skills `doxxnet` hands off to are installed too. `make validate` checks that every skill in `src/skills` is listed.

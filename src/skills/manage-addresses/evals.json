@@ -117,6 +117,18 @@
         "Asks which of the two the user wants and confirms before calling it",
         "Calls release_ip_reservation with ip_address, or release_address with address and type=static_public, as the user chose"
       ]
+    },
+    {
+      "id": 11,
+      "prompt": "Load my Office profile onto my laptop tunnel",
+      "expected_output": "Tries load_profile after confirmation; on 409 profile_in_use shows the message, names the tunnel that holds the profile, and offers the two safe ways out",
+      "expectations": [
+        "Warns that load_profile replaces all of the laptop tunnel's settings and asks for confirmation before calling it",
+        "On a 409 profile_in_use, shows the message and names the tunnel that holds the profile (resolved from in_use_tunnel_token through list_tunnels inside the shell) and its device (in_use_by)",
+        "Does not print in_use_tunnel_token or any other tunnel_token",
+        "Does not follow release_action and does not disconnect or release anything on its own",
+        "Tells the user to disconnect the named tunnel and retry, or to pick another profile"
+      ]
     }
   ]
 }

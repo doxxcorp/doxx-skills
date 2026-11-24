@@ -153,12 +153,12 @@ Full detail: the `manage-addresses` skill.
 - `lease_public_ipv4`: dedicated public IPv4 (a dedicated IP add-on). Modes: `profile_id`, or `profile_name` + `server`, or `server` alone. The profile modes always add an IPv6 too. Optional: `include_ipv6=1`, `ip_type=ipv6` (both pool-only). Returns `ip_address`, `requires_reconnect`.
 - `list_ip_reservations`: dedicated IPv4 reservations with `slots_used`, `slots_max`
 - `release_ip_reservation`: unlink a dedicated IPv4 from its profile. Params: `ip_address`. It stays on the account and keeps its slot; `release_address` with `type=static_public` is the irreversible one.
-- `list_saved_profiles`: profiles with settings and `in_use` (never print `in_use_tunnel_token`)
+- `list_saved_profiles`: profiles with settings and `in_use` (a connected tunnel is bound to the profile or holds its reserved address; `in_use_by_address` marks the second case). Never print `in_use_tunnel_token`
 - `save_profile`: snapshot a tunnel into a new profile. Params: `tunnel_token`, `profile_name`. Needs Pro (`saved_profiles`). Returns `profile_id`, `bound`.
 - `create_saved_profile`: empty profile. Params: `profile_name`, `server`. Optional: `profile_icon`, `profile_type`
 - `update_saved_profile`: params `profile_id`. Optional: `profile_name`, `profile_icon`, `profile_notes`. Never send `re_snapshot=1`: it deletes the profile. To capture a tunnel's current settings, `save_profile` to a new profile
 - `delete_saved_profile`: params `profile_id`
-- `load_profile`: REPLACE the tunnel's settings with the profile. Params: `tunnel_token`, `profile_id`. Optional: `source` (the tunnel's type; the profile type is checked only when it is sent)
+- `load_profile`: REPLACE the tunnel's settings with the profile. Params: `tunnel_token`, `profile_id`. Optional: `source` (the tunnel's type; the profile type is checked only when it is sent). A 409 `profile_in_use` means another tunnel holds the profile: see Errors
 - `lock_profile` / `unlock_profile`: params `profile_id` or `tunnel_token`. Optional: `lock_type` (`ip`/`settings`)
 - `apply_mode`: REPLACE every setting with a mode template; detaches the profile and releases its addresses, a dedicated IPv4 included. Params: `tunnel_token`, `settings` (JSON). Optional: `template_key`, `dns`
 

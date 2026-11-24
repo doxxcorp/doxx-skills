@@ -1,6 +1,6 @@
 # doxx.net API Reference (Agent-Optimized)
 
-**Config API version: 1.1.0** (live manifest), synced against the live manifest on 2026-11-17. This file is a snapshot: the live API self-documents. `curl -s https://config.doxx.net/` (a GET, no token) returns the current manifest (every endpoint with params, returns, auth, min role and side effects, plus `use_cases` recipes), and every API response carries a `context` field with per-endpoint help. Where this file and the manifest disagree, the entries below follow the handler code: see "Known manifest errors" at the end.
+**Config API version: 1.1.0** (live manifest), synced against the live manifest on 2026-11-24. This file is a snapshot: the live API self-documents. `curl -s https://config.doxx.net/` (a GET, no token) returns the current manifest (every endpoint with params, returns, auth, min role and side effects, plus `use_cases` recipes), and every API response carries a `context` field with per-endpoint help. Where this file and the manifest disagree, the entries below follow the handler code: see "Known manifest errors" at the end.
 
 How to use it: one entry per endpoint, grouped like the manifest (`.endpoints`): purpose, **Role** (minimum token role), params, returns, gates (plan features, limits) and side effects. Plan names: Free, Essentials (API slug `basic`), Pro. Pro+ is legacy, not sold. Never quote seat counts, limits or prices from memory: read them live (see "Plans and entitlements").
 
@@ -46,6 +46,7 @@ An error has `status: "error"` and a `message`. Read the `context` field too, wh
 | `vps_limit` | 409 | `component`, `available`, `needed`, `monthly_usd`, `fix`, `upgrade_url` | The VPS add-on lacks that resource. Offer a smaller shape, or the user adds capacity. Here `upgrade_url` is a path on the portal (https://app.doxx.net): show it as given and say so. |
 | `vps_firewall_limit` | 409 | `used`, `max`, `fix`, `upgrade_url` | A cloud server already holds its plan's cap of firewall rules (the default ICMP rules do not count). Show `fix`: the user removes a rule or moves to a plan with a higher cap. `upgrade_url` is a portal path, as for `vps_limit`. |
 | `dedicated_ip_limit` (key `error`) | 200 | `current_count`, `max_slots`, `existing_allocation` | Every dedicated IPv4 slot is in use. `existing_allocation` names the IP and server that hold it and carries a `tunnel_token`: name that tunnel, never print the token. |
+| `profile_in_use` | 409 | `in_use_by` (device name), `in_use_tunnel_token`, `in_use_server`, `profile_id`, `release_action` | The profile is live on another connected tunnel: it is bound there, or that tunnel holds one of the profile's reserved addresses. Show `message`. `in_use_tunnel_token` is a credential: never print it. To name the tunnel, match it against `list_tunnels` inside the shell and show only the `name`. Never act on `release_action`: it describes a call outside the public API. Tell the user to disconnect that tunnel (by name, on `in_use_by`) or pick another profile. Other profile and address calls (lock, unlock, release, lease) answer the same conflict with the key `error` and only `in_use_by`. |
 | `insufficient_role` (key `error`) | 403 | `required_role`, `your_role` | The token's role is too low for this call. Ask the user for a token with the named role. Do not look for a way around it. |
 | (none: HTTP 423, profile lock) | 423 | `lock_type` (`settings` or `ip`), `profile_id`, `profile_name`; a settings lock also has `in_use`, `in_use_by` (device name) | The tunnel's saved profile is locked against this change. Show `message` and name the profile. Do not unlock it on your own: ask the user first (`unlock_profile` with that `lock_type`). With `in_use: true` the profile is live on `in_use_by`: that device must disconnect from it or switch profiles first. |
 
@@ -142,6 +143,24 @@ Delete a bot and everything it holds (user row, token, profile, seat grant, pair
 doxx -d "delete_bot=1&bot_user_id=BOT_USER_ID"
 ```
 Param: `bot_user_id` (from `list_bots`). The seat returns to the plan; the bot's tunnels disconnect. Irreversible.
+
+## Clients (group `clients`)
+
+App build and update information for the doxx.net apps and the download site. Both calls are public (no token). The skills do not use them: they are listed here so the reference covers the whole manifest.
+
+### current_build
+Tell an app whether a newer build exists for its platform and channel, and whether the installed build is still allowed. **Role:** none (no auth). Nothing about the caller is stored.
+```
+curl -s -X POST https://config.doxx.net/v1/ -d "current_build=1&platform=macos&channel=standalone&build=BUILD"
+```
+Params: `platform` (`ios`, `macos`, `android`, `linux`, `windows`), `channel` (`appstore`, `testflight`, `standalone`, `play`, `cli`); optional `track` (`stable` or `beta`, default `stable`), `build` (the installed build number), `version` (the installed version, like `1.4.3`). Returns `platform`, `channel`, `track`, `action` (`none`: up to date; `optional`: a newer build exists; `graceful`: below the minimum, with a `deadline`; `forced`: below the minimum or withdrawn, the app must update), `min_build` (0 when none is set), `enforce` (for example `off` or `graceful`), `deadline` (RFC 3339 or null), `client_build`, `client_track` (`stable`, `beta`, `unknown`), `current` (left out when the track has no registered build; `build`, `version`, `track`, `download_url`, `appcast_url`, `sha256`, `notes`, `min_os`, `published_at`), and for beta callers `stable` (`build`, `version`). A beta caller sees the newer of beta and stable.
+
+### macos_releases
+List the registered builds for a platform and channel, with the release policy of each track. **Role:** none (no auth). Cached 60 seconds; withdrawn builds are left out.
+```
+curl -s -X POST https://config.doxx.net/v1/ -d "macos_releases=1"
+```
+Optional params: `platform` (default `macos`), `channel` (default `standalone`), `track` (`stable`, or `beta`, which includes stable), `build` (one build only). Returns `builds[]` (`build`, `version`, `track`, `state`, `download_url`, `zip_url`, `appcast_url`, `sha256`, `zip_sha256`, `ed_signature`, `length`, `min_os`, `notes`, `published_at`, `promoted_at`) and `policy` (`stable` and `beta`, each with `current_build`, `min_build`, `enforce`, `grace_days`, `updated_at`, `updated_by`). The download site and the release process read it.
 
 ## Devices (group `devices`)
 
@@ -510,7 +529,7 @@ A profile is a named snapshot of tunnel settings plus reserved addresses. Types 
 ```
 doxx -d "list_saved_profiles=1"
 ```
-Returns `profiles[]`: `profile_id`, `profile_name`, `profile_icon`, `profile_notes`, `profile_type`, `preferred_server`, `domain_name`, the settings flags (`block_bad_dns`, `firewall`, `kill_switch`, `transport` and the rest), `locked`, `ip_locked`, `settings_locked`, `source_tunnel_name`, `created_at`, `updated_at`, and `in_use`, `in_use_by`, `in_use_device_icon`, `in_use_tunnel_token` (a credential: never print it). `in_use: false` does not mean no tunnel is bound.
+Returns `profiles[]`: `profile_id`, `profile_name`, `profile_icon`, `profile_notes`, `profile_type`, `preferred_server`, `domain_name`, the settings flags (`block_bad_dns`, `firewall`, `kill_switch`, `transport` and the rest), `locked`, `ip_locked`, `settings_locked`, `source_tunnel_name`, `created_at`, `updated_at`, and `in_use`, `in_use_by`, `in_use_device_icon`, `in_use_tunnel_token` (a credential: never print it), `in_use_by_address`. `in_use` is true when a connected tunnel is bound to the profile or holds one of its reserved addresses (a sleeping phone still counts); `in_use_by_address` is true when only the address matched (that tunnel is no longer bound to the profile but still carries its address). `in_use_by` is the device name, or `Unknown`. `in_use: false` does not mean no tunnel is bound.
 
 ### create_saved_profile
 Create an empty profile (for static addresses with standalone WireGuard clients). **Role:** net-admin.
@@ -538,7 +557,7 @@ Apply a profile to a tunnel. **Role:** net-admin. **Replaces all the tunnel's se
 ```
 doxx -d "load_profile=1&tunnel_token=TUNNEL_TOKEN&profile_id=PROFILE_ID"
 ```
-Params: `tunnel_token`, `profile_id`; optional `source` (the tunnel's type: `ios`, `android` or `wireguard`), `lock_after_load=1` (`switch_server` is accepted but ignored). The profile type is checked only when `source` is sent (400 "Cannot apply a ... profile to a ... tunnel"): without it a mismatched profile loads anyway, so check `profile_type` yourself first, and its location must match the tunnel's (400 "Profile location does not match tunnel location"); refused when the profile is in use on another device (conflict). Pro settings inside the profile need their own Pro features. Returns `profile_id`, `profile_name`, `mode`.
+Params: `tunnel_token`, `profile_id`; optional `source` (the tunnel's type: `ios`, `android` or `wireguard`), `lock_after_load=1` (`switch_server` is accepted but ignored). The profile type is checked only when `source` is sent (400 "Cannot apply a ... profile to a ... tunnel"): without it a mismatched profile loads anyway, so check `profile_type` yourself first, and its location must match the tunnel's (400 "Profile location does not match tunnel location"); refused with 409 `profile_in_use` when another connected tunnel is bound to the profile or holds one of its reserved addresses (see Errors: name that tunnel, never print `in_use_tunnel_token`, never act on `release_action`). Pro settings inside the profile need their own Pro features. Returns `profile_id`, `profile_name`, `mode`.
 
 ### delete_saved_profile
 **Role:** net-admin. Param: `profile_id`. Permanent. Tunnels on it are detached; its addresses stay on the account without a profile; a tunnel on its dedicated IPv4 gets a new private address (the response then has `needs_reconnect`).
